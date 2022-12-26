@@ -216,9 +216,10 @@ const Bodies =
 			eye:Array(2).fill(Limb('viewer',5)),
 			hand:Array(2).fill(Limb('grabber',1.25)),
 			feet:Array(2).fill(Limb('walker',1.25)),
+			finger:Array(10).fill(Limb('grabber',(1.25/20))).concat(Array(10).fill(Limb('walker',(1.25/20)))),
 			nail:Array(10).fill(Limb('grabber',(1.25/20))).concat(Array(10).fill(Limb('walker',(1.25/20)))),
-			arm:Array(2).fill(Limb('grabber',2.5)),
-			leg:Array(2).fill(Limb('walker',2.5)),
+			arm:Array(2).fill(Limb('grabber',1.25)),
+			leg:Array(2).fill(Limb('walker',1.25)),
 			ear:Array(2).fill(Limb('listener',5)),
 			mouth:Limb('eater',5),
 			teeth:Array(32).fill(Limb('eater',(5/32))),
@@ -231,13 +232,11 @@ const Bodies =
 		},
 		_male:
 		{
-			...this.both,
 			penis:Limb('breeder,pisser','5,10'),
 			testicule:Array(2).fill(Limb('breeder',2.5)),	
 		},
 		_female:
 		{
-			...this.both,
 			vagina:Limb('breeder,pisser',"5,10"),
 			ovary:Array(2).fill(Limb('breeder',2.5)),	
 		},
