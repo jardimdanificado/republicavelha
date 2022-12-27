@@ -6,3 +6,8 @@ replit.nix
 node_modules
 package-lock.json
 package.json
+djamba/djamba
+release/
+./republicavelha.js
+./index.html
+./style.css

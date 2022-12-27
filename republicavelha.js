@@ -1,36 +1,13 @@
 //-----------------------------------
-//COLORS
+//PRIMITIVES
 //-----------------------------------
 
-function RGBA(rr,gg,bb,aa)
-{
-    return ({r:rr,g:gg,b:bb,a:aa});
-}
-
-function Vector3(xx,yy,zz)
-{
-    return({x:xx,y:yy,z:zz});
-}
-
-function Vector3Zero()
-{
-    return({x:0,y:0,z:0});
-}
-
-function Vector2(xx,yy)
-{
-    return({x:xx,y:yy});
-}
-
-function Vector2Zero()
-{
-    return({x:0,y:0});
-}
-
-function BoundingBox(min,max)
-{
-    return({min:{x:min.x,y:min.y,z:min.z},max:{x:max.x,y:max.y,z:max.z}});
-}
+function RGBA(r,g,b,a){return({r:r,g:g,b:b,a:a});}
+function Vector3(x,y,z){return({x:x,y:y,z:z});}
+function Vector3Zero(){return({x:0,y:0,z:0});}
+function Vector2(x,y){return({x:x,y:y});}
+function Vector2Zero(){return({x:0,y:0});}
+function BoundingBox(min,max){return({min:{x:min.x,y:min.y,z:min.z},max:{x:max.x,y:max.y,z:max.z}});}
 
 //-----------------------------------
 //UTILS
@@ -101,16 +78,8 @@ const pending = Pending;
 //CALCULATE
 //-----------------------------------
 
-function DifferenceFloat(a, b)
-{
-    return ((a+b+Math.abs(a-b))/2);
-}
-
-function DifferenceVec3(vec1, vec2)
-{
-    return(Vector3(DifferenceFloat(vec1.x, vec2.x),DifferenceFloat(vec1.y, vec2.y),DifferenceFloat(vec1.z, vec2.z)));
-}
-
+function DifferenceFloat(a, b){return((a+b+Math.abs(a-b))/2);}
+function DifferenceVec3(vec1, vec2){return(Vector3(DifferenceFloat(vec1.x, vec2.x),DifferenceFloat(vec1.y, vec2.y),DifferenceFloat(vec1.z, vec2.z)));}
 function RotateAroundPivot(point,pivot,angle)
 {
 	angle = (angle ) * (Math.PI/180); // Convert to radians
@@ -118,7 +87,6 @@ function RotateAroundPivot(point,pivot,angle)
 	var rotatedZ = Math.sin(angle) * (point.x - pivot.x) + Math.cos(angle) * (point.z -pivot.z) + pivot.z;
 	return Vector3(rotatedX,point.y,rotatedZ);
 }
-
 function RotateBoundingBox(hitbox,pivot,angle)
 {
 	let temp = {min:{...hitbox.min},max:{...hitbox.max}};
@@ -129,7 +97,6 @@ function RotateBoundingBox(hitbox,pivot,angle)
 	result.min = {x:Math.min(temp.min.x,temp.max.x),y:Math.min(temp.min.y,temp.max.y),z:Math.min(temp.min.z,temp.max.z)}
 	return result;
 }
-
 function MoveBoundingBox(hitbox,position)
 {
 	let result = {};
@@ -137,14 +104,14 @@ function MoveBoundingBox(hitbox,position)
 	result.max = r.Vector3Add(hitbox.max,position);
 	return result;
 }
-
-function RotateMoveBoundingBox(hitbox,angle,position)//rotate around 0,0,0 then move
-{
-	return(MoveBoundingBox(RotateBoundingBox(hitbox,Vector3(0,0,0),angle),position));
-}
+function RotateMoveBoundingBox(hitbox,angle,position){return(MoveBoundingBox(RotateBoundingBox(hitbox,Vector3(0,0,0),angle),position));}
 
 //-----------------------------------
-//OBJETOS
+//OBJETOS//OBJETOS//OBJETOS//OBJETOS
+//OBJETOS//OBJETOS//OBJETOS//OBJETOS
+//OBJETOS//OBJETOS//OBJETOS//OBJETOS
+//OBJETOS//OBJETOS//OBJETOS//OBJETOS
+//OBJETOS//OBJETOS//OBJETOS//OBJETOS
 //-----------------------------------
 
 const Container = function(amount,type,capacity)
@@ -154,32 +121,7 @@ const Container = function(amount,type,capacity)
 }
 
 //types
-const _New = function(name,type,status,quality,condition,position,optional)
-{
-	if(typeof optional !== 'undefined')
-		return(
-			{
-				name:name,
-				type:defsto(type,'generic'),
-				status:defsto(status,''),
-				quality:defsto(quality,10),
-				condition:defsto(condition,100),
-				position:defsto(position,Vector3(0,0,0))
-			}
-		);
-	else
-	{
-		optional.name = name;
-		optional.type = type;
-		optional.status = status;
-		optional.status = status;
-		optional.quality = quality;
-		optional.condition = condition;
-		return optional;
-	}
-};
-
-const _Item = function(name,status,quality,condition,container,position)
+const _Item = function(name,status,quality,condition,position)
 {
 	return(
 		{
@@ -194,7 +136,6 @@ const _Item = function(name,status,quality,condition,container,position)
 }
 
 //CREATURES
-
 const Limb = function(type,quality,condition)
 {
 	return(
@@ -261,12 +202,12 @@ const _Creature = function(specime,gender,age,position)
 	);
 };
 
-//
+//declaration
 const Objeto = 
 {
 	New:_New,
 	Item:_Item,
 	Creature:_Creature
 }
-
+//test
 console.log(_Creature('human','male'));
