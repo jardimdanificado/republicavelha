@@ -8,6 +8,8 @@ function Vector3Zero(){return({x:0,y:0,z:0});}
 function Vector2(x,y){return({x:x,y:y});}
 function Vector2Zero(){return({x:0,y:0});}
 function BoundingBox(min,max){return({min:{x:min.x,y:min.y,z:min.z},max:{x:max.x,y:max.y,z:max.z}});}
+function Position(local,global){return({local:local,global:global})};
+const infinity = Math.min();
 
 //-----------------------------------
 //UTILS
@@ -114,35 +116,20 @@ function RotateMoveBoundingBox(hitbox,angle,position){return(MoveBoundingBox(Rot
 //OBJETOS//OBJETOS//OBJETOS//OBJETOS
 //-----------------------------------
 
-const Container = function(amount,type,capacity)
+const Storage = function(amount,type,capacity)
 {
-	if(typeof amount == 'undefined'||amount == 1)
-		return{type:defsto(type,'solid'),capacity:defsto(capacity,1),amount:defsto(amount,1)}
+	//solid(kg),liquid(liter),gas(m³),writing(characters)
+	return{type:defsto(type,'solid'),capacity:defsto(capacity,1),amount:defsto(amount,1)}
 }
 
-//types
-const _Item = function(name,status,quality,condition,position)
+const Limb = function(type,importance,condition)
 {
 	return(
 		{
-			name:name,
-			type:'item',
-			status:defsto(status,''),
-			quality:defsto(quality,10),
-			condition:defsto(condition,100),
-			position:defsto(position,Vector3Zero())
-		}
-	);
-}
-
-//CREATURES
-const Limb = function(type,quality,condition)
-{
-	return(
-		{
-			//viewer,breeder,eater,grabber,speaker,listener,smeller,breather,thinker,pisser,shitter,walker,other
+			//all,viewer,breeder,eater,grabber,speaker,listener,smeller,breather,thinker,pisser,shitter,walker,other
 			type:defsto(type,'breeder'),
-			quality:defsto(quality,10),
+			importance:defsto(importance,10),//0 = NO IMPORTANCE, 10 = VERY IMPORTANT, INFINITY = ESSENTIAL
+			quality:100,
 			condition:defsto(condition,100)
 		}
 	);
@@ -151,63 +138,113 @@ const Limb = function(type,quality,condition)
 const Bodies = 
 {
 	human:
-	{	
+	{
 		_both:
 		{
-			eye:Array(2).fill(Limb('viewer',5)),
-			hand:Array(2).fill(Limb('grabber',1.25)),
-			feet:Array(2).fill(Limb('walker',1.25)),
-			finger:Array(10).fill(Limb('grabber',(1.25/20))).concat(Array(10).fill(Limb('walker',(1.25/20)))),
-			nail:Array(10).fill(Limb('grabber',(1.25/20))).concat(Array(10).fill(Limb('walker',(1.25/20)))),
-			arm:Array(2).fill(Limb('grabber',1.25)),
-			leg:Array(2).fill(Limb('walker',1.25)),
-			ear:Array(2).fill(Limb('listener',5)),
-			mouth:Limb('eater',5),
-			teeth:Array(32).fill(Limb('eater',(5/32))),
+			eye:Array(2).fill(Limb('viewer')),
+			hand:Array(2).fill(Limb('grabber')),
+			feet:Array(2).fill(Limb('walker')),
+			finger:Array(10).fill(Limb('grabber',1)).concat(Array(10).fill(Limb('walker',1))),
+			nail:Array(10).fill(Limb('grabber',1)).concat(Array(10).fill(Limb('walker',1))),
+			arm:Array(2).fill(Limb('grabber')),
+			leg:Array(2).fill(Limb('walker')),
+			ear:Array(2).fill(Limb('listener')),
+			mouth:Limb('eater'),
+			teeth:Array(32).fill(Limb('eater',1)),
 			nose:Limb('smeller,breather','10,2'),
 			lung:Array(2).fill(Limb('breather',8)),
-			head:Limb('other'),
+			neck:Limb('all',infinity),
+			head:Limb('all',infinity),
 			brain:Limb('thinker'),
-			torso:Limb('other'),
+			torso:Limb('all',infinity),
 			anus:Limb('shitter'),
 		},
 		_male:
 		{
-			penis:Limb('breeder,pisser','5,10'),
-			testicule:Array(2).fill(Limb('breeder',2.5)),	
+			penis:Limb('breeder,pisser'),
+			testicule:Array(2).fill(Limb('breeder')),	
 		},
 		_female:
 		{
-			vagina:Limb('breeder,pisser',"5,10"),
-			ovary:Array(2).fill(Limb('breeder',2.5)),	
+			vagina:Limb('breeder,pisser'),
+			ovary:Array(2).fill(Limb('breeder')),	
 		},
 		male:function(){return{...this._both,...this._male}},
 		female:function(){return{...this._both,...this._female}},
 	}
-	
-};
-
-const _Creature = function(specime,gender,age,position)
-{
-	return(
-		{
-			type:'creature',
-			specime:specime,
-			gender:gender,
-			age:defsto(age,15*360),//age is in days
-			status:'idle',
-			body:Bodies[specime][gender](),
-			position:defsto(position,Vector3(0,0,0))
-		}
-	);
 };
 
 //declaration
-const Objeto = 
+const Objecto = 
 {
-	New:_New,
-	Item:_Item,
-	Creature:_Creature
+	Generic:function(type,status,birth,position,quality,condition,mods)
+	{
+		return(
+			{
+				type:defsto(type,'generic'),
+				status:defsto(status,''),
+				mods:defsto(mods,[]),
+				quality:defsto(quality,100),
+				condition:defsto(condition,100),
+				position:defsto(position,Position(Vector3Zero(),Vector3Zero())),
+				birth:defsto(birth,0)//birth in seconds
+			}
+		);
+	},
+	Creature:function(specime,gender,birth,position)
+	{
+		return(
+			{
+				...this.Generic('creature','idle',birth,position),
+				specime:specime,
+				gender:gender,
+				body:Bodies[specime][gender]()
+			}
+		);
+	},
+	Block:function(subtype,status,birth,position,quality,condition)
+	{
+		return(
+			{
+				...this.Generic('block',status,birth,position,quality,condition),
+				subtype:defsto(subtype,'empty'),//empty,full,floor,half
+			}
+		);
+	}
+};
+
+const Room = 
+{
+	Generic:function(objectos,collision,temperature)
+	{
+		return(	
+			{
+				map:
+				{
+					objecto:defsto(objectos,[]),
+					collision:defsto(collision,[]),
+					temperature:defsto(temperature,[])
+				}
+			}
+		)
+	},
+	
 }
+const World = function(rooms)
+{
+	return(	
+		{
+			time:0,
+			rooms:defsto(rooms,[]),
+		}
+	)
+}
+
+//INTERPRETATION
+function frame(world)
+{
+	world.time++;
+}
+
 //test
-console.log(_Creature('human','male'));
+console.log(Objecto.Creature('human','male'));
