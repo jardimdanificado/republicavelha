@@ -135,6 +135,21 @@ const Limb = function(type,importance,condition)
 	);
 }
 
+const Modificator = function(subtype,status,quality,condition,func)
+{
+	return(
+		{
+			type:type,//trait,mood,memory,
+			subtype:defsto(subtype,'permanent'),//permanent,temporary
+			status:defsto(status,'active'),
+			active:true,
+			quality:defsto(quality,100),
+			condition:defsto(condition,100),
+			func:defsto(func,[])
+		}
+	);
+}
+
 const Bodies = 
 {
 	human:
@@ -191,14 +206,14 @@ const Objecto =
 			}
 		);
 	},
-	Creature:function(specime,gender,birth,position)
+	Creature:function(subtype,gender,birth,position)
 	{
 		return(
 			{
 				...this.Generic('creature','idle',birth,position),
-				specime:specime,
+				subtype:subtype,
 				gender:gender,
-				body:Bodies[specime][gender]()
+				body:Bodies[subtype][gender]()
 			}
 		);
 	},
