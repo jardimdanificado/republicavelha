@@ -89,31 +89,13 @@ function RotateAroundPivot(point,pivot,angle)
 	var rotatedZ = Math.sin(angle) * (point.x - pivot.x) + Math.cos(angle) * (point.z -pivot.z) + pivot.z;
 	return Vector3(rotatedX,point.y,rotatedZ);
 }
-function RotateBoundingBox(hitbox,pivot,angle)
-{
-	let temp = {min:{...hitbox.min},max:{...hitbox.max}};
-	temp.min = RotateAroundPivot(temp.min,pivot,angle);
-	temp.max = RotateAroundPivot(temp.max,pivot,angle);
-	let result = {};
-	result.max = {x:Math.max(temp.min.x,temp.max.x),y:Math.max(temp.min.y,temp.max.y),z:Math.max(temp.min.z,temp.max.z)}
-	result.min = {x:Math.min(temp.min.x,temp.max.x),y:Math.min(temp.min.y,temp.max.y),z:Math.min(temp.min.z,temp.max.z)}
-	return result;
-}
-function MoveBoundingBox(hitbox,position)
-{
-	let result = {};
-	result.min = r.Vector3Add(hitbox.min,position);
-	result.max = r.Vector3Add(hitbox.max,position);
-	return result;
-}
-function RotateMoveBoundingBox(hitbox,angle,position){return(MoveBoundingBox(RotateBoundingBox(hitbox,Vector3(0,0,0),angle),position));}
 
 //-----------------------------------
-//OBJETOS//OBJETOS//OBJETOS//OBJETOS
-//OBJETOS//OBJETOS//OBJETOS//OBJETOS
-//OBJETOS//OBJETOS//OBJETOS//OBJETOS
-//OBJETOS//OBJETOS//OBJETOS//OBJETOS
-//OBJETOS//OBJETOS//OBJETOS//OBJETOS
+//MODIFICATOR//MODIFICATOR//MODIFICATOR//MODIFICATOR
+//MODIFICATOR//MODIFICATOR//MODIFICATOR//MODIFICATOR
+//MODIFICATOR//MODIFICATOR//MODIFICATOR//MODIFICATOR
+//MODIFICATOR//MODIFICATOR//MODIFICATOR//MODIFICATOR
+//MODIFICATOR//MODIFICATOR//MODIFICATOR//MODIFICATOR
 //-----------------------------------
 
 const Storage = function(amount,type,capacity)
@@ -126,8 +108,7 @@ const Limb = function(type,importance,condition)
 {
 	return(
 		{
-			//all,viewer,breeder,eater,grabber,speaker,listener,smeller,breather,thinker,pisser,shitter,walker,other
-			type:defsto(type,'breeder'),
+			type:defsto(type,'breeder'),//all,viewer,breeder,eater,grabber,speaker,listener,smeller,breather,thinker,pisser,shitter,walker,other
 			importance:defsto(importance,10),//0 = NO IMPORTANCE, 10 = VERY IMPORTANT, INFINITY = ESSENTIAL
 			quality:100,
 			condition:defsto(condition,100)
@@ -135,7 +116,7 @@ const Limb = function(type,importance,condition)
 	);
 }
 
-const Modificator = function(subtype,status,quality,condition,func)
+const Modificator = function(type,subtype,status,quality,condition,func)
 {
 	return(
 		{
@@ -149,6 +130,167 @@ const Modificator = function(subtype,status,quality,condition,func)
 		}
 	);
 }
+
+//-----------------------------------
+//TERRAIN
+//-----------------------------------
+
+function Heightmap(size) {
+	const N = 8;
+	const RANDOM_INITIAL_RANGE = 10;
+	var MATRIX_LENGTH = Math.pow(2, N) + 1;
+
+	const randomInRange = function(min, max) {
+		return Math.floor(Math.random() * (max - min + 1) + min);
+	}
+
+	const generateMatrix = function() {
+		const matrix = new Array(MATRIX_LENGTH)
+			.fill(0)
+			.map(() => new Array(MATRIX_LENGTH).fill(null));
+
+		matrix[0][MATRIX_LENGTH - 1] = randomInRange(0, RANDOM_INITIAL_RANGE);
+		matrix[MATRIX_LENGTH - 1][0] = randomInRange(0, RANDOM_INITIAL_RANGE);
+		matrix[0][0] = randomInRange(0, RANDOM_INITIAL_RANGE);
+		matrix[MATRIX_LENGTH - 1][MATRIX_LENGTH - 1] = randomInRange(
+			0,
+			RANDOM_INITIAL_RANGE
+		);
+
+		return matrix;
+	}
+
+	const calculateSquare = function(matrix, chunkSize, randomFactor) {
+		let sumComponents = 0;
+		let sum = 0;
+		for (let i = 0; i < matrix.length - 1; i += chunkSize) {
+			for (let j = 0; j < matrix.length - 1; j += chunkSize) {
+				const BOTTOM_RIGHT = matrix[j + chunkSize]
+					? matrix[j + chunkSize][i + chunkSize]
+					: null;
+				const BOTTOM_LEFT = matrix[j + chunkSize]
+					? matrix[j + chunkSize][i]
+					: null;
+				const TOP_LEFT = matrix[j][i];
+				const TOP_RIGHT = matrix[j][i + chunkSize];
+				const { count, sum } = [
+					BOTTOM_RIGHT,
+					BOTTOM_LEFT,
+					TOP_LEFT,
+					TOP_RIGHT
+				].reduce(
+					(result, value) => {
+						if (isFinite(value) && value != null) {
+							result.sum += value;
+							result.count += 1;
+						}
+						return result;
+					},
+					{ sum: 0, count: 0 }
+				);
+				matrix[j + chunkSize / 2][i + chunkSize / 2] =
+					sum / count + randomInRange(-randomFactor, randomFactor);
+			}
+		}
+	}
+
+	const calculateDiamond = function(matrix, chunkSize, randomFactor) {
+		const half = chunkSize / 2;
+		for (let y = 0; y < matrix.length; y += half) {
+			for (let x = (y + half) % chunkSize; x < matrix.length; x += chunkSize) {
+				const BOTTOM = matrix[y + half] ? matrix[y + half][x] : null;
+				const LEFT = matrix[y][x - half];
+				const TOP = matrix[y - half] ? matrix[y - half][x] : null;
+				const RIGHT = matrix[y][x + half];
+				const { count, sum } = [BOTTOM, LEFT, TOP, RIGHT].reduce(
+					(result, value) => {
+						if (isFinite(value) && value != null) {
+							result.sum += value;
+							result.count += 1;
+						}
+						return result;
+					},
+					{ sum: 0, count: 0 }
+				);
+				matrix[y][x] = sum / count + randomInRange(-randomFactor, randomFactor);
+			}
+		}
+		return matrix;
+	}
+
+	const diamondSquare = function(matrix) {
+		let chunkSize = MATRIX_LENGTH - 1;
+		let randomFactor = RANDOM_INITIAL_RANGE;
+
+		while (chunkSize > 1) {
+			calculateSquare(matrix, chunkSize, randomFactor);
+			calculateDiamond(matrix, chunkSize, randomFactor);
+			chunkSize /= 2;
+			randomFactor /= 2;
+		}
+
+		return matrix;
+	}
+
+	const normalizeMatrix = function(matrix) {
+		const maxValue = matrix.reduce((max, row) => {
+			return row.reduce((max, value) => Math.max(value, max));
+		}, -Infinity);
+
+		return matrix.map((row) => {
+			return row.map((val) => val / maxValue);
+		});
+	}
+	
+	if (typeof size != 'undefined')
+		MATRIX_LENGTH = size + 1;
+	
+	return (normalizeMatrix(diamondSquare(generateMatrix())));
+}
+
+function Terrain(size)
+{
+	var mt = Heightmap(size);
+	var mm = {max:infinity*(-1),min:infinity};
+	var result = [];
+	for(let x = 0 ;x < mt.length; x++)
+	{
+		for(let y = 0;y < mt.length;y++)
+		{
+			if(mm.min > mt[x][y]) 
+			{
+				mm.min = mt[x][y];
+			}
+			if(mm.max < mt[x][y]) 
+			{
+				mm.max = mt[x][y];
+			}
+		}
+	}
+	for(let x = 0;x < mt.length;x++)
+	{
+		result[x] = [];
+		for(let z = 0;z < mt.length;z++)
+		{
+			result[x][z] = [];
+			for(let y = 0; y < mt.length;y++)
+			{
+				result[x][y] = [];
+				let hei = Math.abs(mm.min*Math.pow(10,((Math.round(mm.min) + '').length)));
+				const earthBlocs = Math.round(mt[x][z] + hei);
+				const airBlocks = Math.round((mt.length) - earthBlocs);
+				result[x][y] = Array(earthBlocs)
+									.fill(Objecto.Block('earth','full'))
+									.concat(Array(airBlocks).fill(Objecto.Block('air','empty',1)));
+			}
+		}
+	}
+	return(result);
+}
+
+//-----------------------------------
+//BODIES
+//-----------------------------------
 
 const Bodies = 
 {
@@ -189,6 +331,14 @@ const Bodies =
 	}
 };
 
+//-----------------------------------
+//OBJETOS//OBJETOS//OBJETOS//OBJETOS
+//OBJETOS//OBJETOS//OBJETOS//OBJETOS
+//OBJETOS//OBJETOS//OBJETOS//OBJETOS
+//OBJETOS//OBJETOS//OBJETOS//OBJETOS
+//OBJETOS//OBJETOS//OBJETOS//OBJETOS
+//-----------------------------------
+
 //declaration
 const Objecto = 
 {
@@ -206,22 +356,23 @@ const Objecto =
 			}
 		);
 	},
-	Creature:function(subtype,gender,birth,position)
+	Creature:function(specime,gender,birth,position)
 	{
 		return(
 			{
 				...this.Generic('creature','idle',birth,position),
-				subtype:subtype,
+				specime:specime,//human
 				gender:gender,
-				body:Bodies[subtype][gender]()
+				body:Bodies[specime][gender]()
 			}
 		);
 	},
-	Block:function(subtype,status,birth,position,quality,condition)
+	Block:function(material,subtype,status,birth,position,quality,condition)
 	{
 		return(
 			{
 				...this.Generic('block',status,birth,position,quality,condition),
+				material:defsto(material,'earth'),//earth,wood,rock
 				subtype:defsto(subtype,'empty'),//empty,full,floor,half
 			}
 		);
@@ -243,13 +394,13 @@ const Room =
 			}
 		)
 	},
-	
 }
 const World = function(rooms)
 {
 	return(	
 		{
 			time:0,
+			creatures:[],
 			rooms:defsto(rooms,[]),
 		}
 	)
@@ -263,3 +414,4 @@ function frame(world)
 
 //test
 console.log(Objecto.Creature('human','male'));
+console.log(Terrain(128));

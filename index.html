@@ -2,15 +2,33 @@
 <html>
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <title>republicavelha</title>
-  <link href="style.css" rel="stylesheet" type="text/css" />
+	<style>
+		html, body 
+		{
+		  border: 0px; 
+		  margin: 0px;
+		  padding: 0px;
+		  height: 100%;
+		  width: 100%;
+		}
+		canvas 
+		{
+		  display: block;
+		  position: absolute;
+		  left: 0;
+		  top: 0;
+		}
+	</style>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>republicavelha</title>
+	<link href="style.css" rel="stylesheet" type="text/css" />
 </head>
 
 <body>
-  <p id="console-screen">republicavelha</p>
-  <script src="republicavelha.js"></script> 
+	<p id="console-screen">republicavelha</p>
+	<script type="module" src="genmap.js"></script>
+	<script type="module" src="republicavelha.js"></script>
 </body>
 
 </html>
