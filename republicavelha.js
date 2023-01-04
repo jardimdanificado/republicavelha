@@ -9,7 +9,6 @@ function Vector2(x,y){return({x:x,y:y});}
 function Vector2Zero(){return({x:0,y:0});}
 function BoundingBox(min,max){return({min:{x:min.x,y:min.y,z:min.z},max:{x:max.x,y:max.y,z:max.z}});}
 function Position(local,global){return({local:local,global:global})};
-const infinity = Math.min();
 
 //-----------------------------------
 //UTILS
@@ -251,7 +250,7 @@ function Heightmap(size) {
 function Terrain(size)
 {
 	var mt = Heightmap(size);
-	var mm = {max:infinity*(-1),min:infinity};
+	var mm = {max:Infinity*(-1),min:Infinity};
 	var result = [];
 	for(let x = 0 ;x < mt.length; x++)
 	{
@@ -270,19 +269,16 @@ function Terrain(size)
 	for(let x = 0;x < mt.length;x++)
 	{
 		result[x] = [];
-		for(let z = 0;z < mt.length;z++)
+		for(let y = 0;y < mt.length;y++)
 		{
-			result[x][z] = [];
-			for(let y = 0; y < mt.length;y++)
-			{
-				result[x][y] = [];
-				let hei = Math.abs(mm.min*Math.pow(10,((Math.round(mm.min) + '').length)));
-				const earthBlocs = Math.round(mt[x][z] + hei);
-				const airBlocks = Math.round((mt.length) - earthBlocs);
-				result[x][y] = Array(earthBlocs)
-									.fill(Objecto.Block('earth','full'))
-									.concat(Array(airBlocks).fill(Objecto.Block('air','empty',1)));
-			}
+			result[x][y] = [];
+			let hei = Math.abs(mm.min*Math.pow(10,((Math.round(mm.min) + '').length)));
+			const earthBlocs = limito((Math.abs(Math.round(mt[x][y] + hei)))*4,1,mt.lenght);
+			const airBlocks = limito(Math.round((mt.length) - earthBlocs-hei),2,mt.lenght);
+			result[x][y] = Array(earthBlocs)
+								.fill([Objecto.Block('earth','full')])
+								.concat([[Objecto.Block('grass','floor'),Objecto.Block('air','empty')]])
+								.concat(Array(airBlocks-1).fill([Objecto.Block('air','empty')]));
 		}
 	}
 	return(result);
@@ -310,10 +306,10 @@ const Bodies =
 			teeth:Array(32).fill(Limb('eater',1)),
 			nose:Limb('smeller,breather','10,2'),
 			lung:Array(2).fill(Limb('breather',8)),
-			neck:Limb('all',infinity),
-			head:Limb('all',infinity),
+			neck:Limb('all',Infinity),
+			head:Limb('all',Infinity),
 			brain:Limb('thinker'),
-			torso:Limb('all',infinity),
+			torso:Limb('all',Infinity),
 			anus:Limb('shitter'),
 		},
 		_male:
@@ -414,4 +410,4 @@ function frame(world)
 
 //test
 console.log(Objecto.Creature('human','male'));
-console.log(Terrain(128));
+console.log(Terrain(32));
