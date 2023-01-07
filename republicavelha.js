@@ -2,7 +2,42 @@
 //PRIMITIVES
 //-----------------------------------
 
+function RGB(r,g,b){return({r:r,g:g,b:b});}
 function RGBA(r,g,b,a){return({r:r,g:g,b:b,a:a});}
+function HSL2RGB(h, s, l)
+{
+    var r, g, b;
+    if(s == 0)
+	{
+        r = g = b = l; // achromatic
+    }
+	else
+	{
+        var hue2rgb = function hue2rgb(p, q, t)
+		{
+            if(t < 0) t += 1;
+            if(t > 1) t -= 1;
+            if(t < 1/6) return p + (q - p) * 6 * t;
+            if(t < 1/2) return q;
+            if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+            return p;
+        }
+
+        var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        var p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+    }
+
+    return(RGB(Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)));
+}
+function HSL2RGBA(h, s, l)
+{
+	let temp = HSL2RGB(h,s,l);
+	temp.a = 255;
+	return(temp);
+};
 function Vector3(x,y,z){return({x:x,y:y,z:z});}
 function Vector3Zero(){return({x:0,y:0,z:0});}
 function Vector2(x,y){return({x:x,y:y});}
@@ -75,6 +110,8 @@ const pendent = Pending;
 const pend = Pending;
 const pending = Pending;
 
+const randomInRange = function(min, max){return Math.floor(Math.random() * (max - min + 1) + min);}
+const randi = randomInRange;
 //-----------------------------------
 //CALCULATE
 //-----------------------------------
@@ -135,13 +172,9 @@ const Modificator = function(type,subtype,status,quality,condition,func)
 //-----------------------------------
 
 function Heightmap(size) {
-	const N = 8;
-	const RANDOM_INITIAL_RANGE = 10;
-	var MATRIX_LENGTH = Math.pow(2, N) + 1;
-
-	const randomInRange = function(min, max) {
-		return Math.floor(Math.random() * (max - min + 1) + min);
-	}
+	const N = randi(4,size);
+	const RANDOM_INITIAL_RANGE = randi(5, size);
+	var MATRIX_LENGTH = Math.pow(2, N)+1;
 
 	const generateMatrix = function() {
 		const matrix = new Array(MATRIX_LENGTH)
@@ -247,8 +280,12 @@ function Heightmap(size) {
 	return (normalizeMatrix(diamondSquare(generateMatrix())));
 }
 
+var teste = 0;
+
 function Terrain(size)
 {
+	teste++;
+	console.log(teste)
 	var mt = Heightmap(size);
 	var mm = {max:Infinity*(-1),min:Infinity};
 	var result = [];
@@ -272,13 +309,16 @@ function Terrain(size)
 		for(let y = 0;y < mt.length;y++)
 		{
 			result[x][y] = [];
-			let hei = Math.abs(mm.min*Math.pow(10,((Math.round(mm.min) + '').length)));
-			const earthBlocs = limito((Math.abs(Math.round(mt[x][y] + hei)))*4,1,mt.lenght);
-			const airBlocks = limito(Math.round((mt.length) - earthBlocs-hei),2,mt.lenght);
-			result[x][y] = Array(earthBlocs)
+			let hei = (mm.min*Math.pow(10,((Math.trunc(mm.min) + '').length)));
+			const earthb = Math.round(mt[x][y] + hei);
+			const airb = Math.round(mt.length - earthb);
+			
+			if(earthb < 0 || airb<0 || isNaN(earthb) || isNaN(airb) || airb + earthb > mt.length)
+				return(Terrain(size));
+			result[x][y] = Array(earthb)
 								.fill([Objecto.Block('earth','full')])
 								.concat([[Objecto.Block('grass','floor'),Objecto.Block('air','empty')]])
-								.concat(Array(airBlocks-1).fill([Objecto.Block('air','empty')]));
+								.concat(Array(airb-1).fill([Objecto.Block('air','empty')]));
 		}
 	}
 	return(result);
@@ -410,4 +450,20 @@ function frame(world)
 
 //test
 console.log(Objecto.Creature('human','male'));
-console.log(Terrain(32));
+var mapa = Terrain(32);
+var htmltxt = '';
+
+for(let x = 0;x<32;x++)
+{
+	for(let y = 0;y<32;y++)
+	{
+		for(let z = 0;z<32;z++)
+			if(mapa[x][y][z][0].subtype === "floor")
+			{
+				htmltxt += (z+' ');
+				break;
+			}
+	}
+	htmltxt += '\n';
+}
+document.getElementById("console-screen").innerHTML = htmltxt;
