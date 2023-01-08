@@ -92,7 +92,7 @@ function Pending(frames,func,args)
 	{
 		for(let i = 0;i<pendingList.length;i++)
 		{
-			//console.log(pendingList)
+
 			if(pendingList[i].frames > 0)
 				pendingList[i].frames--;
 			else
@@ -172,8 +172,8 @@ const Modificator = function(type,subtype,status,quality,condition,func)
 //-----------------------------------
 
 function Heightmap(size) {
-	const N = randi(4,size);
-	const RANDOM_INITIAL_RANGE = randi(5, size);
+	const N = (8+randi(0,5));
+	const RANDOM_INITIAL_RANGE = (10+randi(0,3));
 	var MATRIX_LENGTH = Math.pow(2, N)+1;
 
 	const generateMatrix = function() {
@@ -280,14 +280,27 @@ function Heightmap(size) {
 	return (normalizeMatrix(diamondSquare(generateMatrix())));
 }
 
-var teste = 0;
+var mapattempt = 0;
 
-function Terrain(size)
+function Terrain(size,type)
 {
-	teste++;
-	console.log(teste)
-	var mt = Heightmap(size);
+	type = defsto(type,1);
+	mapattempt += 1;
+	var mt;
+	if(typeof size == 'number'||typeof size == 'string')
+	{
+		mt = Heightmap(size);
+	}
+	else if(typeof size == 'object')
+	{
+		mt = size;
+	}
+	else
+	{
+		mt = Heightmap(32);
+	}
 	var mm = {max:Infinity*(-1),min:Infinity};
+	var nlist = [];
 	var result = [];
 	for(let x = 0 ;x < mt.length; x++)
 	{
@@ -309,19 +322,75 @@ function Terrain(size)
 		for(let y = 0;y < mt.length;y++)
 		{
 			result[x][y] = [];
-			let hei = (mm.min*Math.pow(10,((Math.trunc(mm.min) + '').length)));
-			const earthb = Math.round(mt[x][y] + hei);
-			const airb = Math.round(mt.length - earthb);
+			var earthb = Math.round((mt[x][y] +mm.min)*(Math.pow(10,((Math.trunc(mm.min) + '').length))));//default is flat
 			
-			if(earthb < 0 || airb<0 || isNaN(earthb) || isNaN(airb) || airb + earthb > mt.length)
-				return(Terrain(size));
+			if(type == 0 || type == 'flat')
+				earthb = Math.round((mt[x][y])+(mm.min*Math.pow(10,((Math.trunc(mm.min) + '').length))));//flat
+			else if(type == 1 || type == 'random')
+				earthb = Math.round((mt[x][y] +mm.min)*(Math.pow(10,((Math.trunc(mm.min) + '').length))));//random
+			
+			var airb = Math.round(mt.length - earthb);
+
+			if(isNaN(earthb)||isNaN(airb) || earthb < 0 || airb < 0)
+			{
+				function tempo(siz)
+				{
+					if(typeof siz == 'object')
+					{
+						temp = siz.length;
+					}
+					else if(typeof siz == 'number')
+					{
+						temp = siz;
+					}
+					else 
+					{
+						temp = 32;
+					}
+				}
+				var temp = tempo(size);
+				if(typeof temp == 'undefined')
+				{
+					return Terrain(32);
+				}
+				earthb = temp/2;
+				airb = temp - earthb;
+			}
+			
 			result[x][y] = Array(earthb)
 								.fill([Objecto.Block('earth','full')])
 								.concat([[Objecto.Block('grass','floor'),Objecto.Block('air','empty')]])
-								.concat(Array(airb-1).fill([Objecto.Block('air','empty')]));
+								.concat(Array(airb).fill([Objecto.Block('air','empty')]));
+			if(!nlist.includes(earthb))
+				nlist.push(earthb);
 		}
 	}
+	console.log("terrain generated in " + mapattempt + " tries.");
+	mapattempt = 0;
 	return(result);
+}
+function MultiTerrain(mapsize,howmanyterrains,type)
+{
+	var hmaps = [];
+	var result = [];
+	for(let x = 0 ;x < howmanyterrains; x++)
+	{
+		hmaps.push(Heightmap(mapsize));
+	}
+	for(let k = 0 ;k < howmanyterrains; k++)
+	{	
+		for(let x = 0 ;x < mapsize; x++)
+		{
+			if(typeof result[x] == 'undefined')
+				result[x] = Array(mapsize).fill(0);
+			for(let y = 0;y < mapsize;y++)
+			{
+				result[x][y] += hmaps[k][x][y];
+			}
+		}
+	}
+	var terr = Terrain(result,type);
+	return(terr);
 }
 
 //-----------------------------------
@@ -450,14 +519,14 @@ function frame(world)
 
 //test
 console.log(Objecto.Creature('human','male'));
-var mapa = Terrain(32);
+var mapa = MultiTerrain(16,4,'flat');
 var htmltxt = '';
 
-for(let x = 0;x<32;x++)
+for(let x = 0;x<16;x++)
 {
-	for(let y = 0;y<32;y++)
+	for(let y = 0;y<16;y++)
 	{
-		for(let z = 0;z<32;z++)
+		for(let z = 0;z<16;z++)
 			if(mapa[x][y][z][0].subtype === "floor")
 			{
 				htmltxt += (z+' ');
