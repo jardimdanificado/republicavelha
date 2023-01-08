@@ -519,7 +519,7 @@ function frame(world)
 
 //test
 console.log(Objecto.Creature('human','male'));
-var mapa = MultiTerrain(16,4,'flat');
+var mapa = MultiTerrain(16,4,randi(0,1));
 var htmltxt = '';
 
 for(let x = 0;x<16;x++)
