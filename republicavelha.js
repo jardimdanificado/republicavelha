@@ -326,32 +326,54 @@ function smoothHeightmap(hm)
 				hm[x-1][y+1],hm[x][y+1],hm[x+1][y+1]
 			];
 			let center = grid[4];
-			let up = {sum:0,count:0,average:0};
-			let down = {sum:0,count:0,average:0};
+			let up = 0;
+			let down = 0;
 			for(let i = 0 ;i < 9; i+=1)
 			{
 				if(i==4)
 					continue;
 				if(grid[i]>center)
 				{
-					up.sum += grid[i];
-					up.count += 1;
+					up += 1;
 				}
 				else if(grid[i]<center)
 				{
-					down.sum += grid[i];
-					down.count += 1;
+					down += 1;
 				}
 			}
-			up.average = Math.abs((up.sum/up.count) - center);
-			down.average = Math.abs(center - (down.sum/down.count));
-			if(up.average > 0 && up.average > down.average)
+			if(up > down)
 				hm[x][y] += 1;
-			else if(down.average > 0 && down.average > up.average)
+			else if(down > up)
 				hm[x][y] -= 1;
 		}
 	}
 	return(hm);
+}
+
+function subdivideHeightmap(hm)
+{
+	function grid(input)
+	{
+		return(Array(9).fill(input));
+	}
+	var result = [];
+	for(let x = 0;x < hm.length;x++)
+	{
+		result[x] = [];
+		for(let y = 0;y < hm.length;y++)
+		{
+			let g = grid(hm[x][y]);
+			if(x != 0)
+			{
+			
+			}
+			
+			if(y != 0)
+			{
+				
+			}
+		}
+	}
 }
 
 var mapattempt = 0;
@@ -539,7 +561,7 @@ function frame(world)
 
 //test
 console.log(Objecto.Creature('human','male'));
-var mapa = MultiTerrain(8,1,1,200000);
+var mapa = MultiTerrain(16,1,1,200000);
 var htmltxt = '';
 
 for(let x = 0;x<mapa.length;x++)
