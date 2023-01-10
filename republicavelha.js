@@ -356,24 +356,130 @@ function subdivideHeightmap(hm)
 	{
 		return(Array(9).fill(input));
 	}
-	var result = [];
-	for(let x = 0;x < hm.length;x++)
+	var grided = [];
+	for(let x = 0;x < hm.length-1;x++)
 	{
-		result[x] = [];
-		for(let y = 0;y < hm.length;y++)
+		grided[x] = [];
+		for(let y = 0;y < hm.length-1;y++)
 		{
 			let g = grid(hm[x][y]);
-			if(x != 0)
+			if(x > 0)
 			{
-			
+				g[3] = Math.round((hm[x-1][y]+g[3])/2);
+				if(x<hm.length-1)
+				{
+					g[5] = Math.round((hm[x+1][y]+g[5])/2);
+					if(y>0)
+					{
+						g[2] = Math.round((hm[x+1][y-1]+g[2])/2);
+						if(y<hm.length-1)
+						{
+							g[8] = Math.round((hm[x+1][y+1]+g[8])/2);
+							g[6] = Math.round((hm[x-1][y+1]+g[6])/2);
+						}
+					}
+				}
+				if(y>0)
+					g[0] = Math.round((hm[x-1][y-1]+g[0])/2);
 			}
-			
-			if(y != 0)
+			if(y > 0)
 			{
-				
+				g[1] = Math.round((hm[x][y-1]+g[1])/2);
+				if(y<hm.length)
+				{
+					g[7] = Math.round((hm[x][y+1]+g[7])/2);
+					if(x>0)
+					{
+						g[6] = Math.round((hm[x-1][y+1]+g[2])/2);
+						if(x<hm.length)
+						{
+							g[8] = Math.round((hm[x+1][y+1]+g[8])/2);
+							g[6] = Math.round((hm[x-1][y+1]+g[6])/2);
+						}
+					}
+				}
 			}
+			grided[x][y] = g;
 		}
 	}
+	var result = [];
+	for(let x = 0;x < (hm.length-1)*3;x+=1)
+		result[x] = [];
+	for(let x = 1;x < (hm.length-1)*3;x+=3)
+	{
+		for(let y = 1;y < (hm.length-1)*3;y+=3)
+		{
+			result[x-1][y-1] = grided[Math.round(x/3)][Math.round(y/3)][0];
+			result[x][y-1] = grided[Math.round(x/3)][Math.round(y/3)][1];
+			result[x+1][y-1] = grided[Math.round(x/3)][Math.round(y/3)][2];
+			result[x-1][y] = grided[Math.round(x/3)][Math.round(y/3)][3];
+			result[x][y] = grided[Math.round(x/3)][Math.round(y/3)][4];
+			result[x+1][y] = grided[Math.round(x/3)][Math.round(y/3)][5];
+			result[x-1][y+1] = grided[Math.round(x/3)][Math.round(y/3)][6];
+			result[x][y+1] = grided[Math.round(x/3)][Math.round(y/3)][7];
+			result[x+1][y+1] = grided[Math.round(x/3)][Math.round(y/3)][8];
+		}
+	}
+	return result;
+}
+
+function nearestHeightmap(hm)
+{
+	var result = [];
+	
+	for(let x = 0;x < (hm.length);x+=1)
+	{
+		result[x] = [];
+		for(let y = 0;y < (hm.length);y+=1)
+		{
+			let sum = 0;
+			let count = 0;
+			if(x>0&&y>0)
+			{
+				sum += hm[x-1][y-1];
+				count++;
+			}
+			if(y>0)
+			{	
+				sum += hm[x][y-1];
+				count++;
+			}
+			if(x<hm.length-1 && y>0)
+			{	
+				sum += hm[x+1][y-1];
+				count++;
+			}
+			if(x>0)
+			{	
+				sum += hm[x-1][y];
+				count++;
+			}
+			sum += hm[x][y];
+			count++;
+			if(x<hm.length-1)
+			{	
+				sum += hm[x+1][y];
+				count++;
+			}
+			if(x>0&&y<hm.length-1)
+			{	
+				sum += hm[x-1][y+1];
+				count++;
+			}
+			if(y<hm.length-1)
+			{	
+				sum += hm[x][y+1];
+				count++;
+			}
+			if(x<hm.length-1&&y<hm.length-1)
+			{	
+				sum += hm[x+1][y+1];
+				count++;
+			}
+			result[x][y] = sum/count;
+		}
+	}
+	return result;
 }
 
 var mapattempt = 0;
@@ -388,9 +494,8 @@ function Terrain(inmap)
 		for(let y = 0;y < mt.length;y++)
 		{
 			result[x][y] = [];
-			var earthb = limito(mt[x][y],(mt.length-((mt.length/4)*3)),(mt.length-(mt.length/4)));
+			var earthb = Math.round(limito(mt[x][y],(mt.length-((mt.length/4)*3)),(mt.length-(mt.length/4))));
 			var airb = mt.length - earthb;
-			
 			result[x][y] = Array(earthb)
 								.fill([Objecto.Block('earth','full')])
 								.concat([[Objecto.Block('grass','floor'),Objecto.Block('air','empty')]])
@@ -402,30 +507,44 @@ function Terrain(inmap)
 	return(result);
 }
 
-function MultiTerrain(mapsize,howmanyterrains,type,smooth)
+function MultiTerrain(mapsize,howmanyterrains,type,smooth,subdivide,nearest)
 {
 	var hmaps = [];
 	var result = [];
 	smooth ??= false;
+	subdivide ??= false;
+	nearest ??= false;
 	for(let x = 0 ;x < howmanyterrains; x++)
 	{
 		let tmap = roundHeightmap(Heightmap(mapsize),type);
 		let lsmooth = smooth;
+		let lsub = subdivide;
+		let lnea = nearest;
+		while(lsub>0)
+		{
+			tmap = subdivideHeightmap(tmap);
+			lsub--;
+		}
 		while(lsmooth>0)
-		{	
+		{
 			tmap = smoothHeightmap(tmap);
 			lsmooth--;
+		}
+		while(lnea>0)
+		{
+			tmap = nearestHeightmap(tmap);
+			lnea--;
 		}
 		hmaps.push(tmap);
 	}
 	type = randi(0,1);
 	for(let k = 0 ;k < howmanyterrains; k++)
-	{	
-		for(let x = 0 ;x < mapsize; x++)
+	{
+		for(let x = 0 ;x < hmaps[0].length; x++)
 		{
 			if(typeof result[x] == 'undefined')
-				result[x] = Array(mapsize).fill(0);
-			for(let y = 0;y < mapsize;y++)
+				result[x] = Array(hmaps[0].length).fill(0);
+			for(let y = 0;y < hmaps[0].length;y++)
 			{
 				result[x][y] += hmaps[k][x][y];
 			}
@@ -561,7 +680,8 @@ function frame(world)
 
 //test
 console.log(Objecto.Creature('human','male'));
-var mapa = MultiTerrain(16,1,1,200000);
+var mapa = MultiTerrain(16,14,'random',0,0,600);
+console.log(mapa.length)
 var htmltxt = '';
 
 for(let x = 0;x<mapa.length;x++)
@@ -571,7 +691,10 @@ for(let x = 0;x<mapa.length;x++)
 		for(let z = 0;z<mapa.length;z++)
 			if(mapa[x][y][z][0].subtype === "floor")
 			{
-				htmltxt += (z+' ');
+				if(z<10)
+					htmltxt += ('0'+z + ' ');
+				else
+					htmltxt += (z+' ');
 				break;
 			}
 	}
