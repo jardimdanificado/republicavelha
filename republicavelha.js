@@ -313,7 +313,7 @@ function roundHeightmap(hm,type)
 	return hm;
 }
 
-function smoothHeightmap(hm)
+function randomizeHeightmap(hm)
 {
 	for(let x = 1 ;x < hm.length-1; x+=2)
 	{
@@ -423,7 +423,7 @@ function subdivideHeightmap(hm)
 	return result;
 }
 
-function nearestHeightmap(hm)
+function smoothHeightmap(hm)
 {
 	var result = [];
 	
@@ -482,10 +482,8 @@ function nearestHeightmap(hm)
 	return result;
 }
 
-var mapattempt = 0;
 function Terrain(inmap)
 {
-	mapattempt += 1;
 	var mt = inmap;
 	var result = [];
 	for(let x = 0;x < mt.length;x++)
@@ -496,49 +494,50 @@ function Terrain(inmap)
 			result[x][y] = [];
 			var earthb = Math.round(limito(mt[x][y],(mt.length-((mt.length/4)*3)),(mt.length-(mt.length/4))));
 			var airb = mt.length - earthb;
-			result[x][y] = Array(earthb)
-								.fill([Objecto.Block('earth','full')])
-								.concat([[Objecto.Block('grass','floor'),Objecto.Block('air','empty')]])
-								.concat(Array(airb).fill([Objecto.Block('air','empty')]));
+			if(earthb >=1)
+				result[x][y] = Array(earthb-1).fill([Objecto.Block('earth','full')]);
+			
+			result[x][y] = result[x][y].concat([[Objecto.Block('earth','full'),Objecto.Block('grass','floor')]]);
+			if(airb >= 1)
+				result[x][y] = result[x][y].concat(Array(airb).fill([Objecto.Block('air','empty')]));
 		}
 	}
-	console.log("terrain generated in " + mapattempt + " tries.");
-	mapattempt = 0;
 	return(result);
 }
 
-function MultiTerrain(mapsize,howmanyterrains,type,smooth,subdivide,nearest)
+function AutoTerrain(mapsize,type,layercount,smooth,randomize,subdivide)
 {
 	var hmaps = [];
 	var result = [];
-	smooth ??= false;
+	randomize ??= false;
 	subdivide ??= false;
-	nearest ??= false;
-	for(let x = 0 ;x < howmanyterrains; x++)
+	smooth ??= false;
+	layercount ??= 1;
+	for(let x = 0 ;x < layercount; x++)
 	{
 		let tmap = roundHeightmap(Heightmap(mapsize),type);
-		let lsmooth = smooth;
-		let lsub = subdivide;
-		let lnea = nearest;
-		while(lsub>0)
+		var lsub = subdivide;
+		var lrnd = randomize;
+		var lsmo = smooth;
+		while(lsub<0)
 		{
 			tmap = subdivideHeightmap(tmap);
-			lsub--;
+			lsub++;
 		}
-		while(lsmooth>0)
+		while(lrnd<0)
+		{
+			tmap = randomizeHeightmap(tmap);
+			lrnd++;
+		}
+		while(lsmo<0)
 		{
 			tmap = smoothHeightmap(tmap);
-			lsmooth--;
-		}
-		while(lnea>0)
-		{
-			tmap = nearestHeightmap(tmap);
-			lnea--;
+			lsmo++;
 		}
 		hmaps.push(tmap);
 	}
-	type = randi(0,1);
-	for(let k = 0 ;k < howmanyterrains; k++)
+
+	for(let k = 0 ;k < layercount; k++)
 	{
 		for(let x = 0 ;x < hmaps[0].length; x++)
 		{
@@ -550,7 +549,22 @@ function MultiTerrain(mapsize,howmanyterrains,type,smooth,subdivide,nearest)
 			}
 		}
 	}
-	var terr = Terrain(result,type);
+	while(randomize>0)
+	{
+		result = randomizeHeightmap(result);
+		randomize--;
+	}
+	while(smooth>0)
+	{
+		result = smoothHeightmap(result);
+		smooth--;
+	}
+	while(subdivide>0)
+	{
+		result = subdivideHeightmap(result);
+		subdivide--;
+	}
+	var terr = Terrain(result);
 	return(terr);
 }
 
@@ -678,26 +692,27 @@ function frame(world)
 	world.time++;
 }
 
-//test
-console.log(Objecto.Creature('human','male'));
-var mapa = MultiTerrain(16,14,'random',0,0,600);
-console.log(mapa.length)
-var htmltxt = '';
-
-for(let x = 0;x<mapa.length;x++)
+if(typeof window !== 'undefined')
 {
-	for(let y = 0;y<mapa.length;y++)
+	console.log(Objecto.Creature('human','male'));
+	var mapa = AutoTerrain(16,'random',10,700,25,1);
+	var htmltxt = '';
+	
+	for(let x = 0;x<mapa.length;x++)
 	{
-		for(let z = 0;z<mapa.length;z++)
-			if(mapa[x][y][z][0].subtype === "floor")
-			{
-				if(z<10)
-					htmltxt += ('0'+z + ' ');
-				else
-					htmltxt += (z+' ');
-				break;
-			}
+		for(let y = 0;y<mapa.length;y++)
+		{
+			for(let z = 0;z<mapa.length;z++)
+				if(typeof mapa[x][y][z][1] !== 'undefined'&&mapa[x][y][z][1].subtype === "floor")
+				{
+					if(z<10)
+						htmltxt += ('0'+z + ' ');
+					else
+						htmltxt += (z+' ');
+					break;
+				}
+		}
+		htmltxt += '<br>';
 	}
-	htmltxt += '\n';
+	document.getElementById("console-screen").innerHTML = htmltxt;
 }
-document.getElementById("console-screen").innerHTML = htmltxt;
