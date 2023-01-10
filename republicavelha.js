@@ -692,27 +692,36 @@ function frame(world)
 	world.time++;
 }
 
+console.log(Objecto.Creature('human','male'));
+var mapa = AutoTerrain(16,'flat',145,512,25,1);
+var htmltxt = '';
+
+for(let x = 0;x<mapa.length;x++)
+{
+	for(let y = 0;y<mapa.length;y++)
+	{
+		for(let z = 0;z<mapa.length;z++)
+			if(typeof mapa[x][y][z][1] !== 'undefined'&&mapa[x][y][z][1].subtype === "floor")
+			{
+				if(z<10)
+					htmltxt += ('0'+z + ' ');
+				else
+					htmltxt += (z+' ');
+				break;
+			}
+	}
+	if(typeof window !== 'undefined')
+		htmltxt += '<br>';
+	else if(typeof process !== 'undefined')
+		htmltxt += '\n';
+}
+
 if(typeof window !== 'undefined')
 {
-	console.log(Objecto.Creature('human','male'));
-	var mapa = AutoTerrain(16,'random',10,700,25,1);
-	var htmltxt = '';
-	
-	for(let x = 0;x<mapa.length;x++)
-	{
-		for(let y = 0;y<mapa.length;y++)
-		{
-			for(let z = 0;z<mapa.length;z++)
-				if(typeof mapa[x][y][z][1] !== 'undefined'&&mapa[x][y][z][1].subtype === "floor")
-				{
-					if(z<10)
-						htmltxt += ('0'+z + ' ');
-					else
-						htmltxt += (z+' ');
-					break;
-				}
-		}
-		htmltxt += '<br>';
-	}
 	document.getElementById("console-screen").innerHTML = htmltxt;
+}
+else if(typeof process !== 'undefined')
+{
+	console.clear();
+	process.stdout.write(htmltxt);
 }
