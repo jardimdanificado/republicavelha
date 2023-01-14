@@ -384,18 +384,22 @@ function Terrain(inmap)
 	return(result);
 }
 
-export function AutoTerrain(mapsize,type,layercount,smooth,randomize,subdivide,multi)
+export function AutoTerrain(mapsize,type,multiHorizontal,multiVertical,smooth,randomize,subdivide)
 {
+	//note that multiHorizontal multiplyes the mapsize, putting differentmaps side by side
+	//while multiVertical keeps the mapsize, as it sum all layers
 	var hmaps = [];
 	var result = [];
+	mapsize ??= 32;
+	type ??= "flat";
 	randomize ??= false;
 	subdivide ??= false;
 	smooth ??= false;
-	multi ??= 1;
-	layercount ??= 1;
-	for(let x = 0 ;x < layercount; x++)
+	multiHorizontal ??= 1;
+	multiVertical ??= 1;
+	for(let x = 0 ;x < Math.abs(multiVertical); x++)
 	{
-		let tmap = roundHeightmap(multiHeightmap(mapsize,multi),type);
+		let tmap = roundHeightmap(multiHeightmap(mapsize,Math.abs(multiHorizontal)),type);
 		var lsub = subdivide;
 		var lrnd = randomize;
 		var lsmo = smooth;
@@ -403,7 +407,7 @@ export function AutoTerrain(mapsize,type,layercount,smooth,randomize,subdivide,m
 		hmaps.push(tmap);
 	}
 
-	for(let k = 0 ;k < layercount; k++)
+	for(let k = 0 ;k < Math.abs(multiVertical); k++)
 	{
 		for(let x = 0 ;x < hmaps[0].length; x++)
 		{
