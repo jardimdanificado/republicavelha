@@ -5,18 +5,23 @@
 	<style>
 		html, body 
 		{
-		  border: 0px; 
-		  margin: 0px;
-		  padding: 0px;
-		  height: 100%;
-		  width: 100%;
+			border: 0px; 
+			margin: 0px;
+			padding: 0px;
+			height: 100%;
+			width: 100%;
+			font-family:'Lucida Console', monospace;
+			font-size: 80%;
+			white-space: nowrap;
+		    overflow: hidden;
+		    text-overflow: ellipsis;
 		}
 		canvas 
 		{
-		  display: block;
-		  position: absolute;
-		  left: 0;
-		  top: 0;
+			display: block;
+			position: absolute;
+			left: 0;
+			top: 0;
 		}
 	</style>
 	<meta charset="utf-8">
@@ -26,7 +31,46 @@
 
 <body>
 	<p id="console-screen">republicavelha</p>
-	<script src="republicavelha.js"></script>
+	<script src="src/republicavelha.js" type="module"></script>
+	<script>
+		var mapa, Republica, htmltxt;//declared outside debug function so we can console.log it globally
+		async function debug()
+		{
+			Republica = await import("./src/republicavelha.js");
+			console.log(Republica)
+			console.log(Republica.Objecto.Creature('human','male'));
+			
+			mapa = Republica.Terrain.AutoTerrain(16,'flat',15,4,25,0,2);
+			var htmltxt = '';
+			
+			for(let x = 0;x<mapa.length;x++)
+			{
+				for(let y = 0;y<mapa.length;y++)
+					for(let z = 0;z<mapa.length;z++)
+						if(typeof mapa[x][y][z][1] !== 'undefined'&&mapa[x][y][z][1].subtype === "floor")
+						{
+							if(z<10)
+								htmltxt += ('0'+z + ' ');
+							else
+								htmltxt += (z+' ');
+							break;
+						}
+				if(typeof window !== 'undefined')
+					htmltxt += '<br>';
+				else if(typeof process !== 'undefined')
+					htmltxt += '\n';
+			}
+			
+			if(typeof window !== 'undefined')
+				document.getElementById("console-screen").innerHTML = htmltxt;
+			else if(typeof process !== 'undefined')
+			{
+				console.clear();
+				process.stdout.write(htmltxt);
+			}
+		};
+		debug();
+	</script>
 </body>
 
 </html>
