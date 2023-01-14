@@ -423,7 +423,11 @@ function rampifyTerrain(terrain)
 						(x<terrain.length-1 && terrain[x+1][y][z+1][0].subtype == "full" && terrain[x+1][y][z+2][0].subtype == "empty")||
 						(x>0&&terrain[x-1][y][z+1][0].subtype == "full" && terrain[x-1][y][z+2][0].subtype == "empty")||
 						(y<terrain.length-1 && terrain[x][y+1][z+1][0].subtype == "full" && terrain[x][y+1][z+2][0].subtype == "empty")||
-						(y>0 && terrain[x][y-1][z+1][0].subtype == "full" && terrain[x][y-1][z+2][0].subtype == "empty")
+						(y>0 && terrain[x][y-1][z+1][0].subtype == "full" && terrain[x][y-1][z+2][0].subtype == "empty") ||
+						(x<terrain.length-1 && y<terrain.length-1 && terrain[x+1][y+1][z+1][0].subtype == "full" && terrain[x+1][y+1][z+2][0].subtype == "empty")||
+						(x>0&& y<terrain.length-1 &&terrain[x-1][y+1][z+1][0].subtype == "full" && terrain[x-1][y+1][z+2][0].subtype == "empty")||
+						(x<terrain.length-1 && y<0 && terrain[x+1][y-1][z+1][0].subtype == "full" && terrain[x][y-1][z+2][0].subtype == "empty")||
+						(x>0 && y>0 && terrain[x-1][y-1][z+1][0].subtype == "full" && terrain[x][y-1][z+2][0].subtype == "empty")
 					)	
 					{
 						terrain[x][y][z][0].subtype = 'half';
@@ -470,9 +474,7 @@ export function AutoTerrain(mapsize,type,multiHorizontal,multiVertical,smooth,ra
 	}
 	result = HeightmapModder(result,lsmo,lrnd,lsub,false);
 	var terr = [];
-	terr[0] = [];
-	terr[0][0] = [];
-	terr[0][0][0] = [];
+	terr = Terrain(result);
 	while(typeof terr[0][0][0] == 'undefined'||terr[0][0][0].length === 0)
 		terr = Terrain(result);
 	terr = rampifyTerrain(terr);
