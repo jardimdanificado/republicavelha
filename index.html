@@ -13,8 +13,6 @@
 			font-family:'Lucida Console', monospace;
 			font-size: 80%;
 			white-space: nowrap;
-		    overflow: hidden;
-		    text-overflow: ellipsis;
 		}
 		canvas 
 		{
@@ -40,7 +38,7 @@
 			console.log(Republica)
 			console.log(Republica.Objecto.Creature('human','male'));
 			
-			mapa = Republica.Terrain.AutoTerrain(16,'flat',15,4,25,0,2);
+			mapa = Republica.Terrain.AutoTerrain(16,'flat',15,400,0,0,3);
 			var htmltxt = '';
 			
 			for(let x = 0;x<mapa.length;x++)
@@ -63,7 +61,7 @@
 			
 			if(typeof window !== 'undefined')
 				document.getElementById("console-screen").innerHTML = htmltxt;
-			else if(typeof process !== 'undefined')
+			else if(typeof process !== 'undefined')//
 			{
 				console.clear();
 				process.stdout.write(htmltxt);
