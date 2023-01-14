@@ -38,21 +38,42 @@
 			console.log(Republica)
 			console.log(Republica.Objecto.Creature('human','male'));
 			
-			mapa = Republica.Terrain.AutoTerrain(16,'flat',3,15,400,0,0);
+			mapa = Republica.Terrain.AutoTerrain(8,'flat',4,15,1024,0,-1);
 			var htmltxt = '';
 			
 			for(let x = 0;x<mapa.length;x++)
 			{
 				for(let y = 0;y<mapa.length;y++)
-					for(let z = 0;z<mapa.length;z++)
-						if(typeof mapa[x][y][z][1] !== 'undefined'&&mapa[x][y][z][1].subtype === "floor")
+				{
+					let ok = false;
+					for(let z = 0;z<mapa.length-1;z++)
+					{
+						if(mapa[x][y][z][0].subtype === 'half')
 						{
-							if(z<10)
-								htmltxt += ('0'+z + ' ');
-							else
-								htmltxt += (z+' ');
+							htmltxt += '>> ';
+							ok=true;
 							break;
 						}
+						else if(mapa[x][y][z][0].subtype === "full"&&mapa[x][y][z+1][0].subtype === "empty")
+						{
+							if(z<10)
+							{	
+								htmltxt += ('0'+z + ' ');
+								ok = true;
+							}	
+							else
+							{
+								htmltxt += (z+' ');
+								ok = true;
+							}
+							break;
+						}
+					}
+					if(!ok)
+					{
+						htmltxt += "JJ ";
+					}
+				}
 				if(typeof window !== 'undefined')
 					htmltxt += '<br>';
 				else if(typeof process !== 'undefined')

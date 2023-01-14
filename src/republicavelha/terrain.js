@@ -374,14 +374,34 @@ function Terrain(inmap)
 			var earthb = Math.round(rve.limito(mt[x][y],(mt.length-((mt.length/4)*3)),(mt.length-(mt.length/4))));
 			var airb = mt.length - earthb;
 			if(earthb >=1)
-				result[x][y] = Array(earthb-1).fill([Objecto.Block('earth','full')]);
-			
-			result[x][y] = result[x][y].concat([[Objecto.Block('earth','full'),Objecto.Block('grass','floor')]]);
+				result[x][y] = Array(earthb).fill([Objecto.Block('earth','full')]);
 			if(airb >= 1)
 				result[x][y] = result[x][y].concat(Array(airb).fill([Objecto.Block('air','empty')]));
 		}
 	}
 	return(result);
+}
+
+function rampifyTerrain(terrain)
+{
+	for(let x = 1;x<terrain.length-1;x++)
+		for(let y = 1;y<terrain.length-1;y++)
+			for(let z = 1;z<terrain.length-2;z++)
+			{
+				if(terrain[x][y][z][0].subtype == "full" && terrain[x][y][z+1][0].subtype == "empty")
+				{
+					if(
+						(terrain[x+1][y][z+1][0].subtype == "full" && terrain[x+1][y][z+2][0].subtype == "empty")||
+						(terrain[x-1][y][z+1][0].subtype == "full" && terrain[x-1][y][z+2][0].subtype == "empty")||
+						(terrain[x][y+1][z+1][0].subtype == "full" && terrain[x][y+1][z+2][0].subtype == "empty")||
+						(terrain[x][y-1][z+1][0].subtype == "full" && terrain[x][y-1][z+2][0].subtype == "empty")
+					)	
+					{
+						terrain[x][y][z][0].subtype = 'half';
+					}
+				}
+			}
+	return terrain;
 }
 
 export function AutoTerrain(mapsize,type,multiHorizontal,multiVertical,smooth,randomize,subdivide)
@@ -420,6 +440,6 @@ export function AutoTerrain(mapsize,type,multiHorizontal,multiVertical,smooth,ra
 		}
 	}
 	result = HeightmapModder(result,lsmo,lrnd,lsub,false);
-	var terr = Terrain(result);
+	var terr = rampifyTerrain(Terrain(result));
 	return(terr);
 }
