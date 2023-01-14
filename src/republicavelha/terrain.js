@@ -413,17 +413,17 @@ function Terrain(inmap)
 
 function rampifyTerrain(terrain)
 {
-	for(let x = 1;x<terrain.length-1;x++)
-		for(let y = 1;y<terrain.length-1;y++)
-			for(let z = 1;z<terrain.length-2;z++)
+	for(let x = 0;x<terrain.length;x++)
+		for(let y = 0;y<terrain.length;y++)
+			for(let z = 0;z<terrain.length-2;z++)
 			{
 				if(terrain[x][y][z][0].subtype == "full" && terrain[x][y][z+1][0].subtype == "empty")
 				{
 					if(
-						(terrain[x+1][y][z+1][0].subtype == "full" && terrain[x+1][y][z+2][0].subtype == "empty")||
-						(terrain[x-1][y][z+1][0].subtype == "full" && terrain[x-1][y][z+2][0].subtype == "empty")||
-						(terrain[x][y+1][z+1][0].subtype == "full" && terrain[x][y+1][z+2][0].subtype == "empty")||
-						(terrain[x][y-1][z+1][0].subtype == "full" && terrain[x][y-1][z+2][0].subtype == "empty")
+						(x<terrain.length-1 && terrain[x+1][y][z+1][0].subtype == "full" && terrain[x+1][y][z+2][0].subtype == "empty")||
+						(x>0&&terrain[x-1][y][z+1][0].subtype == "full" && terrain[x-1][y][z+2][0].subtype == "empty")||
+						(y<terrain.length-1 && terrain[x][y+1][z+1][0].subtype == "full" && terrain[x][y+1][z+2][0].subtype == "empty")||
+						(y>0 && terrain[x][y-1][z+1][0].subtype == "full" && terrain[x][y-1][z+2][0].subtype == "empty")
 					)	
 					{
 						terrain[x][y][z][0].subtype = 'half';
@@ -469,6 +469,12 @@ export function AutoTerrain(mapsize,type,multiHorizontal,multiVertical,smooth,ra
 		}
 	}
 	result = HeightmapModder(result,lsmo,lrnd,lsub,false);
-	var terr = rampifyTerrain(Terrain(result));
+	var terr = [];
+	terr[0] = [];
+	terr[0][0] = [];
+	terr[0][0][0] = [];
+	while(typeof terr[0][0][0] == 'undefined'||terr[0][0][0].length === 0)
+		terr = Terrain(result);
+	terr = rampifyTerrain(terr);
 	return(terr);
 }
