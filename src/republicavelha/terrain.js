@@ -246,63 +246,92 @@ function subdivideHeightmap(hm)
 	return result;
 }
 
-function smoothHeightmap(hm)
+function smoothBlock(hm,position)
 {
-	var result = [];
-	
-	for(let x = 0;x < (hm.length);x+=1)
+	let x = position.x;
+	let y = position.y;
+	let sum = 0;
+	let count = 0;
+	if(x>0&&y>0)
 	{
-		result[x] = [];
-		for(let y = 0;y < (hm.length);y+=1)
-		{
-			let sum = 0;
-			let count = 0;
-			if(x>0&&y>0)
-			{
-				sum += hm[x-1][y-1];
-				count++;
-			}
-			if(y>0)
-			{	
-				sum += hm[x][y-1];
-				count++;
-			}
-			if(x<hm.length-1 && y>0)
-			{	
-				sum += hm[x+1][y-1];
-				count++;
-			}
-			if(x>0)
-			{	
-				sum += hm[x-1][y];
-				count++;
-			}
-			sum += hm[x][y];
-			count++;
-			if(x<hm.length-1)
-			{	
-				sum += hm[x+1][y];
-				count++;
-			}
-			if(x>0&&y<hm.length-1)
-			{	
-				sum += hm[x-1][y+1];
-				count++;
-			}
-			if(y<hm.length-1)
-			{	
-				sum += hm[x][y+1];
-				count++;
-			}
-			if(x<hm.length-1&&y<hm.length-1)
-			{	
-				sum += hm[x+1][y+1];
-				count++;
-			}
-			result[x][y] = sum/count;
-		}
+		sum += hm[x-1][y-1];
+		count++;
 	}
-	return result;
+	if(y>0)
+	{	
+		sum += hm[x][y-1];
+		count++;
+	}
+	if(x<hm.length-1 && y>0)
+	{	
+		sum += hm[x+1][y-1];
+		count++;
+	}
+	if(x>0)
+	{	
+		sum += hm[x-1][y];
+		count++;
+	}
+	sum += hm[x][y];
+	count++;
+	if(x<hm.length-1)
+	{	
+		sum += hm[x+1][y];
+		count++;
+	}
+	if(x>0&&y<hm.length-1)
+	{	
+		sum += hm[x-1][y+1];
+		count++;
+	}
+	if(y<hm.length-1)
+	{	
+		sum += hm[x][y+1];
+		count++;
+	}
+	if(x<hm.length-1&&y<hm.length-1)
+	{	
+		sum += hm[x+1][y+1];
+		count++;
+	}
+	return(sum/count);
+}
+
+function smoothHeightmap(hm,corner)
+{
+	corner ??= randi(0,3);
+	switch(corner)
+	{
+		case 0:
+		{
+			for(let x = 0;x < (hm.length);x+=1)
+				for(let y = 0;y < (hm.length);y+=1)
+					hm[x][y] = smoothBlock(hm,rve.Vector2(x,y));
+		}
+		break;
+		case 1:
+		{
+			for(let x = hm.length-1;x >=0;x-=1)
+				for(let y = 0;y < (hm.length);y+=1)
+					hm[x][y] = smoothBlock(hm,rve.Vector2(x,y));
+		}
+		break;
+		case 2:
+		{
+			for(let x = hm.length-1;x >=0;x-=1)
+				for(let y = hm.length-1;y >=0;y-=1)
+					hm[x][y] = smoothBlock(hm,rve.Vector2(x,y));
+		}
+		break;
+		case 3:
+		{
+			for(let x = 0;x < (hm.length);x+=1)
+				for(let y = hm.length-1;y >=0;y-=1)
+					hm[x][y] = smoothBlock(hm,rve.Vector2(x,y));
+		}
+		break;
+	}
+	return hm;
 }
 
 function multiHeightmap(mapsize,multi)
@@ -350,7 +379,7 @@ function HeightmapModder(hm,smooth,randomize,subdivide,pre)
 	}
 	while(condition(smooth))
 	{
-		hm = smoothHeightmap(hm);
+		hm = smoothHeightmap(hm,rve.randi(0,3));
 		smooth+=mut;
 	}
 	while(condition(subdivide))
