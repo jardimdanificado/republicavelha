@@ -1,8 +1,8 @@
-export const Util = await import("./republicavelha/essential.js");
-export const Modificator = await import("./republicavelha/modificator.js");
-export const Terrain = await import("./republicavelha/terrain.js");
-export const Bodies = await import("./republicavelha/body.js");
-export const Objecto = await import("./republicavelha/objecto.js");
+export const Util = await import("./republicavelha/essential.mjs");
+export const Modificator = await import("./republicavelha/modificator.mjs");
+export const Terrain = await import("./republicavelha/terrain.mjs");
+export const Bodies = await import("./republicavelha/body.mjs");
+export const Objecto = await import("./republicavelha/objecto.mjs");
 
 export const Room = 
 {

@@ -1,5 +1,5 @@
-import * as rve from "./essential.js"
-import * as Bodies from "./body.js"
+import * as rve from "./essential.mjs"
+import * as Bodies from "./body.mjs"
 export const Generic = function(type,status,birth,position,quality,condition,mods)
 {
 	return(

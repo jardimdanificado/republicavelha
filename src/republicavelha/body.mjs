@@ -1,4 +1,4 @@
-import {Limb} from "./modificator.js"
+import {Limb} from "./modificator.mjs"
 
 export const human =
 {

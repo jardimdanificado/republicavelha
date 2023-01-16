@@ -1,5 +1,5 @@
-import * as rve from "./essential.js"
-import * as Objecto from "./objecto.js"
+import * as rve from "./essential.mjs"
+import * as Objecto from "./objecto.mjs"
 
 //-----------------------------------
 //TERRAIN

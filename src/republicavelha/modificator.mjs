@@ -1,4 +1,4 @@
-import * as rve from "./essential.js"
+import * as rve from "./essential.mjs"
 
 export const Storage = function(amount,type,capacity)
 {
