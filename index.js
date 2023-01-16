@@ -6,7 +6,7 @@ async function debug()
 	console.log(Republica)
 	console.log(Republica.Objecto.Creature('human','male'));
 	
-	mapa = Republica.Terrain.AutoTerrain(16,'flat',1,1,40,0,0);
+	mapa = Republica.Terrain.AutoTerrain(32,'flat',1,1,40,0,0);
 	var htmltxt = '';
 	
 	for(let x = 0;x<mapa.length;x++)
