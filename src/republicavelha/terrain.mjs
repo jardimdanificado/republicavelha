@@ -507,7 +507,7 @@ export function AutoTerrain(mapsize,type,multiHorizontal,multiVertical,smooth,ra
 			{
 				if(typeof result[x] == 'undefined')
 					result[x] = Array(hmaps[0].length).fill(0);
-				for(let y = 0;y < hmaps[0].length;y++)
+				for(let y = 0;y < hmaps[0][0].length;y++)
 				{
 					result[x][y] += hmaps[k][x][y];
 				}
@@ -531,10 +531,10 @@ export function AutoTerrain(mapsize,type,multiHorizontal,multiVertical,smooth,ra
 			setTimeout(timeout,1000);
 	   else
 	   {
-			util.Assing(dummy,part2(workers,mapsize));
+			util.Assing(dummy,part2());//this assigns the part2 return to dummy withou breakin the reference
 		   	//console.log(teste)
 	   }
 	};
 	setTimeout(timeout,1000);
-	return(dummy)
+	return(dummy);//returns the dummy reference
 }

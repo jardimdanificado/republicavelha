@@ -7,10 +7,11 @@ async function debug()
 	console.log(Republica)
 	console.log(Republica.Objecto.Creature('human','male'));
 	let msize = 128;
+	let mwidth = 4;
 	/*let cmr = await import("./src/republicavelha/comrade/comrade.js");
 	worker = cmr.modular("../terrain.mjs","Terrain",[8]);
 	console.log(worker)*/
-	mapa = Republica.Terrain.AutoTerrain(Republica.Util.Size(msize,64),'flat',1,1,msize,0,0);
+	mapa = Republica.Terrain.AutoTerrain(Republica.Util.Size(msize,32),'flat',mwidth,1,msize*mwidth,0,0);
 	function part2()
 	{
 		var htmltxt = '';
