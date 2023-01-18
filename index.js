@@ -1,6 +1,6 @@
 "use strict";
 var mapa, Republica, htmltxt;//declared outside debug function so we can console.log it globally
-let worker;
+//let worker;
 async function debug()
 {
 	Republica = await import("./src/republicavelha.mjs");
@@ -10,16 +10,16 @@ async function debug()
 	/*let cmr = await import("./src/republicavelha/comrade/comrade.js");
 	worker = cmr.modular("../terrain.mjs","Terrain",[8]);
 	console.log(worker)*/
-	mapa = Republica.Terrain.AutoTerrain(msize,'flat',3,1,msize,0,0);
-	function part2(mapa)
+	mapa = Republica.Terrain.AutoTerrain(Republica.Util.Size(msize,64),'flat',1,1,msize,0,0);
+	function part2()
 	{
 		var htmltxt = '';
 		for(let x = 0;x<mapa.length;x++)
 		{
-			for(let y = 0;y<mapa.length;y++)
+			for(let y = 0;y<mapa[0].length;y++)
 			{
 				let ok = false;
-				for(let z = 0;z<mapa.length-1;z++)
+				for(let z = 0;z<mapa[0][0].length-1;z++)
 				{
 					if(mapa[x][y][z][0].subtype === 'half')
 					{
@@ -63,13 +63,13 @@ async function debug()
 			process.stdout.write(htmltxt);
 		}
 	}
-	var timeout = function(mapa)
+	var timeout = function()
 	{
 	   if(mapa.length === 0)
-			setTimeout(timeout,1000,mapa);
+			setTimeout(timeout,1000,);
 	   else
-			part2(mapa);
+			part2();
 	};
-	setTimeout(timeout,1000,mapa);
+	setTimeout(timeout,1000);
 };
 debug();

@@ -45,6 +45,9 @@ export function Vector2Zero(){return({x:0,y:0});}
 export function BoundingBox(min,max){return({min:{x:min.x,y:min.y,z:min.z},max:{x:max.x,y:max.y,z:max.z}});}
 export function Position(local,global){return({local:local,global:global})};
 
+export function Size(w,h){var temp = {w:w,h:h};temp.height = temp.h;temp.width = temp.w;return temp;};
+
+export function getSizeInBytes(input){if(typeof input == 'function')return(input.toString().length);else return(JSON.stringify(input).length);}
 //-----------------------------------
 //UTILS
 //-----------------------------------

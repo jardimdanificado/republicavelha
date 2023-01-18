@@ -392,18 +392,19 @@ export function HeightmapModder(hm,smooth,randomize,subdivide,pre)
 	return hm;
 }
 
-export function Terrain(inmap)
+export function Terrain(inmap,fixedHeight)
 {
 	var mt = inmap;
 	var result = [];
+	fixedHeight ??= 128;
 	for(let x = 0;x < mt.length;x++)
 	{
 		result[x] = [];
 		for(let y = 0;y < mt.length;y++)
 		{
 			result[x][y] = [];
-			var earthb = Math.round(util.limito(mt[x][y],(mt.length-((mt.length/4)*3)),(mt.length-(mt.length/4))));
-			var airb = mt.length - earthb;
+			var earthb = Math.round(util.limito(mt[x][y],(fixedHeight-(fixedHeight/2)),(fixedHeight-(fixedHeight/4)*2)));
+			var airb = fixedHeight - earthb;
 			if(earthb >=1)
 				result[x][y] = Array(earthb).fill([Objecto.Block('earth','full')]);
 			if(airb >= 1)
@@ -416,8 +417,8 @@ export function Terrain(inmap)
 export function rampifyTerrain(terrain)
 {
 	for(let x = 0;x<terrain.length;x++)
-		for(let y = 0;y<terrain.length;y++)
-			for(let z = 0;z<terrain.length-2;z++)
+		for(let y = 0;y<terrain[0].length;y++)
+			for(let z = 0;z<terrain[0][0].length-2;z++)
 			{
 				if(terrain[x][y][z][0].subtype == "full" && terrain[x][y][z+1][0].subtype == "empty")
 				{
@@ -465,8 +466,13 @@ export function AutoTerrain(mapsize,type,multiHorizontal,multiVertical,smooth,ra
 	//note that multiHorizontal multiplyes the mapsize, putting differentmaps side by side
 	//while multiVertical keeps the mapsize, as it sum all layers
 	var hmaps = [];
+	if(typeof mapsize == 'undefined')
+		mapsize = util.Size(128,64);	
+	else if(typeof mapsize == 'number')
+		mapsize = util.Size(mapsize,mapsize);
+	else if(typeof mapsize == 'array')
+		mapsize = util.Size(mapsize[0],mapsize[1]);
 	
-	mapsize ??= 32;
 	type ??= "flat";
 	randomize ??= false;
 	subdivide ??= false;
@@ -477,9 +483,9 @@ export function AutoTerrain(mapsize,type,multiHorizontal,multiVertical,smooth,ra
 	var dummy = [];
 	for(let i = 0;i < Math.abs(multiHorizontal)*Math.abs(multiHorizontal);i++)
 	{
-		workers.push(Comrade.modular("../terrain.mjs","multiHeightmap",[mapsize,Math.abs(multiHorizontal)]))
+		workers.push(Comrade.modular("../terrain.mjs","multiHeightmap",[mapsize.w,Math.abs(multiHorizontal)]))
 	}
-	function part2(workers)
+	function part2()
 	{
 		var result = [];
 		for(let i = 0;i<workers.length;i++)
@@ -509,26 +515,26 @@ export function AutoTerrain(mapsize,type,multiHorizontal,multiVertical,smooth,ra
 		}
 		result = HeightmapModder(result,lsmo,lrnd,lsub,false);
 		var terr = [];
-		terr = Terrain(result);
+		terr = Terrain(result,mapsize);
 		while(typeof terr[0][0][0] == 'undefined'||terr[0][0][0].length === 0)
-			terr = Terrain(result);
+			terr = Terrain(result,mapsize.h);
 		terr = rampifyTerrain(terr);
 		return(terr);
 	}
-	var timeout = function(workers)
+	var timeout = function()
 	{
 	   var sum = 0;
 	   for(let i = 0;i<workers.length;i++)
 			if(workers[i].done)
 				sum++;
 	   if(sum !== workers.length)
-			setTimeout(timeout,1000,workers);
+			setTimeout(timeout,1000);
 	   else
 	   {
-			util.Assing(dummy,part2(workers));
+			util.Assing(dummy,part2(workers,mapsize));
 		   	//console.log(teste)
 	   }
 	};
-	setTimeout(timeout,1000,workers);
+	setTimeout(timeout,1000);
 	return(dummy)
 }
