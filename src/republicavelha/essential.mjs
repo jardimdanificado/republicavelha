@@ -49,6 +49,10 @@ export function Position(local,global){return({local:local,global:global})};
 //UTILS
 //-----------------------------------
 
+export function Assing(reference, array) {
+    Object.assign(reference, array, { length: array.length });
+}
+
 export function manualLength(arr)
 {
 	var count = 0;

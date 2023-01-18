@@ -1,12 +1,14 @@
-import * as rve from "./essential.mjs"
+import * as util from "./essential.mjs"
 import * as Objecto from "./objecto.mjs"
+import * as Comrade from "./comrade/comrade.js"
 
 //-----------------------------------
 //TERRAIN
 //-----------------------------------
-function Heightmap(size) {
-	const N = (8+rve.randi(0,5));
-	const RANDOM_INITIAL_RANGE = (10+rve.randi(0,3));
+export function Heightmap(size) 
+{
+	const N = (8+util.randi(0,5));
+	const RANDOM_INITIAL_RANGE = (10+util.randi(0,3));
 	var MATRIX_LENGTH = Math.pow(2, N)+1;
 
 	const generateMatrix = function() {
@@ -14,10 +16,10 @@ function Heightmap(size) {
 			.fill(0)
 			.map(() => new Array(MATRIX_LENGTH).fill(null));
 
-		matrix[0][MATRIX_LENGTH - 1] = rve.randomInRange(0, RANDOM_INITIAL_RANGE);
-		matrix[MATRIX_LENGTH - 1][0] = rve.randomInRange(0, RANDOM_INITIAL_RANGE);
-		matrix[0][0] = rve.randomInRange(0, RANDOM_INITIAL_RANGE);
-		matrix[MATRIX_LENGTH - 1][MATRIX_LENGTH - 1] = rve.randomInRange(
+		matrix[0][MATRIX_LENGTH - 1] = util.randomInRange(0, RANDOM_INITIAL_RANGE);
+		matrix[MATRIX_LENGTH - 1][0] = util.randomInRange(0, RANDOM_INITIAL_RANGE);
+		matrix[0][0] = util.randomInRange(0, RANDOM_INITIAL_RANGE);
+		matrix[MATRIX_LENGTH - 1][MATRIX_LENGTH - 1] = util.randomInRange(
 			0,
 			RANDOM_INITIAL_RANGE
 		);
@@ -54,7 +56,7 @@ function Heightmap(size) {
 					{ sum: 0, count: 0 }
 				);
 				matrix[j + chunkSize / 2][i + chunkSize / 2] =
-					sum / count + rve.randomInRange(-randomFactor, randomFactor);
+					sum / count + util.randomInRange(-randomFactor, randomFactor);
 			}
 		}
 	}
@@ -77,7 +79,7 @@ function Heightmap(size) {
 					},
 					{ sum: 0, count: 0 }
 				);
-				matrix[y][x] = sum / count + rve.randomInRange(-randomFactor, randomFactor);
+				matrix[y][x] = sum / count + util.randomInRange(-randomFactor, randomFactor);
 			}
 		}
 		return matrix;
@@ -113,7 +115,7 @@ function Heightmap(size) {
 	return (normalizeMatrix(diamondSquare(generateMatrix())));
 }
 
-function roundHeightmap(hm,type)
+export function roundHeightmap(hm,type)
 {
 	var min = Infinity;
 	for(let x = 0 ;x < hm.length; x++)
@@ -136,7 +138,7 @@ function roundHeightmap(hm,type)
 	return hm;
 }
 
-function randomizeHeightmap(hm)
+export function randomizeHeightmap(hm)
 {
 	for(let x = 1 ;x < hm.length-1; x+=2)
 	{
@@ -173,7 +175,7 @@ function randomizeHeightmap(hm)
 	return(hm);
 }
 
-function subdivideHeightmap(hm)
+export function subdivideHeightmap(hm)
 {
 	function grid(input)
 	{
@@ -246,7 +248,7 @@ function subdivideHeightmap(hm)
 	return result;
 }
 
-function smoothBlock(hm,position)
+export function smoothBlock(hm,position)
 {
 	let x = position.x;
 	let y = position.y;
@@ -297,7 +299,7 @@ function smoothBlock(hm,position)
 	return(sum/count);
 }
 
-function smoothHeightmap(hm,corner)
+export function smoothHeightmap(hm,corner)
 {
 	corner ??= randi(0,3);
 	switch(corner)
@@ -306,35 +308,35 @@ function smoothHeightmap(hm,corner)
 		{
 			for(let x = 0;x < (hm.length);x+=1)
 				for(let y = 0;y < (hm.length);y+=1)
-					hm[x][y] = smoothBlock(hm,rve.Vector2(x,y));
+					hm[x][y] = smoothBlock(hm,util.Vector2(x,y));
 		}
 		break;
 		case 1:
 		{
 			for(let x = hm.length-1;x >=0;x-=1)
 				for(let y = 0;y < (hm.length);y+=1)
-					hm[x][y] = smoothBlock(hm,rve.Vector2(x,y));
+					hm[x][y] = smoothBlock(hm,util.Vector2(x,y));
 		}
 		break;
 		case 2:
 		{
 			for(let x = hm.length-1;x >=0;x-=1)
 				for(let y = hm.length-1;y >=0;y-=1)
-					hm[x][y] = smoothBlock(hm,rve.Vector2(x,y));
+					hm[x][y] = smoothBlock(hm,util.Vector2(x,y));
 		}
 		break;
 		case 3:
 		{
 			for(let x = 0;x < (hm.length);x+=1)
 				for(let y = hm.length-1;y >=0;y-=1)
-					hm[x][y] = smoothBlock(hm,rve.Vector2(x,y));
+					hm[x][y] = smoothBlock(hm,util.Vector2(x,y));
 		}
 		break;
 	}
 	return hm;
 }
 
-function multiHeightmap(mapsize,multi)
+export function multiHeightmap(mapsize,multi)
 {
 	if(multi==1)
 	{
@@ -362,7 +364,7 @@ function multiHeightmap(mapsize,multi)
 	}
 }
 
-function HeightmapModder(hm,smooth,randomize,subdivide,pre)
+export function HeightmapModder(hm,smooth,randomize,subdivide,pre)
 {
 	let mut = -1;
 	let condition = function(im){return(im>0)};
@@ -379,7 +381,7 @@ function HeightmapModder(hm,smooth,randomize,subdivide,pre)
 	}
 	while(condition(smooth))
 	{
-		hm = smoothHeightmap(hm,rve.randi(0,3));
+		hm = smoothHeightmap(hm,util.randi(0,3));
 		smooth+=mut;
 	}
 	while(condition(subdivide))
@@ -390,7 +392,7 @@ function HeightmapModder(hm,smooth,randomize,subdivide,pre)
 	return hm;
 }
 
-function Terrain(inmap)
+export function Terrain(inmap)
 {
 	var mt = inmap;
 	var result = [];
@@ -400,7 +402,7 @@ function Terrain(inmap)
 		for(let y = 0;y < mt.length;y++)
 		{
 			result[x][y] = [];
-			var earthb = Math.round(rve.limito(mt[x][y],(mt.length-((mt.length/4)*3)),(mt.length-(mt.length/4))));
+			var earthb = Math.round(util.limito(mt[x][y],(mt.length-((mt.length/4)*3)),(mt.length-(mt.length/4))));
 			var airb = mt.length - earthb;
 			if(earthb >=1)
 				result[x][y] = Array(earthb).fill([Objecto.Block('earth','full')]);
@@ -411,7 +413,7 @@ function Terrain(inmap)
 	return(result);
 }
 
-function rampifyTerrain(terrain)
+export function rampifyTerrain(terrain)
 {
 	for(let x = 0;x<terrain.length;x++)
 		for(let y = 0;y<terrain.length;y++)
@@ -420,14 +422,35 @@ function rampifyTerrain(terrain)
 				if(terrain[x][y][z][0].subtype == "full" && terrain[x][y][z+1][0].subtype == "empty")
 				{
 					if(
-						(x<terrain.length-1 && terrain[x+1][y][z+1][0].subtype == "full" && terrain[x+1][y][z+2][0].subtype == "empty")||
-						(x>0&&terrain[x-1][y][z+1][0].subtype == "full" && terrain[x-1][y][z+2][0].subtype == "empty")||
-						(y<terrain.length-1 && terrain[x][y+1][z+1][0].subtype == "full" && terrain[x][y+1][z+2][0].subtype == "empty")||
-						(y>0 && terrain[x][y-1][z+1][0].subtype == "full" && terrain[x][y-1][z+2][0].subtype == "empty") ||
-						(x<terrain.length-1 && y<terrain.length-1 && terrain[x+1][y+1][z+1][0].subtype == "full" && terrain[x+1][y+1][z+2][0].subtype == "empty")||
-						(x>0&& y<terrain.length-1 &&terrain[x-1][y+1][z+1][0].subtype == "full" && terrain[x-1][y+1][z+2][0].subtype == "empty")||
-						(x<terrain.length-1 && y<0 && terrain[x+1][y-1][z+1][0].subtype == "full" && terrain[x][y-1][z+2][0].subtype == "empty")||
-						(x>0 && y>0 && terrain[x-1][y-1][z+1][0].subtype == "full" && terrain[x][y-1][z+2][0].subtype == "empty")
+						(x<terrain.length-1 &&
+						 terrain[x+1][y][z+1][0].subtype == "full" &&
+						 terrain[x+1][y][z+2][0].subtype == "empty")||
+						(x>0&&
+						 terrain[x-1][y][z+1][0].subtype == "full" &&
+						 terrain[x-1][y][z+2][0].subtype == "empty")||
+						(y<terrain.length-1 &&
+						 terrain[x][y+1][z+1][0].subtype == "full" &&
+						 terrain[x][y+1][z+2][0].subtype == "empty")||
+						(y>0 &&
+						 terrain[x][y-1][z+1][0].subtype == "full" &&
+						 terrain[x][y-1][z+2][0].subtype == "empty") ||
+						
+						(x<terrain.length-1 &&
+						 y<terrain.length-1 &&
+						 terrain[x+1][y+1][z+1][0].subtype == "full" && 
+						 terrain[x+1][y+1][z+2][0].subtype == "empty")||
+						(x>0&&
+						 y<terrain.length-1 &&
+						 terrain[x-1][y+1][z+1][0].subtype == "full" && 
+						 terrain[x-1][y+1][z+2][0].subtype == "empty")||
+						(x<terrain.length-1 &&
+						 y>0 &&
+						 terrain[x+1][y-1][z+1][0].subtype == "full" &&
+						 terrain[x][y-1][z+2][0].subtype == "empty")||
+						(x>0 &&
+						 y>0 &&
+						 terrain[x-1][y-1][z+1][0].subtype == "full" &&
+						 terrain[x][y-1][z+2][0].subtype == "empty")
 					)	
 					{
 						terrain[x][y][z][0].subtype = 'half';
@@ -442,7 +465,7 @@ export function AutoTerrain(mapsize,type,multiHorizontal,multiVertical,smooth,ra
 	//note that multiHorizontal multiplyes the mapsize, putting differentmaps side by side
 	//while multiVertical keeps the mapsize, as it sum all layers
 	var hmaps = [];
-	var result = [];
+	
 	mapsize ??= 32;
 	type ??= "flat";
 	randomize ??= false;
@@ -450,33 +473,62 @@ export function AutoTerrain(mapsize,type,multiHorizontal,multiVertical,smooth,ra
 	smooth ??= false;
 	multiHorizontal ??= 1;
 	multiVertical ??= 1;
-	for(let x = 0 ;x < Math.abs(multiVertical); x++)
+	var workers = [];
+	var dummy = [];
+	for(let i = 0;i < Math.abs(multiHorizontal)*Math.abs(multiHorizontal);i++)
 	{
-		let tmap = roundHeightmap(multiHeightmap(mapsize,Math.abs(multiHorizontal)),type);
-		var lsub = subdivide;
-		var lrnd = randomize;
-		var lsmo = smooth;
-		tmap = HeightmapModder(tmap,lsmo,lrnd,lsub,true);
-		hmaps.push(tmap);
+		workers.push(Comrade.modular("../terrain.mjs","multiHeightmap",[mapsize,Math.abs(multiHorizontal)]))
 	}
-
-	for(let k = 0 ;k < Math.abs(multiVertical); k++)
+	function part2(workers)
 	{
-		for(let x = 0 ;x < hmaps[0].length; x++)
-		{
-			if(typeof result[x] == 'undefined')
-				result[x] = Array(hmaps[0].length).fill(0);
-			for(let y = 0;y < hmaps[0].length;y++)
+		var result = [];
+		for(let i = 0;i<workers.length;i++)
+		{	
+			if(workers[i].done === true)
 			{
-				result[x][y] += hmaps[k][x][y];
+				//console.log(workers[0])
+				let tmap = roundHeightmap(workers[i].result,type);
+				var lsub = subdivide;
+				var lrnd = randomize;
+				var lsmo = smooth;
+				tmap = HeightmapModder(tmap,lsmo,lrnd,lsub,true);
+				hmaps.push(tmap);
 			}
 		}
-	}
-	result = HeightmapModder(result,lsmo,lrnd,lsub,false);
-	var terr = [];
-	terr = Terrain(result);
-	while(typeof terr[0][0][0] == 'undefined'||terr[0][0][0].length === 0)
+		for(let k = 0 ;k < Math.abs(multiVertical); k++)
+		{
+			for(let x = 0 ;x < hmaps[0].length; x++)
+			{
+				if(typeof result[x] == 'undefined')
+					result[x] = Array(hmaps[0].length).fill(0);
+				for(let y = 0;y < hmaps[0].length;y++)
+				{
+					result[x][y] += hmaps[k][x][y];
+				}
+			}
+		}
+		result = HeightmapModder(result,lsmo,lrnd,lsub,false);
+		var terr = [];
 		terr = Terrain(result);
-	terr = rampifyTerrain(terr);
-	return(terr);
+		while(typeof terr[0][0][0] == 'undefined'||terr[0][0][0].length === 0)
+			terr = Terrain(result);
+		terr = rampifyTerrain(terr);
+		return(terr);
+	}
+	var timeout = function(workers)
+	{
+	   var sum = 0;
+	   for(let i = 0;i<workers.length;i++)
+			if(workers[i].done)
+				sum++;
+	   if(sum !== workers.length)
+			setTimeout(timeout,1000,workers);
+	   else
+	   {
+			util.Assing(dummy,part2(workers));
+		   	//console.log(teste)
+	   }
+	};
+	setTimeout(timeout,1000,workers);
+	return(dummy)
 }
