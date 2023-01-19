@@ -1,6 +1,5 @@
 "use strict";
 var mapa, Republica, htmltxt;//declared outside debug function so we can console.log it globally
-//let worker;
 async function debug()
 {
 	Republica = await import("./src/republicavelha.mjs");
@@ -8,11 +7,14 @@ async function debug()
 	console.log(Republica.Objecto.Creature('human','male'));
 	let msize = 128;
 	let mwidth = 4;
+	let smultiplier = Republica.Util.randi(1,2)
 	/*let cmr = await import("./src/republicavelha/comrade/comrade.js");
 	worker = cmr.modular("../terrain.mjs","Terrain",[8]);
 	console.log(worker)*/
-	mapa = Republica.Terrain.AutoTerrain(Republica.Util.Size(msize,32),'flat',mwidth,1,msize*mwidth,0,0);
-	function part2()
+	mapa = Republica.Terrain.AutoTerrain(Republica.Util.Size(msize,32),'flat',mwidth,1,msize*(mwidth**smultiplier),0,0);
+	
+	var continuation = 
+	function()
 	{
 		var htmltxt = '';
 		for(let x = 0;x<mapa.length;x++)
@@ -58,19 +60,12 @@ async function debug()
 		
 		if(typeof window !== 'undefined')
 			document.getElementById("console-screen").innerHTML = htmltxt;
-		else if(typeof process !== 'undefined')//
+		else if(typeof process !== 'undefined')
 		{
 			console.clear();
 			process.stdout.write(htmltxt);
 		}
-	}
-	var timeout = function()
-	{
-	   if(mapa.length === 0)
-			setTimeout(timeout,1000,);
-	   else
-			part2();
-	};
-	setTimeout(timeout,1000);
+	}.toString();
+	Function(Republica.Util.Retry("mapa.length === 0",continuation))();
 };
 debug();

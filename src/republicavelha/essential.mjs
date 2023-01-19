@@ -52,8 +52,77 @@ export function getSizeInBytes(input){if(typeof input == 'function')return(input
 //UTILS
 //-----------------------------------
 
-export function Assing(reference, array) {
+export var Comrade = 
+{
+	modular:function(modulePath,functionName,args)
+	{
+	var worker = new Worker("./src/republicavelha/comrade.worker.js");
+	worker.result = [];
+	worker.done = false;
+	var content = 
+	{
+		modulePath:modulePath,
+		method:functionName,
+		args:args
+	};
+	worker.postMessage(content);
+	worker.onmessage = function(event)
+	{
+		worker.result = event.data;
+		worker.terminate();
+		worker.done = true;
+		console.log(modulePath + '.' + functionName+ "(" + args + ') is done;');
+	};
+	return(worker);
+}
+}
+
+
+export function Assign(reference, array) 
+{
     Object.assign(reference, array, { length: array.length });
+}
+
+export function Retry(condition,func,args,delay)
+{
+	args ??= '[]';
+	delay ??= 1000;
+	let id = Date.now();
+	var fname = 'func' + id;
+	var fargs = 'args' + id;
+	var txt = '';
+	
+	txt += 
+	`
+  	var timeout = function()
+	{
+	   	if($condition)
+			setTimeout.apply(this,[timeout,$delay].concat($args))
+	   	else
+		{
+  			let $fname = $func 
+			let $fargs = $args
+   
+  			if($fargs.length > 0)
+				$fname.apply(this,$fargs)
+			else
+   			$fname();
+ 		}
+	};
+ 	timeout();
+ `
+	
+	txt = txt.replace("$condition",condition);
+	txt = txt.replace("$func",func);
+	while(txt.includes("$args"))
+		txt = txt.replace("$args",args);
+	while(txt.includes("$delay"))
+		txt = txt.replace("$delay",delay);
+	while(txt.includes("$fname"))
+		txt = txt.replace("$fname",fname);
+	while(txt.includes("$fargs"))
+		txt = txt.replace("$fargs",fargs);
+	return(txt);
 }
 
 export function manualLength(arr)

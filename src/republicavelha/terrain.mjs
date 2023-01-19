@@ -1,6 +1,5 @@
 import * as util from "./essential.mjs"
 import * as Objecto from "./objecto.mjs"
-import * as Comrade from "./comrade/comrade.js"
 
 //-----------------------------------
 //TERRAIN
@@ -392,11 +391,10 @@ export function HeightmapModder(hm,smooth,randomize,subdivide,pre)
 	return hm;
 }
 
-export function Terrain(inmap,fixedHeight)
+export function Terrain(inmap,fixedHeight = 128)
 {
 	var mt = inmap;
 	var result = [];
-	fixedHeight ??= 128;
 	for(let x = 0;x < mt.length;x++)
 	{
 		result[x] = [];
@@ -483,9 +481,9 @@ export function AutoTerrain(mapsize,type,multiHorizontal,multiVertical,smooth,ra
 	var dummy = [];
 	for(let i = 0;i < Math.abs(multiHorizontal)*Math.abs(multiHorizontal);i++)
 	{
-		workers.push(Comrade.modular("../terrain.mjs","multiHeightmap",[mapsize.w,Math.abs(multiHorizontal)]))
+		workers.push(util.Comrade.modular("./terrain.mjs","multiHeightmap",[mapsize.w,Math.abs(multiHorizontal)]))
 	}
-	function part2()
+	var continuation = function()
 	{
 		var result = [];
 		for(let i = 0;i<workers.length;i++)
@@ -531,7 +529,7 @@ export function AutoTerrain(mapsize,type,multiHorizontal,multiVertical,smooth,ra
 			setTimeout(timeout,1000);
 	   else
 	   {
-			util.Assing(dummy,part2());//this assigns the part2 return to dummy withou breakin the reference
+			util.Assign(dummy,continuation());//this assigns the part2 return to dummy withou breakin the reference
 		   	//console.log(teste)
 	   }
 	};
