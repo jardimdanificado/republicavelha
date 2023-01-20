@@ -479,26 +479,28 @@ export function AutoTerrain(mapsize,type,multiHorizontal,multiVertical,smooth,ra
 	multiVertical ??= 1;
 	var workers = [];
 	var dummy = [];
+	var doneMapCounter = 0;
+	
 	for(let i = 0;i < Math.abs(multiHorizontal)*Math.abs(multiHorizontal);i++)
 	{
-		workers.push(util.Comrade.modular("./terrain.mjs","multiHeightmap",[mapsize.w,Math.abs(multiHorizontal)]))
+		workers.push(util.Comrade.modular("./terrain.mjs","multiHeightmap",[mapsize.w,Math.abs(multiHorizontal)]));
+		workers[i].onmessage = function(e)
+		{
+			doneMapCounter++;
+			workers[i].terminate();
+			let tmap = roundHeightmap(e.data,type);
+			var lsub = subdivide;
+			var lrnd = randomize;
+			var lsmo = smooth;
+			tmap = HeightmapModder(tmap,lsmo,lrnd,lsub,true);
+			hmaps.push(tmap);
+			if(doneMapCounter === multiHorizontal**2)
+				util.Assign(dummy,continuation());
+		}
 	}
 	var continuation = function()
 	{
 		var result = [];
-		for(let i = 0;i<workers.length;i++)
-		{	
-			if(workers[i].done === true)
-			{
-				//console.log(workers[0])
-				let tmap = roundHeightmap(workers[i].result,type);
-				var lsub = subdivide;
-				var lrnd = randomize;
-				var lsmo = smooth;
-				tmap = HeightmapModder(tmap,lsmo,lrnd,lsub,true);
-				hmaps.push(tmap);
-			}
-		}
 		for(let k = 0 ;k < Math.abs(multiVertical); k++)
 		{
 			for(let x = 0 ;x < hmaps[0].length; x++)
@@ -506,33 +508,14 @@ export function AutoTerrain(mapsize,type,multiHorizontal,multiVertical,smooth,ra
 				if(typeof result[x] == 'undefined')
 					result[x] = Array(hmaps[0].length).fill(0);
 				for(let y = 0;y < hmaps[0][0].length;y++)
-				{
 					result[x][y] += hmaps[k][x][y];
-				}
 			}
 		}
-		result = HeightmapModder(result,lsmo,lrnd,lsub,false);
+		result = HeightmapModder(result,smooth,randomize,subdivide,false);
 		var terr = [];
-		terr = Terrain(result,mapsize);
-		while(typeof terr[0][0][0] == 'undefined'||terr[0][0][0].length === 0)
-			terr = Terrain(result,mapsize.h);
+		terr = Terrain(result,mapsize.h);
 		terr = rampifyTerrain(terr);
 		return(terr);
 	}
-	var timeout = function()
-	{
-	   var sum = 0;
-	   for(let i = 0;i<workers.length;i++)
-			if(workers[i].done)
-				sum++;
-	   if(sum !== workers.length)
-			setTimeout(timeout,1000);
-	   else
-	   {
-			util.Assign(dummy,continuation());//this assigns the part2 return to dummy withou breakin the reference
-		   	//console.log(teste)
-	   }
-	};
-	setTimeout(timeout,1000);
 	return(dummy);//returns the dummy reference
 }

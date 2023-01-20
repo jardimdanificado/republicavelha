@@ -54,27 +54,43 @@ export function getSizeInBytes(input){if(typeof input == 'function')return(input
 
 export var Comrade = 
 {
-	modular:function(modulePath,functionName,args)
+	modular:function(modulePath,functionName,args,onterminate,onterminateargs = [])
 	{
-	var worker = new Worker("./src/republicavelha/comrade.worker.js");
-	worker.result = [];
-	worker.done = false;
-	var content = 
+		var worker = new Worker("./src/republicavelha/comrade.worker.js");
+		worker.result = [];
+		var content = 
+		{
+			modulePath:modulePath,
+			method:functionName,
+			args:args
+		};
+		worker.onmessage = function(event)
+		{
+			worker.result = event.data;
+			console.log(modulePath + '.' + functionName+ "(" + args + ') is done;');
+			worker.terminate();
+		};
+		worker.postMessage(content);
+		return(worker);
+	},
+	functional:function(func,args)
 	{
-		modulePath:modulePath,
-		method:functionName,
-		args:args
-	};
-	worker.postMessage(content);
-	worker.onmessage = function(event)
-	{
-		worker.result = event.data;
-		worker.terminate();
-		worker.done = true;
-		console.log(modulePath + '.' + functionName+ "(" + args + ') is done;');
-	};
-	return(worker);
-}
+		var worker = new Worker("./src/republicavelha/comrade.worker.js");
+		worker.result = [];
+		var content = 
+		{
+			method:func,
+			args:args
+		};
+		worker.onmessage = function(event)
+		{
+			worker.result = event.data;
+			console.log(modulePath + '.' + functionName+ "(" + args + ') is done;');
+			worker.terminate();
+		};
+		worker.postMessage(content);
+		return(worker);
+	}
 }
 
 
