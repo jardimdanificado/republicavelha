@@ -5,7 +5,7 @@ async function debug()
 	Republica = await import("./src/republicavelha.mjs");
 	console.log(Republica)
 	console.log(Republica.Objecto.Creature('human','male'));
-	let msize = 16;
+	let msize = 8;
 	let mwidth = 4;
 	let smultiplier = Republica.Util.randi(1,2)
 	/*let cmr = await import("./src/republicavelha/comrade/comrade.js");
