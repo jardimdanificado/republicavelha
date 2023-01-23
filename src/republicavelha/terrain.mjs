@@ -401,7 +401,7 @@ export function Terrain(inmap,fixedHeight = 128)
 		for(let y = 0;y < mt.length;y++)
 		{
 			result[x][y] = [];
-			var earthb = Math.round(util.limito(mt[x][y],1,(fixedHeight-(fixedHeight/4)*2)));
+			var earthb = Math.round(util.limito(mt[x][y],fixedHeight-((fixedHeight/4)*3),(fixedHeight-(fixedHeight/4))));
 			var airb = fixedHeight - earthb;
 			if(earthb >=1)
 				result[x][y] = Array(earthb).fill([Objecto.Block('earth','full')]);
