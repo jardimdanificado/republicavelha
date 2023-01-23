@@ -54,7 +54,7 @@ export function getSizeInBytes(input){if(typeof input == 'function')return(input
 
 export var Comrade = 
 {
-	modular:function(modulePath,functionName,args,onterminate,onterminateargs = [])
+	modular:function(modulePath,functionName,args)
 	{
 		var worker = new Worker("./src/republicavelha/comrade.worker.js");
 		worker.result = [];
@@ -166,12 +166,12 @@ export function LimitItTo(value,min,max)
 	if(value > max)
 	{
 		while(value > max)
-			value -= max;
+			value -= max-min;
 	}
 	if(value < min)
 	{
 		while(value < min)
-			value += max;
+			value += max-min;
 	}
 	return value;
 }

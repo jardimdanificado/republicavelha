@@ -401,7 +401,7 @@ export function Terrain(inmap,fixedHeight = 128)
 		for(let y = 0;y < mt.length;y++)
 		{
 			result[x][y] = [];
-			var earthb = Math.round(util.limito(mt[x][y],(fixedHeight-(fixedHeight/2)),(fixedHeight-(fixedHeight/4)*2)));
+			var earthb = Math.round(util.limito(mt[x][y],1,(fixedHeight-(fixedHeight/4)*2)));
 			var airb = fixedHeight - earthb;
 			if(earthb >=1)
 				result[x][y] = Array(earthb).fill([Objecto.Block('earth','full')]);
@@ -459,11 +459,11 @@ export function rampifyTerrain(terrain)
 	return terrain;
 }
 
-export function AutoTerrain(mapsize,type,multiHorizontal,multiVertical,smooth,randomize,subdivide)
+export function AutoTerrain(mapsize,type,multiHorizontal,smooth,randomize,subdivide)
 {
 	//note that multiHorizontal multiplyes the mapsize, putting differentmaps side by side
 	//while multiVertical keeps the mapsize, as it sum all layers
-	var hmaps = [];
+	var hmap;
 	if(typeof mapsize == 'undefined')
 		mapsize = util.Size(128,64);	
 	else if(typeof mapsize == 'number')
@@ -475,47 +475,18 @@ export function AutoTerrain(mapsize,type,multiHorizontal,multiVertical,smooth,ra
 	randomize ??= false;
 	subdivide ??= false;
 	smooth ??= false;
-	multiHorizontal ??= 1;
-	multiVertical ??= 1;
-	var workers = [];
+	var worker;
 	var dummy = [];
-	var doneMapCounter = 0;
-	
-	for(let i = 0;i < Math.abs(multiHorizontal)*Math.abs(multiHorizontal);i++)
+	worker = util.Comrade.modular("./terrain.mjs","multiHeightmap",[mapsize.w,Math.abs(multiHorizontal)]);
+	worker.onmessage = function(e)
 	{
-		workers.push(util.Comrade.modular("./terrain.mjs","multiHeightmap",[mapsize.w,Math.abs(multiHorizontal)]));
-		workers[i].onmessage = function(e)
-		{
-			doneMapCounter++;
-			workers[i].terminate();
-			let tmap = roundHeightmap(e.data,type);
-			var lsub = subdivide;
-			var lrnd = randomize;
-			var lsmo = smooth;
-			tmap = HeightmapModder(tmap,lsmo,lrnd,lsub,true);
-			hmaps.push(tmap);
-			if(doneMapCounter === multiHorizontal**2)
-				util.Assign(dummy,continuation());
-		}
-	}
-	var continuation = function()
-	{
-		var result = [];
-		for(let k = 0 ;k < Math.abs(multiVertical); k++)
-		{
-			for(let x = 0 ;x < hmaps[0].length; x++)
-			{
-				if(typeof result[x] == 'undefined')
-					result[x] = Array(hmaps[0].length).fill(0);
-				for(let y = 0;y < hmaps[0][0].length;y++)
-					result[x][y] += hmaps[k][x][y];
-			}
-		}
-		result = HeightmapModder(result,smooth,randomize,subdivide,false);
+		worker.terminate();
+		hmap = roundHeightmap(e.data,type);
+		hmap = HeightmapModder(hmap,smooth,randomize,subdivide);
 		var terr = [];
-		terr = Terrain(result,mapsize.h);
+		terr = Terrain(hmap,mapsize.h);
 		terr = rampifyTerrain(terr);
-		return(terr);
+		util.Assign(dummy,terr);
 	}
 	return(dummy);//returns the dummy reference
 }

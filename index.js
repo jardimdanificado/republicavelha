@@ -11,7 +11,7 @@ async function debug()
 	/*let cmr = await import("./src/republicavelha/comrade/comrade.js");
 	worker = cmr.modular("../terrain.mjs","Terrain",[8]);
 	console.log(worker)*/
-	mapa = Republica.Terrain.AutoTerrain(Republica.Util.Size(msize,32),'flat',mwidth,1,msize*(mwidth**smultiplier),0,1);
+	mapa = Republica.Terrain.AutoTerrain(Republica.Util.Size(msize,32),'flat',mwidth,msize*(mwidth**smultiplier),0,1);
 	
 	var continuation = 
 	function()
