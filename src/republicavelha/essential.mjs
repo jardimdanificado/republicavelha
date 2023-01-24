@@ -45,12 +45,54 @@ export function Vector2Zero(){return({x:0,y:0});}
 export function BoundingBox(min,max){return({min:{x:min.x,y:min.y,z:min.z},max:{x:max.x,y:max.y,z:max.z}});}
 export function Position(local,global){return({local:local,global:global})};
 
+export async function organizeArray(arr, parts) {
+    let matrix = [];
+    let chunkSize = Math.ceil(arr.length / parts);
+    for (let i = 0; i < parts; i++) {
+        matrix.push(arr.slice(i * chunkSize, (i + 1) * chunkSize));
+    }
+    return matrix;
+}
+
 export function Size(w,h){var temp = {w:w,h:h};temp.height = temp.h;temp.width = temp.w;return temp;};
 
 export function getSizeInBytes(input){if(typeof input == 'function')return(input.toString().length);else return(JSON.stringify(input).length);}
 //-----------------------------------
 //UTILS
 //-----------------------------------
+
+export function flattenMatrix(matrix) {
+    let finalMatrix = [];
+    let currentRow = 0;
+    for (let i = 0; i < matrix.length; i++) {
+        for (let j = 0; j < matrix[i].length; j++) {
+            for (let x = 0; x < matrix[i][j].length; x++) {
+                for (let y = 0; y < matrix[i][j][x].length; y++) {
+                    if (!finalMatrix[currentRow + x]) {
+                        finalMatrix[currentRow + x] = [];
+                    }
+                    finalMatrix[currentRow + x][y + matrix[i][j][x].length * j] = matrix[i][j][x][y];
+                }
+            }
+        }
+        currentRow += matrix[i][0].length;
+    }
+    return finalMatrix;
+}
+
+export function divideMatrix(largeMatrix, size) {
+    let dividedMatrix = [];
+    for (let i = 0; i < largeMatrix.length; i += size) {
+        let row = largeMatrix.slice(i, i + size);
+        let dividedRow = [];
+        for (let j = 0; j < row.length; j += size) {
+            let subMatrix = row.map(x => x.slice(j, j + size));
+            dividedRow.push(subMatrix);
+        }
+        dividedMatrix.push(dividedRow);
+    }
+    return dividedMatrix;
+}
 
 export var Comrade = 
 {
@@ -93,6 +135,10 @@ export var Comrade =
 	}
 }
 
+export function workerPromise(worker)
+{
+	return(new Promise((resolve) => {worker.onmessage = resolve;}))
+}
 
 export function Assign(reference, array) 
 {

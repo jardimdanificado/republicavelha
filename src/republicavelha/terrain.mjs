@@ -335,32 +335,36 @@ export function smoothHeightmap(hm,corner)
 	return hm;
 }
 
-export function multiHeightmap(mapsize,multi)
+export async function multiHeightmap(mapsize, multi) 
 {
-	if(multi==1)
+    if (multi == 1) 
 	{
-		return(Heightmap(mapsize));
-	}
-	else
+        return Heightmap(mapsize);
+    } else 
 	{
-		let result = [];
-		let maps = [];
-		for(let x = 0;x<mapsize*multi;x++)
-			result[x] = [];
-		
-		for(let x = 0;x<multi;x++)
+        let promises = [];
+        for (let x = 0; x < multi; x++) 
 		{
-			maps[x] = [];
-			for(let y = 0;y<multi;y++)
-				maps[x][y] = Heightmap(mapsize);
-		}
-		for(let x = 0;x<multi;x++)
-			for(let y = 0;y<multi;y++)
-				for(let xx = 0;xx<mapsize;xx++)
-					for(let yy = 0;yy<mapsize;yy++)
-						result[xx+(mapsize*x)][yy+(mapsize*y)] = maps[x][y][xx][yy];
-		return(result);
-	}
+            for (let y = 0; y < multi; y++) 
+			{
+                let worker = new Worker('./src/republicavelha/heightmap.worker.js');
+                worker.postMessage([mapsize]);
+                promises.push(util.workerPromise(worker));
+            }
+        }
+        return (await Promise.all(promises)
+				.then(async (results) => 
+				{
+		            for (let i = 0; i < results.length; i++) 
+					{
+		                results[i] = results[i].data;
+		            }
+		            results = await util.organizeArray(results,multi);
+		            return(util.flattenMatrix(results));
+	        	}
+			)
+		)
+    }
 }
 
 export function HeightmapModder(hm,smooth,randomize,subdivide,pre)
@@ -391,7 +395,7 @@ export function HeightmapModder(hm,smooth,randomize,subdivide,pre)
 	return hm;
 }
 
-export function Terrain(inmap,fixedHeight = 128)
+export async function Terrain(inmap,fixedHeight = 128)
 {
 	var mt = inmap;
 	var result = [];
@@ -403,6 +407,7 @@ export function Terrain(inmap,fixedHeight = 128)
 			result[x][y] = [];
 			var earthb = Math.round(util.limito(mt[x][y],fixedHeight-((fixedHeight/4)*3),(fixedHeight-(fixedHeight/4))));
 			var airb = fixedHeight - earthb;
+			
 			if(earthb >=1)
 				result[x][y] = Array(earthb).fill([Objecto.Block('earth','full')]);
 			if(airb >= 1)
@@ -459,7 +464,7 @@ export function rampifyTerrain(terrain)
 	return terrain;
 }
 
-export function AutoTerrain(mapsize,type,multiHorizontal,smooth,randomize,subdivide)
+export async function AutoTerrain(mapsize,type,multiHorizontal,smooth,randomize,subdivide)
 {
 	//note that multiHorizontal multiplyes the mapsize, putting differentmaps side by side
 	//while multiVertical keeps the mapsize, as it sum all layers
@@ -475,18 +480,11 @@ export function AutoTerrain(mapsize,type,multiHorizontal,smooth,randomize,subdiv
 	randomize ??= false;
 	subdivide ??= false;
 	smooth ??= false;
-	var worker;
-	var dummy = [];
-	worker = util.Comrade.modular("./terrain.mjs","multiHeightmap",[mapsize.w,Math.abs(multiHorizontal)]);
-	worker.onmessage = function(e)
-	{
-		worker.terminate();
-		hmap = roundHeightmap(e.data,type);
-		hmap = HeightmapModder(hmap,smooth,randomize,subdivide);
-		var terr = [];
-		terr = Terrain(hmap,mapsize.h);
-		terr = rampifyTerrain(terr);
-		util.Assign(dummy,terr);
-	}
-	return(dummy);//returns the dummy reference
+	hmap = await multiHeightmap(mapsize.w,multiHorizontal);
+	hmap = roundHeightmap(hmap,type);
+	hmap = HeightmapModder(hmap,smooth,randomize,subdivide);
+	var terr = [];
+	terr = Terrain(hmap,mapsize.h);
+	terr = rampifyTerrain(terr);
+	return(terr);//returns the dummy reference
 }
