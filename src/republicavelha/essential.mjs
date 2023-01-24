@@ -45,13 +45,38 @@ export function Vector2Zero(){return({x:0,y:0});}
 export function BoundingBox(min,max){return({min:{x:min.x,y:min.y,z:min.z},max:{x:max.x,y:max.y,z:max.z}});}
 export function Position(local,global){return({local:local,global:global})};
 
-export async function organizeArray(arr, parts) {
+export async function organizeArray(arr, parts) 
+{
     let matrix = [];
     let chunkSize = Math.ceil(arr.length / parts);
     for (let i = 0; i < parts; i++) {
         matrix.push(arr.slice(i * chunkSize, (i + 1) * chunkSize));
     }
     return matrix;
+}
+
+export function autoOrganizeArray(arr) {
+    let matrix = [];
+    let parts = Math.ceil(Math.sqrt(arr.length));
+    let chunkSize = Math.ceil(arr.length / parts);
+    for (let i = 0; i < parts; i++) {
+        matrix.push(arr.slice(i * chunkSize, (i + 1) * chunkSize));
+    }
+    return matrix;
+}
+
+export function recursiveMap(arr, callback) {
+  return arr.map(function(element) {
+    if (Array.isArray(element)) {
+      return recursiveMap(element, callback);
+    } else {
+      return callback(element);
+    }
+  });
+}
+
+export function flattenMatrix(matrix) {
+    return matrix.reduce((flatArray, currentRow) => flatArray.concat(currentRow), []);
 }
 
 export function Size(w,h){var temp = {w:w,h:h};temp.height = temp.h;temp.width = temp.w;return temp;};
@@ -61,7 +86,8 @@ export function getSizeInBytes(input){if(typeof input == 'function')return(input
 //UTILS
 //-----------------------------------
 
-export function flattenMatrix(matrix) {
+
+export function expandMatrix(matrix) {
     let finalMatrix = [];
     let currentRow = 0;
     for (let i = 0; i < matrix.length; i++) {
@@ -80,7 +106,7 @@ export function flattenMatrix(matrix) {
     return finalMatrix;
 }
 
-export function divideMatrix(largeMatrix, size) {
+export async function divideMatrix(largeMatrix, size) {
     let dividedMatrix = [];
     for (let i = 0; i < largeMatrix.length; i += size) {
         let row = largeMatrix.slice(i, i + size);
@@ -94,45 +120,19 @@ export function divideMatrix(largeMatrix, size) {
     return dividedMatrix;
 }
 
-export var Comrade = 
-{
-	modular:function(modulePath,functionName,args)
-	{
-		var worker = new Worker("./src/republicavelha/comrade.worker.js");
-		worker.result = [];
-		var content = 
-		{
-			modulePath:modulePath,
-			method:functionName,
-			args:args
-		};
-		worker.onmessage = function(event)
-		{
-			worker.result = event.data;
-			console.log(modulePath + '.' + functionName+ "(" + args + ') is done;');
-			worker.terminate();
-		};
-		worker.postMessage(content);
-		return(worker);
-	},
-	functional:function(func,args)
-	{
-		var worker = new Worker("./src/republicavelha/comrade.worker.js");
-		worker.result = [];
-		var content = 
-		{
-			method:func,
-			args:args
-		};
-		worker.onmessage = function(event)
-		{
-			worker.result = event.data;
-			console.log(modulePath + '.' + functionName+ "(" + args + ') is done;');
-			worker.terminate();
-		};
-		worker.postMessage(content);
-		return(worker);
-	}
+export async function splitMatrix(largeMatrix, slices) {
+    let dividedMatrix = [];
+    let sliceSize = Math.floor(largeMatrix.length / slices);
+    for (let i = 0; i < largeMatrix.length; i += sliceSize) {
+        let row = largeMatrix.slice(i, i + sliceSize);
+        let dividedRow = [];
+        for (let j = 0; j < row[0].length; j += sliceSize) {
+            let subMatrix = row.map(x => x.slice(j, j + sliceSize));
+            dividedRow.push(subMatrix);
+        }
+        dividedMatrix.push(dividedRow);
+    }
+    return dividedMatrix;
 }
 
 export function workerPromise(worker)
@@ -140,12 +140,20 @@ export function workerPromise(worker)
 	return(new Promise((resolve) => {worker.onmessage = resolve;}))
 }
 
+export function Comrade (modulePath,functionName,args)
+{
+	var worker = new Worker("./src/republicavelha/comrade.worker.js");
+	worker.result = [];
+	worker.postMessage([modulePath,functionName,args]);
+	return(workerPromise(worker));
+}
+
 export function Assign(reference, array) 
 {
     Object.assign(reference, array, { length: array.length });
 }
 
-export function Retry(condition,func,args,delay)
+export function Retry(condition,func,args,delay)//deprecated, avoid it
 {
 	args ??= '[]';
 	delay ??= 1000;

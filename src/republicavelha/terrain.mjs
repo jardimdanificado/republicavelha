@@ -114,8 +114,8 @@ export function Heightmap(size)
 	return (normalizeMatrix(diamondSquare(generateMatrix())));
 }
 
-export function roundHeightmap(hm,type)
-{
+export function roundHeightmap(hm)
+{	
 	var min = Infinity;
 	for(let x = 0 ;x < hm.length; x++)
 		for(let y = 0;y < hm.length;y++)
@@ -127,14 +127,33 @@ export function roundHeightmap(hm,type)
 	for(let x = 0;x < hm.length;x++)
 		for(let y = 0;y < hm.length;y++)
 		{
-			hm[x][y] = Math.round((hm[x][y] +min)*(Math.pow(10,((Math.trunc(min) + '').length))));//default is random
-			
-			if(type == 0 || type == 'flat')
-				hm[x][y] = Math.round((hm[x][y])+(min*Math.pow(10,((Math.trunc(min) + '').length))));//flat
-			else if(type == 1 || type == 'random')
-				hm[x][y] = Math.round((hm[x][y] +min)*(Math.pow(10,((Math.trunc(min) + '').length))));//random
+			hm[x][y] = Math.round((hm[x][y])+(min*Math.pow(10,((Math.trunc(min) + '').length))));//flat
 		}
 	return hm;
+}
+
+export async function autoRoundHeightmap(hm,divider = 1)
+{
+	if(divider === 1)
+		return roundHeightmap(hm);
+	else if(divider > 1)
+	{
+		let promises = [];
+		let divided = await util.splitMatrix(hm,divider);
+		for(let x =0;x<divided.length;x++)
+			for(let y = 0;y<divided[x].length;y++)
+				promises.push(util.Comrade("./terrain.mjs","roundHeightmap",[divided[x][y]]))
+		
+		return (await Promise.all(promises)
+				.then(async (results) => 
+				{
+					results = results.map(val => val.data);
+		            results = await util.organizeArray(results,divider);
+		            return(util.expandMatrix(results));
+	        	}
+			)
+		)
+	}
 }
 
 export function randomizeHeightmap(hm)
@@ -340,27 +359,23 @@ export async function multiHeightmap(mapsize, multi)
     if (multi == 1) 
 	{
         return Heightmap(mapsize);
-    } else 
+    } 
+	else 
 	{
         let promises = [];
         for (let x = 0; x < multi; x++) 
 		{
             for (let y = 0; y < multi; y++) 
 			{
-                let worker = new Worker('./src/republicavelha/heightmap.worker.js');
-                worker.postMessage([mapsize]);
-                promises.push(util.workerPromise(worker));
+                promises.push(util.Comrade('./terrain.mjs','Heightmap',[mapsize]));
             }
         }
         return (await Promise.all(promises)
 				.then(async (results) => 
 				{
-		            for (let i = 0; i < results.length; i++) 
-					{
-		                results[i] = results[i].data;
-		            }
+					results = results.map(val => val.data);
 		            results = await util.organizeArray(results,multi);
-		            return(util.flattenMatrix(results));
+		            return(util.expandMatrix(results));
 	        	}
 			)
 		)
@@ -417,7 +432,7 @@ export async function Terrain(inmap,fixedHeight = 128)
 	return(result);
 }
 
-export function rampifyTerrain(terrain)
+export async function rampifyTerrain(terrain)
 {
 	for(let x = 0;x<terrain.length;x++)
 		for(let y = 0;y<terrain[0].length;y++)
@@ -464,7 +479,7 @@ export function rampifyTerrain(terrain)
 	return terrain;
 }
 
-export async function AutoTerrain(mapsize,type,multiHorizontal,smooth,randomize,subdivide)
+export async function AutoTerrain(mapsize,multiHorizontal,smooth,randomize,subdivide)
 {
 	//note that multiHorizontal multiplyes the mapsize, putting differentmaps side by side
 	//while multiVertical keeps the mapsize, as it sum all layers
@@ -476,15 +491,15 @@ export async function AutoTerrain(mapsize,type,multiHorizontal,smooth,randomize,
 	else if(typeof mapsize == 'array')
 		mapsize = util.Size(mapsize[0],mapsize[1]);
 	
-	type ??= "flat";
 	randomize ??= false;
 	subdivide ??= false;
 	smooth ??= false;
 	hmap = await multiHeightmap(mapsize.w,multiHorizontal);
-	hmap = roundHeightmap(hmap,type);
+	hmap = await autoRoundHeightmap(hmap,2);
+	
 	hmap = HeightmapModder(hmap,smooth,randomize,subdivide);
 	var terr = [];
-	terr = Terrain(hmap,mapsize.h);
-	terr = rampifyTerrain(terr);
+	terr = await Terrain(hmap,mapsize.h);
+	terr = await rampifyTerrain(terr);
 	return(terr);//returns the dummy reference
 }
