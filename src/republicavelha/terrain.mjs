@@ -277,7 +277,7 @@ export function smoothBlock(hm,position)
 
 export function smoothHeightmap(hm,corner)
 {
-	corner ??= randi(0,3);
+	corner ??= util.randi(0,3);
 	switch(corner)
 	{
 		case 0:
@@ -410,9 +410,9 @@ export async function HeightmapModder(hm,smooth,subdivide,divider = 1)
 	let psub = [];
 	let counter = 0;
 	
-	let dividedmap = await util.marginalSplitMatrix(hm,);
-	for(let i = 0;i<divider;i++)
-		for(let k = 0;k<divider;k++)
+	let dividedmap = await util.marginalSplitMatrix(hm,divider,16);
+	for(let i = 0;i<divider*2;i++)
+		for(let k = 0;k<divider*2;k++)
 			psmo.push(util.Comrades("./terrain.mjs","smoothHeightmap",[dividedmap[i][k],util.randi(0,3)],smooth,dividedmap[i][k]));
 	
 	return (
@@ -421,18 +421,18 @@ export async function HeightmapModder(hm,smooth,subdivide,divider = 1)
 					{
 						results = results.map((val) => val.data);
 						let rst = await util.autoOrganizeArray(results)
-						return (await util.expandMatrix(rst, util.randi(0,3)));
+						return (await util.expandMatrix(rst));
 					})
 				.then(async (results) => 
 					{
-						dividedmap = await util.marginalSplitMatrix(results);
+						dividedmap = await util.marginalSplitMatrix(results,divider,1);
 						
-						for(let i = 0;i<divider;i++)
-							for(let k = 0;k<divider;k++)
+						for(let i = 0;i<divider*2;i++)
+							for(let k = 0;k<divider*2;k++)
 								psub.push(util.Comrades("./terrain.mjs","subdivideHeightmap",[dividedmap[i][k]],subdivide,dividedmap[i][k]))
 						return await Promise.all(psub).then(async (results)=>
 							{
-								return(await util.expandMatrix(await util.autoOrganizeArray(results.map((v)=>v.data),await util.randi(0,3))));
+								return(await util.expandMatrix(await util.autoOrganizeArray(results.map((v)=>v.data))));
 							})
 					})
 		   );
@@ -522,7 +522,7 @@ export async function AutoTerrain(mapsize,multiHorizontal,smooth,subdivide)
 	hmap = await autoHeightmap(mapsize.w,multiHorizontal);
 	hmap = await autoRoundHeightmap(hmap,2);
 	
-	hmap = await HeightmapModder(hmap,smooth,subdivide,2);
+	hmap = await HeightmapModder(hmap,smooth,subdivide);
 	var terr = [];
 	terr = await Terrain(hmap,mapsize.h);
 	terr = await rampifyTerrain(terr);

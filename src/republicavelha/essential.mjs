@@ -117,6 +117,29 @@ export async function splitMatrix(matrix)
     return [[subMatrix1, subMatrix2], [subMatrix3, subMatrix4]];
 }
 
+export async function customSplitMatrix(matrix, slices) 
+{
+    let subMatrixSize = Math.ceil(matrix.length / slices);
+    let subMatrices = [];
+    for (let i = 0; i < slices; i++) {
+        for (let j = 0; j < slices; j++) {
+            let subMatrix = matrix.slice(i * subMatrixSize, (i + 1) * subMatrixSize).map(x => x.slice(j * subMatrixSize, (j + 1) * subMatrixSize));
+            subMatrices.push(subMatrix);
+        }
+    }
+    return subMatrices;
+}
+
+export async function customMarginalSplitMatrix(matrix, slices = 2, margin = 0) 
+{
+    let subMatrixSize = Math.ceil(matrix.length / slices);
+    let subMatrix1 = matrix.slice(0, subMatrixSize+margin).map(x => x.slice(0, subMatrixSize+margin));
+    let subMatrix2 = matrix.slice(0, subMatrixSize+margin).map(x => x.slice(subMatrixSize-margin));
+    let subMatrix3 = matrix.slice(subMatrixSize-margin).map(x => x.slice(0, subMatrixSize+margin));
+    let subMatrix4 = matrix.slice(subMatrixSize-margin).map(x => x.slice(subMatrixSize-margin));
+    return [[subMatrix1, subMatrix2], [subMatrix3, subMatrix4]];
+}
+
 export async function marginalSplitMatrix(matrix,margin = 8) 
 {
     let subMatrixSize = Math.ceil(matrix.length / 2);
