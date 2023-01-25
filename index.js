@@ -6,8 +6,8 @@ async function debug()
 	console.log(Republica)
 	console.log(Republica.Objecto.Creature('human','male'));
 	let msize = 64;
-	let mwidth = 4;
-	mapa = await Republica.Terrain.AutoTerrain(Republica.Util.Size(msize,32),mwidth,msize*((mwidth**2/8)),2);
+	let mwidth = 8;
+	mapa = await Republica.Terrain.AutoTerrain(Republica.Util.Size(msize,32),mwidth,mwidth,0);
 	var htmltxt = '';
 	for(let x = 0;x<mapa.length;x++)
 	{

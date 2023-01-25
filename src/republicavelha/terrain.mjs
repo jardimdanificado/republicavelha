@@ -224,7 +224,34 @@ export function subdivideHeightmap(hm)
 	return result;
 }
 
-export function smoothBlock(hm,position)
+export function expandHeightmap(heightmap) 
+{
+  // Create a new 2D array with 3 times the number of rows and columns
+  var expandedHeightmap = new Array(heightmap.length * 3);
+  for (var i = 0; i < expandedHeightmap.length; i++) {
+    expandedHeightmap[i] = new Array(heightmap[0].length * 3);
+  }
+  
+  // Fill the expanded array with the values from the original heightmap
+  for (var row = 0; row < heightmap.length; row++) {
+    for (var col = 0; col < heightmap[row].length; col++) {
+      var value = heightmap[row][col];
+      expandedHeightmap[row * 3][col * 3] = value;
+      expandedHeightmap[row * 3 + 1][col * 3] = value;
+      expandedHeightmap[row * 3 + 2][col * 3] = value;
+      expandedHeightmap[row * 3][col * 3 + 1] = value;
+      expandedHeightmap[row * 3 + 1][col * 3 + 1] = value;
+      expandedHeightmap[row * 3 + 2][col * 3 + 1] = value;
+      expandedHeightmap[row * 3][col * 3 + 2] = value;
+      expandedHeightmap[row * 3 + 1][col * 3 + 2] = value;
+      expandedHeightmap[row * 3 + 2][col * 3 + 2] = value;
+    }
+  }
+  
+  return expandedHeightmap;
+}
+
+export function smoothBlock(hm,position)//deprecated
 {
 	let x = position.x;
 	let y = position.y;
@@ -275,7 +302,7 @@ export function smoothBlock(hm,position)
 	return(sum/count);
 }
 
-export function smoothHeightmap(hm,corner)
+export function oldSmoothHeightmap(hm,corner)//deprecated, avoid it
 {
 	corner ??= util.randi(0,3);
 	switch(corner)
@@ -312,6 +339,70 @@ export function smoothHeightmap(hm,corner)
 	return hm;
 }
 
+function smoothHeightmap(heightmap, corner) 
+{
+  var smoothedHeightmap = new Array(heightmap.length);
+  for (var i = 0; i < heightmap.length; i++) {
+    smoothedHeightmap[i] = new Array(heightmap[0].length);
+    for (var j = 0; j < heightmap[0].length; j++) {
+      smoothedHeightmap[i][j] = heightmap[i][j];
+    }
+  }
+  var startRow, endRow, startCol, endCol;
+  switch (corner) {
+    case 0:
+      startRow = 0;
+      endRow = Math.floor(heightmap.length/2);
+      startCol = 0;
+      endCol = Math.floor(heightmap[0].length/2);
+      break;
+    case 1:
+      startRow = 0;
+      endRow = Math.floor(heightmap.length/2);
+      startCol = Math.floor(heightmap[0].length/2);
+      endCol = heightmap[0].length;
+      break;
+    case 2:
+      startRow = Math.floor(heightmap.length/2);
+      endRow = heightmap.length;
+      startCol = 0;
+      endCol = Math.floor(heightmap[0].length/2);
+      break;
+    case 3:
+      startRow = Math.floor(heightmap.length/2);
+      endRow = heightmap.length;
+      startCol = Math.floor(heightmap[0].length/2);
+      endCol = heightmap[0].length;
+      break;
+    default:
+      startRow = 0;
+	  endRow = heightmap.length;
+      startCol = 0;
+      endCol = heightmap[0].length;
+  }
+  for (var row = startRow; row < endRow; row++) {
+    for (var col = startCol; col < endCol; col++) {
+      // Get the average of the current cell and its 8 neighboring cells
+      var total = 0;
+      var count = 0;
+      for (var x = Math.max(row - 1, startRow); x <= Math.min(row + 1, endRow - 1); x++) {
+        for (var y = Math.max(col - 1, startCol); y <= Math.min(col + 1, endCol - 1); y++) {
+          total += heightmap[x][y];
+          count++;
+        }
+      }
+      var average;
+      if (count > 0) {
+        average = total / count;
+        smoothedHeightmap[row][col] = average;
+      } else {
+        smoothedHeightmap[row][col] = heightmap[row][col];
+      }
+    }
+  }
+  return smoothedHeightmap;
+}
+
 export function roundHeightmap(hm)
 {	
 	var min = Infinity;
@@ -330,7 +421,7 @@ export function roundHeightmap(hm)
 	return hm;
 }
 
-export async function autoSmoothHeightmap(hm,  divider = 1)//deŕecated, avoid advised
+export async function oldAutoSmoothHeightmap(hm,  divider = 1)//deŕecated, avoid advised
 {
     if (divider === 1) {
         return smoothHeightmap(hm, util.randi(0,3));
@@ -352,7 +443,17 @@ export async function autoSmoothHeightmap(hm,  divider = 1)//deŕecated, avoid a
     }
 }
 
-export async function autoRoundHeightmap(hm,divider = 1)
+export function autoSmoothHeightmap(hm,times)//deprecated
+{
+	while(times>0)
+	{	
+		hm = smoothHeightmap(hm,util.randi(0,3))
+		times--;
+	};
+	return(hm);
+}
+
+export async function autoRoundHeightmap(hm,divider = 1)//deorecated
 {
 	if(divider === 1)
 		return roundHeightmap(hm);
@@ -378,64 +479,43 @@ export async function autoRoundHeightmap(hm,divider = 1)
 
 export async function autoHeightmap(mapsize, multi) 
 {
-    if (multi == 1) 
+	let promises = [];
+	for (let x = 0; x < multi; x++) 
 	{
-        return Heightmap(mapsize);
-    } 
-	else 
-	{
-        let promises = [];
-        for (let x = 0; x < multi; x++) 
+		for (let y = 0; y < multi; y++) 
 		{
-            for (let y = 0; y < multi; y++) 
+			promises.push(util.Comrade('./terrain.mjs','Heightmap',[mapsize]));
+		}
+	}
+	return (await Promise.all(promises)
+			.then(async (results) => 
 			{
-                promises.push(util.Comrade('./terrain.mjs','Heightmap',[mapsize]));
-            }
-        }
-        return (await Promise.all(promises)
-				.then(async (results) => 
-				{
-					results = results.map(val => val.data);
-		            results = await util.organizeArray(results,multi);
-		            return(util.expandMatrix(results));
-	        	}
-			)
+				results = results.map(val => val.data);
+				results = await util.organizeArray(results,multi);
+				return(util.expandMatrix(results));
+			}
 		)
-    }
+	)
+
 }
 
 export async function HeightmapModder(hm,smooth,subdivide,divider = 1)
 {
-	let psmo = [];
 	let psub = [];
-	let counter = 0;
-	
-	let dividedmap = await util.marginalSplitMatrix(hm,divider,16);
+	hm = autoSmoothHeightmap(hm,smooth);
+	let dividedmap = await util.splitMatrix(hm,divider);
 	for(let i = 0;i<divider*2;i++)
 		for(let k = 0;k<divider*2;k++)
-			psmo.push(util.Comrades("./terrain.mjs","smoothHeightmap",[dividedmap[i][k],util.randi(0,3)],smooth,dividedmap[i][k]));
-	
+			psub.push(util.Comrades("./terrain.mjs","expandHeightmap",[dividedmap[i][k]],subdivide,dividedmap[i][k]));
 	return (
-				await Promise.all(psmo)
+				await Promise.all(psub)
 				.then(async (results) => 
 					{
 						results = results.map((val) => val.data);
-						let rst = await util.autoOrganizeArray(results)
-						return (await util.expandMatrix(rst));
+						let expanded = await util.expandMatrix(await util.autoOrganizeArray(results));
+						return (expanded);
 					})
-				.then(async (results) => 
-					{
-						dividedmap = await util.marginalSplitMatrix(results,divider,1);
-						
-						for(let i = 0;i<divider*2;i++)
-							for(let k = 0;k<divider*2;k++)
-								psub.push(util.Comrades("./terrain.mjs","subdivideHeightmap",[dividedmap[i][k]],subdivide,dividedmap[i][k]))
-						return await Promise.all(psub).then(async (results)=>
-							{
-								return(await util.expandMatrix(await util.autoOrganizeArray(results.map((v)=>v.data))));
-							})
-					})
-		   );
+			);
 }
 
 export async function Terrain(inmap,fixedHeight = 128)
@@ -448,7 +528,7 @@ export async function Terrain(inmap,fixedHeight = 128)
 		for(let y = 0;y < mt.length;y++)
 		{
 			result[x][y] = [];
-			var earthb = Math.round(util.limito(mt[x][y],fixedHeight-((fixedHeight/4)*3),(fixedHeight-(fixedHeight/4))));
+			var earthb = Math.round(util.limito(mt[x][y],2,fixedHeight-2));
 			var airb = fixedHeight - earthb;
 			
 			if(earthb >=1)
@@ -519,8 +599,10 @@ export async function AutoTerrain(mapsize,multiHorizontal,smooth,subdivide)
 	
 	subdivide ??= false;
 	smooth ??= false;
+	if(multiHorizontal<2)
+		multihorizontal = 2;
 	hmap = await autoHeightmap(mapsize.w,multiHorizontal);
-	hmap = await autoRoundHeightmap(hmap,2);
+	hmap = roundHeightmap(hmap);
 	
 	hmap = await HeightmapModder(hmap,smooth,subdivide);
 	var terr = [];
