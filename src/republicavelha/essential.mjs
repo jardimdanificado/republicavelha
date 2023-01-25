@@ -55,12 +55,12 @@ export async function organizeArray(arr, parts)
     return matrix;
 }
 
-export function autoOrganizeArray(arr) {
+export async function autoOrganizeArray(arr) {
     let matrix = [];
     let parts = Math.ceil(Math.sqrt(arr.length));
     let chunkSize = Math.ceil(arr.length / parts);
-    for (let i = 0; i < parts; i++) {
-        matrix.push(arr.slice(i * chunkSize, (i + 1) * chunkSize));
+    for (let i = 0; i < arr.length; i += chunkSize) {
+        matrix.push(arr.slice(i, i + chunkSize));
     }
     return matrix;
 }
@@ -87,9 +87,10 @@ export function getSizeInBytes(input){if(typeof input == 'function')return(input
 //-----------------------------------
 
 
-export function expandMatrix(matrix) {
+export async function expandMatrix(matrix) {
     let finalMatrix = [];
     let currentRow = 0;
+	//console.log(matrix)
     for (let i = 0; i < matrix.length; i++) {
         for (let j = 0; j < matrix[i].length; j++) {
             for (let x = 0; x < matrix[i][j].length; x++) {
@@ -106,21 +107,27 @@ export function expandMatrix(matrix) {
     return finalMatrix;
 }
 
-export async function divideMatrix(largeMatrix, size) {
-    let dividedMatrix = [];
-    for (let i = 0; i < largeMatrix.length; i += size) {
-        let row = largeMatrix.slice(i, i + size);
-        let dividedRow = [];
-        for (let j = 0; j < row.length; j += size) {
-            let subMatrix = row.map(x => x.slice(j, j + size));
-            dividedRow.push(subMatrix);
-        }
-        dividedMatrix.push(dividedRow);
-    }
-    return dividedMatrix;
+export async function splitMatrix(matrix) 
+{
+    let subMatrixSize = Math.ceil(matrix.length / 2);
+    let subMatrix1 = matrix.slice(0, subMatrixSize).map(x => x.slice(0, subMatrixSize));
+    let subMatrix2 = matrix.slice(0, subMatrixSize).map(x => x.slice(subMatrixSize));
+    let subMatrix3 = matrix.slice(subMatrixSize).map(x => x.slice(0, subMatrixSize));
+    let subMatrix4 = matrix.slice(subMatrixSize).map(x => x.slice(subMatrixSize));
+    return [[subMatrix1, subMatrix2], [subMatrix3, subMatrix4]];
 }
 
-export async function splitMatrix(largeMatrix, slices) {
+export async function marginalSplitMatrix(matrix,margin = 8) 
+{
+    let subMatrixSize = Math.ceil(matrix.length / 2);
+    let subMatrix1 = matrix.slice(0, subMatrixSize+margin).map(x => x.slice(0, subMatrixSize+margin));
+    let subMatrix2 = matrix.slice(0, subMatrixSize+margin).map(x => x.slice(subMatrixSize-margin));
+    let subMatrix3 = matrix.slice(subMatrixSize-margin).map(x => x.slice(0, subMatrixSize+margin));
+    let subMatrix4 = matrix.slice(subMatrixSize-margin).map(x => x.slice(subMatrixSize-margin));
+    return [[subMatrix1, subMatrix2], [subMatrix3, subMatrix4]];
+}
+
+export async function divideMatrix(largeMatrix, slices) {
     let dividedMatrix = [];
     let sliceSize = Math.floor(largeMatrix.length / slices);
     for (let i = 0; i < largeMatrix.length; i += sliceSize) {
@@ -140,11 +147,17 @@ export function workerPromise(worker)
 	return(new Promise((resolve) => {worker.onmessage = resolve;}))
 }
 
-export function Comrade (modulePath,functionName,args)
+export function Comrade (modulePath,functionName,args)//this create a worker and return a promise which will become the worker's return
 {
 	var worker = new Worker("./src/republicavelha/comrade.worker.js");
-	worker.result = [];
 	worker.postMessage([modulePath,functionName,args]);
+	return(workerPromise(worker));
+}
+
+export function Comrades (modulePath,functionName,args,times,optresult)//the same, but repeated x times, values are stored in a array
+{
+	var worker = new Worker("./src/republicavelha/comrades.worker.js");
+	worker.postMessage([modulePath,functionName,args,times,optresult]);
 	return(workerPromise(worker));
 }
 

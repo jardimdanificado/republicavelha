@@ -5,9 +5,9 @@ async function debug()
 	Republica = await import("./src/republicavelha.mjs");
 	console.log(Republica)
 	console.log(Republica.Objecto.Creature('human','male'));
-	let msize = 64;
+	let msize = 128;
 	let mwidth = 4;
-	mapa = await Republica.Terrain.AutoTerrain(Republica.Util.Size(msize,32),mwidth,msize*(mwidth**2),0,1);
+	mapa = await Republica.Terrain.AutoTerrain(Republica.Util.Size(msize,32),mwidth,msize*((mwidth**2/16)),0,0);
 	var htmltxt = '';
 	for(let x = 0;x<mapa.length;x++)
 	{
