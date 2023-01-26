@@ -5,9 +5,10 @@ async function debug()
 	Republica = await import("./src/republicavelha.mjs");
 	console.log(Republica)
 	console.log(Republica.Objecto.Creature('human','male'));
-	let msize = 64;
-	let mwidth = 8;
-	mapa = await Republica.Terrain.AutoTerrain(Republica.Util.Size(msize,32),mwidth,mwidth,0);
+	let msize = 128;
+	let mwidth = 4;
+	//mapa = await Republica.Terrain.AutoTerrain(Republica.Util.Size(msize,32),mwidth,mwidth,mwidth,0);//boring plains
+	mapa = await Republica.Terrain.AutoTerrain(Republica.Util.Size(msize,32),mwidth,(mwidth**3)*msize,0,0);//cool terrains
 	var htmltxt = '';
 	for(let x = 0;x<mapa.length;x++)
 	{
