@@ -576,7 +576,7 @@ export async function Terrain(inmap,fixedHeight = 128)
 		for(let y = 0;y < mt.length;y++)
 		{
 			result[x][y] = [];
-			var earthb = Math.round(util.limito(mt[x][y],2,fixedHeight-2));
+			var earthb = Math.round(util.limito(mt[x][y],fixedHeight-((fixedHeight/4)*3),fixedHeight-2));
 			var airb = fixedHeight - earthb;
 			
 			if(earthb >=1)
@@ -694,35 +694,8 @@ export function simpleHeightmapModder(hm,smooth,randomize,subdivide)
 	return hm;
 }
 
-//cool and variated maps, very cpu consuming, larges maps are a pain to generate, this uses single threaded gen
-export async function simpleAutoTerrain(mapsize,multiHorizontal,smooth = false,randomize = false,subdivide = false,type = 'flat')
-{
-	//note that multiHorizontal multiplyes the mapsize, putting different maps side by side
-	var hmap;
-	if(typeof mapsize == 'undefined')
-		mapsize = util.Size(128,64);	
-	else if(typeof mapsize == 'number')
-		mapsize = util.Size(mapsize,mapsize);
-	else if(typeof mapsize == 'array')
-		mapsize = util.Size(mapsize[0],mapsize[1]);
-
-	if(multiHorizontal<4)
-		multiHorizontal = 4;
-
-	hmap = await autoHeightmap(mapsize.w,multiHorizontal);
-	hmap = await oldRoundHeightmap(hmap,type);
-	hmap = await(util.Comrade('./terrain.mjs','simpleHeightmapModder',[hmap,smooth,randomize,subdivide]))
-		.then(resolvedValue => {
-			return resolvedValue.data;
-  	});
-	var terr = [];
-	terr = await fastTerrain(hmap,mapsize.h,2);
-	terr = await fastRampify(terr,2);
-	return(terr);
-}
-
 //boring and flat maps, faster for bigger maps(1024+) and doesnt freezes main thread but but maps are very flat
-export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomize = false,subdivide = false)
+export async function altAutoTerrain(mapsize,multiHorizontal,smooth = false,randomize = false,subdivide = false)
 {
 	var hmap;
 	if(typeof mapsize == 'undefined')
@@ -744,3 +717,32 @@ export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomi
 	terr = await fastRampify(terr,2);
 	return(terr);
 }
+
+//cool and variated maps, very cpu consuming, larges maps are a pain to generate, this uses single threaded gen
+export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomize = false,subdivide = false,type = 'flat')
+{
+	//note that multiHorizontal multiplyes the mapsize, putting different maps side by side
+	var hmap;
+	if(typeof mapsize == 'undefined')
+		mapsize = util.Size(128,64);	
+	else if(typeof mapsize == 'number')
+		mapsize = util.Size(mapsize,mapsize);
+	else if(typeof mapsize == 'array')
+		mapsize = util.Size(mapsize[0],mapsize[1]);
+
+	if(multiHorizontal<2)
+		multiHorizontal = 2;
+
+	hmap = await autoHeightmap(mapsize.w,multiHorizontal);
+	hmap = await oldRoundHeightmap(hmap,type);
+	hmap = await(util.Comrade('./terrain.mjs','simpleHeightmapModder',[hmap,smooth,randomize,subdivide]))
+		.then(resolvedValue => {
+			return resolvedValue.data;
+  	});
+	var terr = [];
+	terr = await fastTerrain(hmap,mapsize.h,2);
+	terr = await fastRampify(terr,2);
+	return(terr);
+}
+
+
