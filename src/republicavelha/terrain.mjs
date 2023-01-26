@@ -1,5 +1,5 @@
 import * as util from "./essential.mjs"
-import * as Objecto from "./objecto.mjs"
+import { Primitive } from "../republicavelha.mjs" 
 
 //-----------------------------------
 //TERRAIN
@@ -453,7 +453,7 @@ export async function oldAutoSmoothHeightmap(hm,  divider = 1)//deŕecated, avoi
         let divided = await util.splitMatrix(hm);
         for (let x = 0; x < divided.length; x++) {
             for (let y = 0; y < divided[x].length; y++) {
-                promises.push(util.Comrade("./terrain.mjs", "smoothHeightmap", [divided[x][y], util.randi(0,3)]));
+                promises.push(util.Comrade("../terrain.mjs", "smoothHeightmap", [divided[x][y], util.randi(0,3)]));
             }
         }
         return (await Promise.all(promises)
@@ -486,7 +486,7 @@ export async function autoRoundHeightmap(hm,divider = 1)//deprecated
 		let divided = await util.splitMatrix(hm);
 		for(let x =0;x<divided.length;x++)
 			for(let y = 0;y<divided[x].length;y++)
-				promises.push(util.Comrade("./terrain.mjs","roundHeightmap",[divided[x][y]]))
+				promises.push(util.Comrade("../terrain.mjs","roundHeightmap",[divided[x][y]]))
 		
 		return (await Promise.all(promises)
 				.then(async (results) => 
@@ -507,7 +507,7 @@ export async function autoHeightmap(mapsize, multi)
 	{
 		for (let y = 0; y < multi; y++) 
 		{
-			promises.push(util.Comrade('./terrain.mjs','Heightmap',[mapsize]));
+			promises.push(util.Comrade('../terrain.mjs','Heightmap',[mapsize]));
 		}
 	}
 	return (await Promise.all(promises)
@@ -530,7 +530,7 @@ export async function HeightmapModder(hm,smooth,randomize,subdivide,divider = 1)
 	let dividedmap = await util.splitMatrix(hm,divider);
 	for(let i = 0;i<divider*2;i++)
 		for(let k = 0;k<divider*2;k++)
-			prnd.push(util.Comrades("./terrain.mjs","randomizeHeightmap",[dividedmap[i][k]],randomize,dividedmap[i][k]));
+			prnd.push(util.Comrades("../terrain.mjs","randomizeHeightmap",[dividedmap[i][k]],randomize,dividedmap[i][k]));
 	
 	return (
 				await Promise.all(prnd)
@@ -545,7 +545,7 @@ export async function HeightmapModder(hm,smooth,randomize,subdivide,divider = 1)
 						dividedmap = await util.splitMatrix(results,divider);
 						for(let i = 0;i<divider*2;i++)
 							for(let k = 0;k<divider*2;k++)
-								psmo.push(util.Comrades("./terrain.mjs","oldSmoothHeightmap",[dividedmap[i][k],util.randi(0,3)],smooth,dividedmap[i][k]));
+								psmo.push(util.Comrades("../terrain.mjs","oldSmoothHeightmap",[dividedmap[i][k],util.randi(0,3)],smooth,dividedmap[i][k]));
 						return await Promise.all(psmo).then(async (results)=>
 							{
 								return(await util.expandMatrix(await util.autoOrganizeArray(results.map((v)=>v.data))));
@@ -557,7 +557,7 @@ export async function HeightmapModder(hm,smooth,randomize,subdivide,divider = 1)
 						
 						for(let i = 0;i<divider*2;i++)
 							for(let k = 0;k<divider*2;k++)
-								psub.push(util.Comrades("./terrain.mjs","expandHeightmap",[dividedmap[i][k]],subdivide,dividedmap[i][k]))
+								psub.push(util.Comrades("../terrain.mjs","expandHeightmap",[dividedmap[i][k]],subdivide,dividedmap[i][k]))
 						return await Promise.all(psub).then(async (results)=>
 							{
 								return(await util.expandMatrix(await util.autoOrganizeArray(results.map((v)=>v.data))));
@@ -580,9 +580,9 @@ export async function Terrain(inmap,fixedHeight = 128)
 			var airb = fixedHeight - earthb;
 			
 			if(earthb >=1)
-				result[x][y] = Array(earthb).fill([Objecto.Block('earth','full')]);
+				result[x][y] = Array(earthb).fill([Primitive.Block('earth','full')]);
 			if(airb >= 1)
-				result[x][y] = result[x][y].concat(Array(airb).fill([Objecto.Block('air','empty')]));
+				result[x][y] = result[x][y].concat(Array(airb).fill([Primitive.Block('air','empty')]));
 		}
 	}
 	return(result);
@@ -593,7 +593,7 @@ export async function fastTerrain(hm,fixedHeight,slices)
 	let divided = await util.customSplitMatrix(hm,slices);
 	let terrs = [];
 	for(let i = 0;i<slices**2;i++)
-		terrs.push(util.asyncComrade("./terrain.mjs","Terrain",[divided[i],fixedHeight]));
+		terrs.push(util.asyncComrade("../terrain.mjs","Terrain",[divided[i],fixedHeight]));
 	
 	return (
 				await Promise.all(terrs)
@@ -658,7 +658,7 @@ export async function fastRampify(hm,slices)
 	let divided = await util.customSplitMatrix(hm,slices);
 	let terrs = [];
 	for(let i = 0;i<slices**2;i++)
-			terrs.push(util.asyncComrade("./terrain.mjs","rampifyTerrain",[divided[i]]));
+			terrs.push(util.asyncComrade("../terrain.mjs","rampifyTerrain",[divided[i]]));
 	
 	return (
 				await Promise.all(terrs)
@@ -735,7 +735,7 @@ export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomi
 
 	hmap = await autoHeightmap(mapsize.w,multiHorizontal);
 	hmap = await oldRoundHeightmap(hmap,type);
-	hmap = await(util.Comrade('./terrain.mjs','simpleHeightmapModder',[hmap,smooth,randomize,subdivide]))
+	hmap = await(util.Comrade('../terrain.mjs','simpleHeightmapModder',[hmap,smooth,randomize,subdivide]))
 		.then(resolvedValue => {
 			return resolvedValue.data;
   	});
