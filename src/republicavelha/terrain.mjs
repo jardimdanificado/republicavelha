@@ -744,5 +744,3 @@ export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomi
 	terr = await fastRampify(terr,2);
 	return(terr);
 }
-
-
