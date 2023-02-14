@@ -172,56 +172,56 @@ export function workerPromise(worker)
 
 export function Comrade (modulePath,functionName,args)//this create a worker and return a promise which will become the worker's return
 {
-	var worker = new Worker("./src/republicavelha/comrade.worker.js");
+	var worker = new Worker("./src/republicavelha/comrade/comrade.worker.js");
 	worker.postMessage([modulePath,functionName,args]);
 	return(workerPromise(worker));
 }
 
 export function wComrade (modulePath,functionName,args)//this create a worker and return a promise which will become the worker's return
 {
-	var worker = new Worker("./src/republicavelha/comrade.worker.js");
+	var worker = new Worker("./src/republicavelha/comrade/comrade.worker.js");
 	worker.postMessage([modulePath,functionName,args]);
 	return((worker));
 }
 
 export function asyncComrade (modulePath,functionName,args)//this create a worker and return a promise which will become the worker's return
 {
-	var worker = new Worker("./src/republicavelha/acomrade.worker.js");
+	var worker = new Worker("./src/republicavelha/comrade/acomrade.worker.js");
 	worker.postMessage([modulePath,functionName,args]);
 	return(workerPromise(worker));
 }
 
 export function wasyncComrade (modulePath,functionName,args)//this create a worker and return a promise which will become the worker's return
 {
-	var worker = new Worker("./src/republicavelha/acomrade.worker.js");
+	var worker = new Worker("./src/republicavelha/comrade/acomrade.worker.js");
 	worker.postMessage([modulePath,functionName,args]);
 	return((worker));
 }
 
 export function Comrades (modulePath,functionName,args,times,optresult)//the same, but repeated x times, values are stored in a array
 {
-	var worker = new Worker("./src/republicavelha/comrades.worker.js");
+	var worker = new Worker("./src/republicavelha/comrade/comrades.worker.js");
 	worker.postMessage([modulePath,functionName,args,times,optresult]);
 	return(workerPromise(worker));
 }
 
 export function wComrades (modulePath,functionName,args,times,optresult)//the same, but repeated x times, values are stored in a array
 {
-	var worker = new Worker("./src/republicavelha/comrades.worker.js");
+	var worker = new Worker("./src/republicavelha/comrade/comrades.worker.js");
 	worker.postMessage([modulePath,functionName,args,times,optresult]);
 	return((worker));
 }
 
 export function asyncComrades (modulePath,functionName,args,times,optresult)//the same, but repeated x times, values are stored in a array
 {
-	var worker = new Worker("./src/republicavelha/acomrades.worker.js");
+	var worker = new Worker("./src/republicavelha/comrade/acomrades.worker.js");
 	worker.postMessage([modulePath,functionName,args,times,optresult]);
 	return(workerPromise(worker));
 }
 
 export function wasyncComrades (modulePath,functionName,args,times,optresult)//the same, but repeated x times, values are stored in a array
 {
-	var worker = new Worker("./src/republicavelha/acomrades.worker.js");
+	var worker = new Worker("./src/republicavelha/comrade/acomrades.worker.js");
 	worker.postMessage([modulePath,functionName,args,times,optresult]);
 	return((worker));
 }
