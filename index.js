@@ -8,8 +8,9 @@ async function debug()
 	let msize = 64;
 	let mwidth = 2;
 	//mapa = await Republica.Objecto.Flat(Republica.Util.Size(msize,32),mwidth,(mwidth**3)*msize,0,0);//boring plains
+	console.time((msize*mwidth) + "x" + (msize*mwidth) + " map generated in");
 	mapa = await Republica.Terrain.Default(Republica.Util.Size(msize,32),mwidth,(mwidth**3)*msize,0,0);//cool terrains
-
+	console.timeEnd((msize*mwidth) + "x" + (msize*mwidth) + " map generated in");
 	var htmltxt = '';
 	for(let x = 0;x<mapa.length;x++)
 	{

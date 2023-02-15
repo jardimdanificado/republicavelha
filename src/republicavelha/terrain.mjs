@@ -444,6 +444,24 @@ export function roundHeightmap(hm)
 	return hm;
 }
 
+export function polishHeightmap(heightmap,fixedHeight)//same as smooth but different
+{
+	// Define a function to be applied to each element of the matrix
+	const yCallback = function(num) 
+	{
+	  return Math.round(util.limito(num,fixedHeight-((fixedHeight/4)*3),fixedHeight-2));
+	}
+	
+	// Define a function to be applied to each row of the matrix
+	const xCallback = function(row) 
+	{
+	  return row.map(yCallback);
+	}
+
+	// Apply the doubleRow() function to each row of the matrix using map()
+	return(heightmap.map(xCallback));
+}
+
 export async function oldAutoSmoothHeightmap(hm,  divider = 1)//deŕecated, avoid
 {
     if (divider === 1) {
@@ -519,7 +537,19 @@ export async function autoHeightmap(mapsize, multi)
 			}
 		)
 	)
+}
 
+function heightmapVariablitity(heightmap) 
+{
+  let uniqueValues = new Set();//Set() is a array of unique values
+  
+  for (let i = 0; i < heightmap.length; i++) {
+    for (let j = 0; j < heightmap[0].length; j++) {
+      uniqueValues.add(heightmap[i][j]);
+    }
+  }
+  
+  return uniqueValues.size;
 }
 
 export async function HeightmapModder(hm,smooth,randomize,subdivide,divider = 1)
@@ -566,23 +596,20 @@ export async function HeightmapModder(hm,smooth,randomize,subdivide,divider = 1)
 		   );
 }
 
-export async function Terrain(inmap,fixedHeight = 128)
+export async function Terrain(map,fixedHeight = 128)
 {
-	var mt = inmap;
 	var result = [];
-	for(let x = 0;x < mt.length;x++)
+	for(let x = 0;x < map.length;x++)
 	{
 		result[x] = [];
-		for(let y = 0;y < mt.length;y++)
+		for(let y = 0;y < map.length;y++)
 		{
 			result[x][y] = [];
-			var earthb = Math.round(util.limito(mt[x][y],fixedHeight-((fixedHeight/4)*3),fixedHeight-2));
-			var airb = fixedHeight - earthb;
+			//var earthb = map[x][y];
+			//var airb = fixedHeight - earthb;
 			
-			if(earthb >=1)
-				result[x][y] = Array(earthb).fill([Primitive.Block('earth','full')]);
-			if(airb >= 1)
-				result[x][y] = result[x][y].concat(Array(airb).fill([Primitive.Block('air','empty')]));
+			result[x][y] = Array(map[x][y]).fill([Primitive.Block('earth','full')]);
+			result[x][y] = result[x][y].concat(Array(fixedHeight - map[x][y]).fill([Primitive.Block('air','empty')]));
 		}
 	}
 	return(result);
@@ -639,11 +666,11 @@ export async function rampifyTerrain(terrain)
 						(x<terrain.length-1 &&
 						 y>0 &&
 						 terrain[x+1][y-1][z+1][0].subtype == "full" &&
-						 terrain[x][y-1][z+2][0].subtype == "empty")||
+						 terrain[x+1][y-1][z+2][0].subtype == "empty")||
 						(x>0 &&
 						 y>0 &&
 						 terrain[x-1][y-1][z+1][0].subtype == "full" &&
-						 terrain[x][y-1][z+2][0].subtype == "empty")
+						 terrain[x-1][y-1][z+2][0].subtype == "empty")
 					)	
 					{
 						terrain[x][y][z][0].subtype = 'half';
@@ -653,13 +680,81 @@ export async function rampifyTerrain(terrain)
 	return terrain;
 }
 
-export async function fastRampify(hm,slices)
+export async function rampifyTerrainHM(terrain,heightmap)
 {
-	let divided = await util.customSplitMatrix(hm,slices);
+	for(let x = 0;x<terrain.length;x++)
+		for(let y = 0;y<terrain[0].length;y++)
+		{
+			if(
+				(x<terrain.length-1 &&
+				 terrain[x+1][y][heightmap[x][y]][0].subtype == "full" &&
+				 terrain[x+1][y][heightmap[x][y]+1][0].subtype == "empty")||
+				(x>0&&
+				 terrain[x-1][y][heightmap[x][y]][0].subtype == "full" &&
+				 terrain[x-1][y][heightmap[x][y]+1][0].subtype == "empty")||
+				(y<terrain.length-1 &&
+				 terrain[x][y+1][heightmap[x][y]][0].subtype == "full" &&
+				 terrain[x][y+1][heightmap[x][y]+1][0].subtype == "empty")||
+				(y>0 &&
+				 terrain[x][y-1][heightmap[x][y]][0].subtype == "full" &&
+				 terrain[x][y-1][heightmap[x][y]+1][0].subtype == "empty") ||
+				
+				(x<terrain.length-1 &&
+				 y<terrain.length-1 &&
+				 terrain[x+1][y+1][heightmap[x][y]][0].subtype == "full" && 
+				 terrain[x+1][y+1][heightmap[x][y]+1][0].subtype == "empty")||
+				(x>0&&
+				 y<terrain.length-1 &&
+				 terrain[x-1][y+1][heightmap[x][y]][0].subtype == "full" && 
+				 terrain[x-1][y+1][heightmap[x][y]+1][0].subtype == "empty")||
+				(x<terrain.length-1 &&
+				 y>0 &&
+				 terrain[x+1][y-1][heightmap[x][y]][0].subtype == "full" &&
+				 terrain[x+1][y-1][heightmap[x][y]+1][0].subtype == "empty")||
+				(x>0 &&
+				 y>0 &&
+				 terrain[x-1][y-1][heightmap[x][y]][0].subtype == "full" &&
+				 terrain[x-1][y-1][heightmap[x][y]+1][0].subtype == "empty")
+			)	
+			{
+				terrain[x][y][heightmap[x][y]][0].subtype = 'half';
+			}
+		}
+	return terrain;
+}
+
+export async function countRampsHM(terrain,heightmap)
+{
+	let counter = 0;
+	for(let x = 0;x<terrain.length;x++)
+		for(let y = 0;y<terrain[0].length;y++)
+		{
+			if(terrain[x][y][heightmap[x][y]][0].subtype == "half")
+				 
+			{
+				counter++;
+			}
+		}
+	return counter;
+}
+
+export async function fastRampify(terrain,slices,heightmap)
+{
+	let dividedMap = await util.customSplitMatrix(terrain,slices);
 	let terrs = [];
-	for(let i = 0;i<slices**2;i++)
-			terrs.push(util.asyncComrade("../terrain.mjs","rampifyTerrain",[divided[i]]));
-	
+	if(typeof heightmap !== 'undefined')
+	{
+		let dividedHeightmap = await util.customSplitMatrix(heightmap,slices);
+		for(let i = 0;i<slices**2;i++)
+		{
+			terrs.push(util.asyncComrade("../terrain.mjs","rampifyTerrainHM",[dividedMap[i],dividedHeightmap[i]]));
+		}
+	}
+	else
+		for(let i = 0;i<slices**2;i++)
+		{
+			terrs.push(util.asyncComrade("../terrain.mjs","rampifyTerrain",[dividedMap[i]]));
+		}
 	return (
 				await Promise.all(terrs)
 				.then(async (results) => 
@@ -734,13 +829,19 @@ export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomi
 		multiHorizontal = 2;
 
 	hmap = await autoHeightmap(mapsize.w,multiHorizontal);
+	console.log("raw variability:"+heightmapVariablitity(hmap))
 	hmap = await oldRoundHeightmap(hmap,type);
 	hmap = await(util.Comrade('../terrain.mjs','simpleHeightmapModder',[hmap,smooth,randomize,subdivide]))
 		.then(resolvedValue => {
 			return resolvedValue.data;
   	});
+	hmap = polishHeightmap(hmap,mapsize.h);
 	var terr = [];
+	console.log("post variability:"+heightmapVariablitity(hmap));
+	
 	terr = await fastTerrain(hmap,mapsize.h,2);
-	terr = await fastRampify(terr,2);
+	terr = await fastRampify(terr,2,hmap);
+	console.log("ramp count:"+ await countRampsHM(terr,hmap))
+	terr.heightmap = hmap;//this is COMPELTELY TEMPORARY and SHOULD be replaced AS SOON AS POSSIBLE
 	return(terr);
 }
