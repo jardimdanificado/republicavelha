@@ -637,11 +637,8 @@ export async function fastRampify(terrain,slices,heightmap)
 			)
 }
 
-//cool and variated maps, very cpu consuming, larges maps are a pain to generate
 export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomize = false,subdivide = false,postslices = 1,retry = 0)
 {
-	//note that multiHorizontal multiplyes the mapsize, putting different maps side by side
-	
 	if(typeof mapsize == 'undefined')
 		mapsize = util.Size(128,64);	
 	else if(typeof mapsize == 'number')
