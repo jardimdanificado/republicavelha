@@ -1,6 +1,6 @@
 "use strict";
 var mapa, Republica, htmltxt;//declared outside debug function so we can console.log it globally
-async functiondebug()
+async function debug()
 {
 	Republica = await import("./src/republicavelha.mjs");
 	console.log(Republica)
