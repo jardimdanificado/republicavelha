@@ -339,7 +339,7 @@ export function smoothHeightmap(hm,corner)
 	return hm;
 }
 
-export function roundHeightmap(hm,type)
+export function roundHeightmap(hm)
 {
 	var min = Infinity;
 	for(let x = 0 ;x < hm.length; x++)
@@ -352,12 +352,7 @@ export function roundHeightmap(hm,type)
 	for(let x = 0;x < hm.length;x++)
 		for(let y = 0;y < hm.length;y++)
 		{
-			hm[x][y] = Math.round((hm[x][y] +min)*(Math.pow(10,((Math.trunc(min) + '').length))));//default is random
-			
-			if(type == 0 || type == 'flat')
-				hm[x][y] = Math.round((hm[x][y])+(min*Math.pow(10,((Math.trunc(min) + '').length))));//flat
-			else if(type == 1 || type == 'random')
-				hm[x][y] = Math.round((hm[x][y] +min)*(Math.pow(10,((Math.trunc(min) + '').length))));//random
+			hm[x][y] = Math.round((hm[x][y])+(min*Math.pow(10,((Math.trunc(min) + '').length))));//flat
 		}
 	return hm;
 }
@@ -599,7 +594,7 @@ export async function rampifyTerrainHM(terrain,heightmap)
 	return terrain;
 }
 
-export async function countRampsHM(terrain,heightmap)
+export async function countRampsHeightmap(terrain,heightmap)
 {
 	let counter = 0;
 	for(let x = 0;x<terrain.length;x++)
@@ -643,7 +638,7 @@ export async function fastRampify(terrain,slices,heightmap)
 }
 
 //cool and variated maps, very cpu consuming, larges maps are a pain to generate
-export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomize = false,subdivide = false,type = 'flat',postslices = 1,retry = 0)
+export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomize = false,subdivide = false,postslices = 1,retry = 0)
 {
 	//note that multiHorizontal multiplyes the mapsize, putting different maps side by side
 	
@@ -660,7 +655,7 @@ export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomi
 	console.timeEnd("autoHeightmap");
 	
 	console.time("roundHeightmap");
-	hmap = await roundHeightmap(hmap,type);
+	hmap = await roundHeightmap(hmap);
 	console.timeEnd("roundHeightmap");
 
 	console.time("heightmapModder");
@@ -685,13 +680,13 @@ export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomi
 	terr = await fastRampify(terr,postslices,hmap);
 	console.timeEnd("fastRampify");
 
-	var rampcount = await countRampsHM(terr,hmap);
+	var rampcount = await countRampsHeightmap(terr,hmap);
 	console.log("ramp count:"+ rampcount );
 	if(retry>=1&&rampcount>((mapsize.w*multiHorizontal)**2)/4)
 	{
 		console.log("retry number " + retry);
 		retry++;
-		return(AutoTerrain(mapsize,multiHorizontal,smooth,randomize,subdivide,type,postslices,retry));
+		return(AutoTerrain(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices,retry));
 	}
 	if(retry >= 2)
 		console.log('map generated in ' + retry + ' retries.')

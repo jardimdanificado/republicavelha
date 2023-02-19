@@ -9,7 +9,7 @@ async function debug()
 	let mwidth = 2;
 	let mquality = 1;
 	console.time((msize*mwidth) + "x" + (msize*mwidth) + " map generated in");
-	mapa = await Republica.Terrain.Default(Republica.Util.Size(msize,32),mwidth,(mwidth**mquality)*msize,0,0,'random',1,true);//cool terrains
+	mapa = await Republica.Terrain.Default(Republica.Util.Size(msize,32),mwidth,(mwidth**mquality)*msize,0,0,1,true);//cool terrains
 	console.timeEnd((msize*mwidth) + "x" + (msize*mwidth) + " map generated in");
 	var htmltxt = '';
 	for(let x = 0;x<mapa.length;x++)
