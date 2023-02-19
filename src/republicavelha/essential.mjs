@@ -117,7 +117,7 @@ export async function splitMatrix(matrix)
     return [[subMatrix1, subMatrix2], [subMatrix3, subMatrix4]];
 }
 
-export async function plitMatrix(matrix, slices) 
+export async function customSplitMatrix(matrix, slices) 
 {
     if(typeof matrix.length == 'undefined')
       matrix.length = manualLength(matrix)
