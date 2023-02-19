@@ -374,7 +374,7 @@ export function benchy(callback, args, optName = "unamed")
   return (result);
 }
 
-export function benchy(callback, args, optName = "unamed")
+export function abenchy(callback, args, optName = "unamed")
 {
   callback.name ??= optName; 
   console.time(callback.name);
