@@ -352,7 +352,7 @@ export function roundHeightmap(hm)
 	for(let x = 0;x < hm.length;x++)
 		for(let y = 0;y < hm.length;y++)
 		{
-			hm[x][y] = Math.round((hm[x][y])+(min*Math.pow(10,((Math.trunc(min) + '').length))));//flat
+			hm[x][y] = Math.round((hm[x][y] +min)*(Math.pow(10,((Math.trunc(min) + '').length))));
 		}
 	return hm;
 }
@@ -508,52 +508,99 @@ export async function rampifyTerrain(terrain)
 {
 	for(let x = 0;x<terrain.length;x++)
 		for(let y = 0;y<terrain[0].length;y++)
+			for(let z = 0;z<terrain[0][0].length-2;z++)
+			{
+				if(terrain[x][y][z][0].subtype == "full" && terrain[x][y][z+1][0].subtype == "empty")
+				{
+					if(
+						(x<terrain.length-1 &&
+						 terrain[x+1][y][z+1][0].subtype == "full" &&
+						 terrain[x+1][y][z+2][0].subtype == "empty")||
+						(x>0&&
+						 terrain[x-1][y][z+1][0].subtype == "full" &&
+						 terrain[x-1][y][z+2][0].subtype == "empty")||
+						(y<terrain.length-1 &&
+						 terrain[x][y+1][z+1][0].subtype == "full" &&
+						 terrain[x][y+1][z+2][0].subtype == "empty")||
+						(y>0 &&
+						 terrain[x][y-1][z+1][0].subtype == "full" &&
+						 terrain[x][y-1][z+2][0].subtype == "empty") ||
+						
+						(x<terrain.length-1 &&
+						 y<terrain.length-1 &&
+						 terrain[x+1][y+1][z+1][0].subtype == "full" && 
+						 terrain[x+1][y+1][z+2][0].subtype == "empty")||
+						(x>0&&
+						 y<terrain.length-1 &&
+						 terrain[x-1][y+1][z+1][0].subtype == "full" && 
+						 terrain[x-1][y+1][z+2][0].subtype == "empty")||
+						(x<terrain.length-1 &&
+						 y>0 &&
+						 terrain[x+1][y-1][z+1][0].subtype == "full" &&
+						 terrain[x+1][y-1][z+2][0].subtype == "empty")||
+						(x>0 &&
+						 y>0 &&
+						 terrain[x-1][y-1][z+1][0].subtype == "full" &&
+						 terrain[x-1][y-1][z+2][0].subtype == "empty")
+					)	
+					{
+						terrain[x][y][z][0].subtype = 'half';
+					}
+				}
+			}
+	return terrain;
+}
+
+export async function rampifyTerrainHM(terrain,heightmap)
+{
+	for(let x = 0;x<terrain.length;x++)
+		for(let y = 0;y<terrain[0].length;y++)
 		{
 			if(
 				(x<terrain.length-1 &&
-				 terrain[x+1][y][terrain.heightmap[x][y]][0].subtype == "full" &&
-				 terrain[x+1][y][terrain.heightmap[x][y]+1][0].subtype == "empty")||
+				 terrain[x+1][y][heightmap[x][y]][0].subtype == "full" &&
+				 terrain[x+1][y][heightmap[x][y]+1][0].subtype == "empty")||
 				(x>0&&
-				 terrain[x-1][y][terrain.heightmap[x][y]][0].subtype == "full" &&
-				 terrain[x-1][y][terrain.heightmap[x][y]+1][0].subtype == "empty")||
+				 terrain[x-1][y][heightmap[x][y]][0].subtype == "full" &&
+				 terrain[x-1][y][heightmap[x][y]+1][0].subtype == "empty")||
 				(y<terrain.length-1 &&
-				 terrain[x][y+1][terrain.heightmap[x][y]][0].subtype == "full" &&
-				 terrain[x][y+1][terrain.heightmap[x][y]+1][0].subtype == "empty")||
+				 terrain[x][y+1][heightmap[x][y]][0].subtype == "full" &&
+				 terrain[x][y+1][heightmap[x][y]+1][0].subtype == "empty")||
 				(y>0 &&
-				 terrain[x][y-1][terrain.heightmap[x][y]][0].subtype == "full" &&
-				 terrain[x][y-1][terrain.heightmap[x][y]+1][0].subtype == "empty") ||
+				 terrain[x][y-1][heightmap[x][y]][0].subtype == "full" &&
+				 terrain[x][y-1][heightmap[x][y]+1][0].subtype == "empty") ||
 				
 				(x<terrain.length-1 &&
 				 y<terrain.length-1 &&
-				 terrain[x+1][y+1][terrain.heightmap[x][y]][0].subtype == "full" && 
-				 terrain[x+1][y+1][terrain.heightmap[x][y]+1][0].subtype == "empty")||
+				 terrain[x+1][y+1][heightmap[x][y]][0].subtype == "full" && 
+				 terrain[x+1][y+1][heightmap[x][y]+1][0].subtype == "empty")||
 				(x>0&&
 				 y<terrain.length-1 &&
-				 terrain[x-1][y+1][terrain.heightmap[x][y]][0].subtype == "full" && 
-				 terrain[x-1][y+1][terrain.heightmap[x][y]+1][0].subtype == "empty")||
+				 terrain[x-1][y+1][heightmap[x][y]][0].subtype == "full" && 
+				 terrain[x-1][y+1][heightmap[x][y]+1][0].subtype == "empty")||
 				(x<terrain.length-1 &&
 				 y>0 &&
-				 terrain[x+1][y-1][terrain.heightmap[x][y]][0].subtype == "full" &&
-				 terrain[x+1][y-1][terrain.heightmap[x][y]+1][0].subtype == "empty")||
+				 terrain[x+1][y-1][heightmap[x][y]][0].subtype == "full" &&
+				 terrain[x+1][y-1][heightmap[x][y]+1][0].subtype == "empty")||
 				(x>0 &&
 				 y>0 &&
-				 terrain[x-1][y-1][terrain.heightmap[x][y]][0].subtype == "full" &&
-				 terrain[x-1][y-1][terrain.heightmap[x][y]+1][0].subtype == "empty")
+				 terrain[x-1][y-1][heightmap[x][y]][0].subtype == "full" &&
+				 terrain[x-1][y-1][heightmap[x][y]+1][0].subtype == "empty")
 			)	
 			{
-				terrain[x][y][terrain.heightmap[x][y]][0].subtype = 'half';
+				terrain[x][y][heightmap[x][y]][0].subtype = 'half';
 			}
 		}
 	return terrain;
 }
 
-export async function countRampsHeightmap(terrain)
+export async function countRampsHeightmap(terrain,heightmap)
 {
 	let counter = 0;
 	for(let x = 0;x<terrain.length;x++)
 		for(let y = 0;y<terrain[0].length;y++)
 		{
-			if(terrain[x][y][terrain.heightmap[x][y]][0].subtype == "half")
+			if(terrain[x][y][heightmap[x][y]][0].subtype == "half")
 				 
 			{
 				counter++;
@@ -562,16 +609,23 @@ export async function countRampsHeightmap(terrain)
 	return counter;
 }
 
-export async function fastRampify(terrain,slices)
+export async function fastRampify(terrain,slices,heightmap)
 {
 	let dividedMap = await util.customSplitMatrix(terrain,slices);
 	let terrs = [];
-	console.log(terrain)
-	let dividedHeightmap = await util.customSplitMatrix(terrain.heightmap,slices);
-	for(let i = 0;i<slices**2;i++)
+	if(typeof heightmap !== 'undefined')
 	{
-		terrs.push(util.asyncComrade("../terrain.mjs","rampifyTerrain",[dividedMap[i],dividedHeightmap[i]]));
+		let dividedHeightmap = await util.customSplitMatrix(heightmap,slices);
+		for(let i = 0;i<slices**2;i++)
+		{
+			terrs.push(util.asyncComrade("../terrain.mjs","rampifyTerrainHM",[dividedMap[i],dividedHeightmap[i]]));
+		}
 	}
+	else
+		for(let i = 0;i<slices**2;i++)
+		{
+			terrs.push(util.asyncComrade("../terrain.mjs","rampifyTerrain",[dividedMap[i]]));
+		}
 	return (
 				await Promise.all(terrs)
 				.then(async (results) => 
@@ -580,13 +634,13 @@ export async function fastRampify(terrain,slices)
 						let rst = await util.autoOrganizeArray(results)
 						return (await util.expandMatrix(rst));
 					})
-	)
+			)
 }
 
 export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomize = false,subdivide = false,postslices = 1,retry = 0)
 {
 	if(typeof mapsize == 'undefined')
-		mapsize = util.Size(128,64);	
+		mapsize = util.Size(128,64);
 	else if(typeof mapsize == 'number')
 		mapsize = util.Size(mapsize,mapsize);
 	else if(typeof mapsize == 'array')
@@ -596,22 +650,23 @@ export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomi
 	hmap = await util.abenchy(autoHeightmap,[mapsize.w,multiHorizontal]);
 	hmap = await util.abenchy(roundHeightmap,[hmap]);
 	hmap = await util.abenchy(
-	  async function()
-	  {
-	    return (await(util.Comrade('../terrain.mjs','heightmapModder',[hmap,smooth,randomize,subdivide]))
-	    	.then(resolvedValue => {
-	  	  	return resolvedValue.data;
-      	})
-      	)
-    },
-	  [0,1],
-	  "heightmapModder"
+	  	async function()
+	  	{
+		    return (await(util.Comrade('../terrain.mjs','heightmapModder',[hmap,smooth,randomize,subdivide]))
+		    	.then(resolvedValue => {
+		  	  	return resolvedValue.data;
+	      		})
+	      	)
+		},
+		[0,1],
+		"heightmapModder"
 	);
+
 	hmap = await util.abenchy(polishHeightmap,[hmap,mapsize.h]);
 	
 	var terr = [];
 	terr = await util.abenchy(fastTerrain,[hmap,mapsize.h,postslices]);
-	terr = await util.abenchy(fastRampify,[terr,mapsize.h,postslices]);
+	terr = await util.abenchy(fastRampify,[terr,postslices,hmap]);
 
 	var rampcount = await countRampsHeightmap(terr,hmap);
 	console.log("ramp count:"+ rampcount );
