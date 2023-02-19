@@ -373,3 +373,12 @@ export function benchy(callback, args, optName = "unamed")
   console.timeEnd(callback.name);
   return (result);
 }
+
+export function benchy(callback, args, optName = "unamed")
+{
+  callback.name ??= optName; 
+  console.time(callback.name);
+  result = await callback.apply(this,args);
+  console.timeEnd(callback.name);
+  return (result)
+}
