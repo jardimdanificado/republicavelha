@@ -360,3 +360,16 @@ export function RotateAroundPivot(point,pivot,angle)
 	var rotatedZ = Math.sin(angle) * (point.x - pivot.x) + Math.cos(angle) * (point.z -pivot.z) + pivot.z;
 	return Vector3(rotatedX,point.y,rotatedZ);
 }
+
+//-----------------------------------
+//DEBUG
+//-----------------------------------
+
+export function benchy(callback, args, optName = "unamed")
+{
+  callback.name ??= optName; 
+  console.time(callback.name);
+  result = callback.apply(this,args);
+  console.timeEnd(callback.name);
+  return (result);
+}
