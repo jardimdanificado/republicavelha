@@ -376,10 +376,10 @@ export function benchy(callback, args, optName = "unamed")
 
 export async function abenchy(callback, args, optName = "unamed")
 {
-  if(optName == "unamed"&&callback.name != "")
-  optName = callback.name;
-  console.time(callback.name);
+  if(optName == "unamed"&&callback.name.length > 0)
+    optName = callback.name;
+  console.time(optName);
   var result = await callback.apply(this,args);
-  console.timeEnd(callback.name);
+  console.timeEnd(optName);
   return (result)
 }
