@@ -566,6 +566,7 @@ export async function fastRampify(terrain,slices)
 {
 	let dividedMap = await util.customSplitMatrix(terrain,slices);
 	let terrs = [];
+	console.log(terrain)
 	let dividedHeightmap = await util.customSplitMatrix(terrain.heightmap,slices);
 	for(let i = 0;i<slices**2;i++)
 	{
