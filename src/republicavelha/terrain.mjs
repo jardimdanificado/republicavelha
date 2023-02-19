@@ -647,20 +647,20 @@ export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomi
 		mapsize = util.Size(mapsize[0],mapsize[1]);
 	
 	var hmap;
-	console.time("autoHeightmap");
-	hmap = await autoHeightmap(mapsize.w,multiHorizontal);
-	console.timeEnd("autoHeightmap");
-	
-	console.time("roundHeightmap");
-	hmap = await roundHeightmap(hmap);
-	console.timeEnd("roundHeightmap");
+	hmap = await util.abenchy(autoHeightmap,[mapsize.w,multiHorizontal]);
+	hmap = await util.abenchy(roundHeightmap,[hmap]);
+	hmap = await util.abenchy(roundHeightmap,[hmap]);
 
-	console.time("heightmapModder");
-	hmap = await(util.Comrade('../terrain.mjs','heightmapModder',[hmap,smooth,randomize,subdivide]))
-		.then(resolvedValue => {
-			return resolvedValue.data;
-  	});
-	console.timeEnd("heightmapModder");
+	hmap = await util.abenchy(
+	  function()
+	  {
+	  return await(util.Comrade('../terrain.mjs','heightmapModder',[hmap,smooth,randomize,subdivide]))
+	    	.then(resolvedValue => {
+	  	  	return resolvedValue.data;
+      	});
+    },
+	  "heightmapModder",[]
+	  );
 
 	console.time("polishHeightmap");
 	hmap = polishHeightmap(hmap,mapsize.h);
