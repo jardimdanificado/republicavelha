@@ -376,8 +376,8 @@ export function benchy(callback, args, optName = "unamed")
 
 export async function abenchy(callback, args, optName = "unamed")
 {
-  if(optName != "unamed"||callback.name == "")
-    callback.name = optName; 
+  if(optName == "unamed"&&callback.name != "")
+  optName = callback.name;
   console.time(callback.name);
   var result = await callback.apply(this,args);
   console.timeEnd(callback.name);
