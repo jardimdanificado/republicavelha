@@ -547,13 +547,13 @@ export async function rampifyTerrain(terrain)
 	return terrain;
 }
 
-export async function countRampsHeightmap(terrain,heightmap)
+export async function countRampsHeightmap(terrain)
 {
 	let counter = 0;
 	for(let x = 0;x<terrain.length;x++)
 		for(let y = 0;y<terrain[0].length;y++)
 		{
-			if(terrain[x][y][heightmap[x][y]][0].subtype == "half")
+			if(terrain[x][y][terrain.heightmap[x][y]][0].subtype == "half")
 				 
 			{
 				counter++;
