@@ -7,9 +7,9 @@ async function debug()
 	console.log(Republica.Primitive.Creature('human','male'));
 	let msize = 64;
 	let mwidth = 2;
-	//mapa = await Republica.Objecto.Flat(Republica.Util.Size(msize,32),mwidth,(mwidth**3)*msize,0,0);//boring plains
+	let mquality = 1;
 	console.time((msize*mwidth) + "x" + (msize*mwidth) + " map generated in");
-	mapa = await Republica.Terrain.Default(Republica.Util.Size(msize,32),mwidth,(mwidth**3)*msize,0,0);//cool terrains
+	mapa = await Republica.Terrain.Default(Republica.Util.Size(msize,32),mwidth,(mwidth**mquality)*msize,0,0,'random',1,true);//cool terrains
 	console.timeEnd((msize*mwidth) + "x" + (msize*mwidth) + " map generated in");
 	var htmltxt = '';
 	for(let x = 0;x<mapa.length;x++)

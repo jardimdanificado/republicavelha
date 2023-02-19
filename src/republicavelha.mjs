@@ -77,13 +77,9 @@ export const Body =
 
 export const Terrain =
 {
-	Default:(mapsize,mwidth,smooth = false,randomize = false,subdivide = false,type = 'flat')=>
+	Default:(mapsize,mwidth,smooth = false,randomize = false,subdivide = false,type = 'flat',slices = 1, retry = 0)=>
 	{
-		return _Terrain.AutoTerrain(mapsize,mwidth,smooth,randomize,subdivide,type);
-	},
-	Flat:(mapsize,mwidth,smooth = false,randomize = false,subdivide = false)=>
-	{
-		return _Terrain.altAutoTerrain(mapsize,mwidth,smooth,randomize,subdivide);
+		return _Terrain.AutoTerrain(mapsize,mwidth,smooth,randomize,subdivide,type,slices,retry);
 	}
 }
 
