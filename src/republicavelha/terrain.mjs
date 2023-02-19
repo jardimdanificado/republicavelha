@@ -610,8 +610,8 @@ export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomi
 	hmap = await util.abenchy(polishHeightmap,[hmap,mapsize.h]);
 	
 	var terr = [];
-	hmap = await util.abenchy(fastTerrain,[hmap,mapsize.h,postslices]);
-	hmap = await util.abenchy(fastRampify,[terr,mapsize.h,postslices]);
+	terr = await util.abenchy(fastTerrain,[hmap,mapsize.h,postslices]);
+	terr = await util.abenchy(fastRampify,[terr,mapsize.h,postslices]);
 
 	var rampcount = await countRampsHeightmap(terr,hmap);
 	console.log("ramp count:"+ rampcount );
