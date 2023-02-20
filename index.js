@@ -4,10 +4,10 @@ async function debug()
 {
 	Republica = await import("./src/republicavelha.mjs");
 	console.log(Republica)
-	console.log(Republica.Primitive.Creature('human','male'));
+	//console.log(Republica.Primitive.Creature('human','male'));
 	let msize = 64;
 	let mwidth = 2;
-	let mquality = 4;
+	let mquality = 1;
 	console.time((msize*mwidth) + "x" + (msize*mwidth) + " map generated in");
 	mapa = await Republica.Terrain.Default(Republica.Util.Size(msize,32),mwidth,(mwidth**mquality)*msize,0,0,1,true);//cool terrains
 	console.timeEnd((msize*mwidth) + "x" + (msize*mwidth) + " map generated in");

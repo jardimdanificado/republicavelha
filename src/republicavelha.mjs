@@ -35,45 +35,7 @@ export const Modificator =
 	}
 }
 
-export const Body = 
-{
-	human:
-	{
-		_both:
-		{
-			eye:Array(2).fill(Modificator.Limb('viewer')),
-			hand:Array(2).fill(Modificator.Limb('grabber')),
-			feet:Array(2).fill(Modificator.Limb('walker')),
-			finger:Array(10).fill(Modificator.Limb('grabber',1)).concat(Array(10).fill(Modificator.Limb('walker',1))),
-			nail:Array(10).fill(Modificator.Limb('grabber',1)).concat(Array(10).fill(Modificator.Limb('walker',1))),
-			arm:Array(2).fill(Modificator.Limb('grabber')),
-			leg:Array(2).fill(Modificator.Limb('walker')),
-			ear:Array(2).fill(Modificator.Limb('listener')),
-			mouth:Modificator.Limb('eater'),
-			teeth:Array(32).fill(Modificator.Limb('eater',1)),
-			nose:Modificator.Limb('smeller,breather','10,2'),
-			lung:Array(2).fill(Modificator.Limb('breather',8)),
-			neck:Modificator.Limb('all',Infinity),
-			head:Modificator.Limb('all',Infinity),
-			brain:Modificator.Limb('thinker'),
-			torso:Modificator.Limb('all',Infinity),
-			anus:Modificator.Limb('shitter'),
-		},
-		_male:
-		{
-			penis:Modificator.Limb('breeder,pisser'),
-			testicule:Array(2).fill(Modificator.Limb('breeder')),	
-		},
-		_female:
-		{
-			vagina:Modificator.Limb('breeder,pisser'),
-			ovary:Array(2).fill(Modificator.Limb('breeder')),	
-		},
-		male:function(){return{...this._both,...this._male}},
-		female:function(){return{...this._both,...this._female}},
-	}
 
-}
 
 export const Terrain =
 {
