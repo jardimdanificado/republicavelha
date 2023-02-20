@@ -547,13 +547,13 @@ export async function rampifyTerrain(terrain)
 	return terrain;
 }
 
-export async function countRampsHeightmap(terrain,heightmap)
+export async function countRamps(terrain)
 {
 	let counter = 0;
 	for(let x = 0;x<terrain.length;x++)
 		for(let y = 0;y<terrain[0].length;y++)
 		{
-			if(terrain[x][y][heightmap[x][y]][0].subtype == "half")
+			if(terrain[x][y][terrain.heightmap[x][y]][0].subtype == "half")
 				 
 			{
 				counter++;
@@ -577,8 +577,10 @@ export async function fastRampify(terrain,slices)
 				.then(async (results) => 
 					{
 						results = results.map((val) => val.data);
-						let rst = await util.autoOrganizeArray(results)
-						return (await util.expandMatrix(rst));
+						results = await util.autoOrganizeArray(results)
+						results = await util.expandMatrix(results)
+						results.heightmap = terrain.heightmap;
+						return (results);
 					})
 			)
 }
@@ -614,7 +616,7 @@ export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomi
 	terr = await util.abenchy(fastTerrain,[hmap,mapsize.h,postslices]);
 	terr = await util.abenchy(fastRampify,[terr,postslices]);
 
-	var rampcount = await countRampsHeightmap(terr,hmap);
+	var rampcount = await countRamps(terr);
 	console.log("ramp count:"+ rampcount );
 	if(retry>=1&&rampcount>((mapsize.w*multiHorizontal)**2)/4)
 	{
