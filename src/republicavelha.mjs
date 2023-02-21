@@ -8,17 +8,6 @@ export const Modificator =
 		//solid(kg),liquid(liter),gas(m³),writing(characters)
 		return{type:Util.defsto(type,'solid'),capacity:Util.defsto(capacity,1),amount:Util.defsto(amount,1)}
 	},
-	Limb:function(type,importance,condition)
-	{
-		return(
-			{
-				type:Util.defsto(type,'breeder'),//all,viewer,breeder,eater,grabber,speaker,listener,smeller,breather,thinker,pisser,shitter,walker,other
-				importance:Util.defsto(importance,10),//0 = NO IMPORTANCE, 10 = VERY IMPORTANT, INFINITY = ESSENTIAL
-				quality:100,
-				condition:Util.defsto(condition,100)
-			}
-		);
-	},
 	Modificator: function(type,subtype,status,quality,condition,func)
 	{
 		return(

@@ -1,5 +1,6 @@
 .config
 .git
+.vscode
 .replit
 replit.nix
 .upm
