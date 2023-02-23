@@ -1,4 +1,4 @@
-export const Util = await import("./republicavelha/essential.mjs");
+export const Util = await import("./republicavelha/util.mjs");
 import * as _Terrain from "./republicavelha/terrain.mjs"
 
 export const Modificator = 

@@ -18,6 +18,9 @@ export const Body =
 			lung:Array(2).fill(Limb('breather',8)),
 			neck:Limb('all',Infinity),
 			head:Limb('all',Infinity),
+			stomach:Limb('food processor, food storage','2,10'),
+			intestine:Limb('food processor, shit storage','8,10'),
+			figado:Limb("energy storage",100),
 			brain:Limb('thinker'),
 			torso:Limb('all',Infinity),
 			anus:Limb('shitter'),
@@ -37,14 +40,14 @@ export const Body =
 	}
 }
 
-function Limb(type,importance,condition)
+function Limb(type = 'breeder',importance = 10,condition = 100)
 {
 	return(
 		{
-			type:Util.defsto(type,'breeder'),//all,viewer,breeder,eater,grabber,speaker,listener,smeller,breather,thinker,pisser,shitter,walker,other
-			importance:Util.defsto(importance,10),//0 = NO IMPORTANCE, 10 = VERY IMPORTANT, INFINITY = ESSENTIAL
+			type:type,//all,viewer,breeder,eater,grabber,speaker,listener,smeller,breather,thinker,pisser,shitter,walker,other
+			importance:importance,//0 = NO IMPORTANCE, 10 = VERY IMPORTANT, INFINITY = ESSENTIAL
 			quality:100,
-			condition:Util.defsto(condition,100)
+			condition:condition
 		}
 	);
 }
@@ -58,7 +61,7 @@ function Tought(type,intensity,content)
 	}
 }
 
-function Primitive(specime,gender,birth,position)
+function Creature(specime,gender,birth,position)
 {
 	return(
 		{
@@ -70,4 +73,9 @@ function Primitive(specime,gender,birth,position)
 			
 		}
 	);
+}
+
+function determinateCreature(creature) 
+{
+	
 }
