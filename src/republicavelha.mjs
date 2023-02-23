@@ -24,8 +24,6 @@ export const Modificator =
 	}
 }
 
-
-
 export const Terrain =
 {
 	Default:(mapsize,mwidth,smooth = false,randomize = false,subdivide = false,slices = 1, retry = 0)=>
