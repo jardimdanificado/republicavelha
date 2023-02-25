@@ -20,6 +20,7 @@ export class Block extends Generic
 	  super('block', status, birth, position, quality, condition);
 	  this.material = material; //earth,wood,rock
 	  this.amount = amount;
+      this.velocityZ = 0;
 	}
 }
  

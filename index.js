@@ -59,9 +59,9 @@ async function debug(msize,mwidth,mquality)
 		console.clear();
 		process.stdout.write(htmltxt);
 	}
-	mundo.loop.start('interval');
+	mundo.loop.start('raf');
 	for(let x = 0;x<mundo.map.heightmap.length;x++)
-		for(let y = 0;y<mundo.map.heightmap.length;y++)
-			mundo.plant.spawn ('seed', 'grass', 'breeding', {x:x,y:y,z:mundo.map.heightmap[x][y]}, 100, 100);
+		for(let y = 0;y<mundo.map.heightmap[0].length;y++)
+			mundo.plant.spawn ('seed', 'grass', 'breeding', {x:x,y:y,z:mundo.map.block[0][0].length-1}, 100, 100);
 };
 debug(64,2,1);

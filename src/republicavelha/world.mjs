@@ -135,7 +135,10 @@ export function frame(world)
         world.plant = world.plant.map((seed)=>
             {
                 if(seed.type == 'seed')
-                    if(world.time%60==0)
+                {
+                    if(seed.position.z > 1)
+                        seed.position.z -= 1;
+                    if(world.time%60==0&&typeof world.map.block[seed.position.x][seed.position.y][seed.position.z-1] !== 'undefined')
                         if(world.map.block[seed.position.x][seed.position.y][seed.position.z-1][0].material == 'earth')
                         {
                             seed.breed++;
@@ -145,6 +148,7 @@ export function frame(world)
                                 return(new Plant(seed.specie,seed.status,seed.birth,seed.position,seed.quality,100));
                             }
                         }
+                }
                 return(seed);
             }
         )
