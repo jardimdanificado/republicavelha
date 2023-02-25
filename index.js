@@ -4,13 +4,13 @@ var mapa, Republica, htmltxt;//declared outside debug function so we can console
 async function debug()
 {
 	Republica = await import("./src/republicavelha.mjs");
-	console.log(Republica)
-	//console.log(Republica.Primitive.Creature('human','male'));
+	console.log(Republica);
+	console.log(Republica.Primitive.Creature('human','male'));
 	let msize = 64;
 	let mwidth = 2;
 	let mquality = 1;
 	console.time((msize*mwidth) + "x" + (msize*mwidth) + " map generated in");
-	mapa = await Republica.Map.Generate(Republica.Util.Size(msize,32),mwidth,(mwidth**mquality)*msize,0,0,1,true);//cool terrains
+	mapa = await Republica.World.Map(Republica.Util.Size(msize,32),mwidth,(mwidth**mquality)*msize,0,0,1,true);
 	mapa = mapa.block;
 	console.timeEnd((msize*mwidth) + "x" + (msize*mwidth) + " map generated in");
 	var htmltxt = '';

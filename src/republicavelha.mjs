@@ -1,6 +1,6 @@
 export const Util = await import("./republicavelha/util.mjs");
-import * as _Terrain from "./republicavelha/terrain.mjs"
-import * as _Map from "./republicavelha/map.mjs"
+import * as _World from "./republicavelha/world.mjs"
+import * as _Creature from "./republicavelha/creature.mjs"
 
 export const Modificator = 
 {
@@ -22,14 +22,6 @@ export const Modificator =
 				func:Util.defsto(func,[])
 			}
 		);
-	}
-}
-
-export const Map =
-{
-	Generate:(mapsize,mwidth,smooth = false,randomize = false,subdivide = false,slices = 1, retry = 0)=>
-	{
-		return _Map.genMap(mapsize,mwidth,smooth,randomize,subdivide,slices,retry);
 	}
 }
 
@@ -56,7 +48,7 @@ export const Primitive =
 				...this.Generic('creature','idle',birth,position),
 				specime:specime,//human
 				gender:gender,
-				body:Body[specime][gender]()
+				body:_Creature.Body[specime][gender]()
 			}
 		);
 	},
@@ -72,15 +64,9 @@ export const Primitive =
 	}
 }
 
-export const World = function()
+export const World =
 {
-
-	return(	
-		{
-			time:0,
-			creatures:[],
-		}
-	)
+	Map:_World.Map,
 }
 
 //INTERPRETATION
