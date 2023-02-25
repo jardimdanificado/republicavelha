@@ -40,7 +40,7 @@ export const Body =
 	}
 }
 
-function Limb(type = 'breeder',importance = 10,condition = 100)
+export function Limb(type = 'breeder',importance = 10,condition = 100)
 {
 	return(
 		{
@@ -52,7 +52,7 @@ function Limb(type = 'breeder',importance = 10,condition = 100)
 	);
 }
 
-function Tought(type,intensity,content) 
+export function Tought(type,intensity,content) 
 {
 	return{
 		type:type,
@@ -61,14 +61,14 @@ function Tought(type,intensity,content)
 	}
 }
 
-function Creature(specime,gender,birth,position)
+export function Creature(specie,gender,birth,position)
 {
 	return(
 		{
 			...this.Generic('creature','idle',birth,position),
-			specime:specime,//human
+			specie:specie,//human
 			gender:gender,
-			body:Body[specime][gender](),
+			body:Body[specie][gender](),
 			thought:[],
 			
 		}

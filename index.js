@@ -1,17 +1,14 @@
 "use strict";
-var mapa, Republica, htmltxt;//declared outside debug function so we can console.log it globally
+var mundo, mapa, Republica, htmltxt;//declared outside debug function so we can console.log it globally
 
-async function debug()
+async function debug(msize,mwidth,mquality)
 {
 	Republica = await import("./src/republicavelha.mjs");
-	console.log(Republica)
-	//console.log(Republica.Primitive.Creature('human','male'));
-	let msize = 64;
-	let mwidth = 2;
-	let mquality = 1;
+	console.log(Republica);
+	console.log(new Republica.Type.Creature('human','male'));
 	console.time((msize*mwidth) + "x" + (msize*mwidth) + " map generated in");
-	mapa = await Republica.Map.Generate(Republica.Util.Size(msize,32),mwidth,(mwidth**mquality)*msize,0,0,1,true);//cool terrains
-	mapa = mapa.block;
+	mundo = await Republica.World.Create(Republica.Util.Size(msize,32),mwidth,(mwidth**mquality)*msize,0,0,1,true);
+	mapa = mundo.map.block;
 	console.timeEnd((msize*mwidth) + "x" + (msize*mwidth) + " map generated in");
 	var htmltxt = '';
 	for(let x = 0;x<mapa.length;x++)
@@ -62,5 +59,9 @@ async function debug()
 		console.clear();
 		process.stdout.write(htmltxt);
 	}
+	mundo.loop.start('raf');
+	for(let x = 0;x<mundo.map.heightmap.length;x++)
+		for(let y = 0;y<mundo.map.heightmap[0].length;y++)
+			mundo.plant.spawn ('seed', 'grass', 'breeding', {x:x,y:y,z:mundo.map.block[0][0].length-1}, 100, 100);
 };
-debug();
+debug(64,2,1);
