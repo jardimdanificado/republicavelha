@@ -1,23 +1,7 @@
 import * as Util from "./util.mjs";
 import { AutoTerrain } from "./terrain.mjs";
-import { Plant, Seed } from "./types.mjs";
+import { Creature, Plant, Seed } from "./types.mjs";
 import * as Plants from "./plants.mjs";
-
-export async function Map(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices ,retry)
-{
-    var block = await AutoTerrain(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices ,retry);
-    var temperature = Util.create3DArray(block.length,block[0].length,block[0][0].length,29);
-    var creature = Util.create3DArray(block.length,block[0].length,block[0][0].length,[]);
-    var plant = Util.create3DArray(block.length,block[0].length,block[0][0].length,[]);
-    var item = Util.create3DArray(block.length,block[0].length,block[0][0].length,[]);
-    return {
-      block,
-      temperature,
-      creature,
-      plant,
-      item
-    };
-}
 
 function getHourOfDay(totalSeconds) 
 {
@@ -47,50 +31,19 @@ function getSunIntensity(minHour, maxHour, seconds)
     return intensity;
 }
 
-//INTERPRETATION
-export function frame(world)
+export async function Map(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices ,retry)
 {
-	world.time++;
-}
-
-export function startInterval(world)
-{
-    if(world.loop.id != null)
-    {
-        if(world.loop.type == 'raf')
-        {
-            cancelAnimationFrame(world.loop.id);
-            world.loop.id = null;
-            world.loop.type = null;
-        }
-        else if (world.loop.type == 'interval')
-        {
-            clearInterval(world.loop.id);
-            world.loop.id = null;
-            world.loop.type = null;
-        }
-    }
-    world.loop.id = Util.repeatWithInterval(Republica.World.frame,[mundo],4);
-    world.loop.type = 'interval';
-}
-
-export function startAnimationFrame(world)
-{
-    if(world.loop.id != null)
-    {
-        if(world.loop.type == 'raf')
-        {
-            cancelAnimationFrame(world.loop.id);
-            world.loop.id = null;
-        }
-        else if (world.loop.type == 'interval')
-        {
-            clearInterval(world.loop.id);
-            world.loop.id = null;
-        }
-    }
-    world.loop.type = 'raf';
-    world.loop.id = Util.repeatWithAnimationFrame(Republica.World.frame,[mundo]);
+    var block = await AutoTerrain(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices ,retry);
+    var heightmap = block.heightmap;
+    delete block.heightmap;
+    var temperature = Util.create3DArray(block.length,block[0].length,block[0][0].length,29);
+    var plant = Util.create3DArray(block.length,block[0].length,block[0][0].length,[]);
+    return {
+      block,
+      heightmap,
+      temperature,
+      plant,
+    };
 }
 
 export const Loop = 
@@ -152,6 +105,52 @@ export const Loop =
     }
 };
 
+export const Life = 
+{
+    Spawn:
+    {
+        Seed:(world,specie = 'cannabis', status = 'idle', position = {x:0,y:0,z:0}, quality = 100, condition = 100, decayRate = 2592000/*(30days)*/)=>
+        {
+            world.plant.push(new Seed(specie, status, world.time, position, quality, condition, decayRate));
+        },
+        Plant:(world,specie = 'cannabis', status = 'idle', position = {x:0,y:0,z:0}, quality = 100, condition = 100)=>
+        {
+            let newobject = new Plant(specie, status, world.time, position, quality, condition, decayRate);
+            world.plant.push(newobject);
+            world.map.plant[position.x][position.y][position.z].push(newobject);
+        },
+        Creature:(world,specie = 'human', gender = 'female', status = 'idle', position = {x:0,y:0,z:0}, quality = 100, condition = 100)=>
+        {
+            world.creature.push(new Creature(specie,gender,status,world.time,position,quality,condition))
+        }
+    }
+}
+
+//INTERPRETATION
+export function frame(world)
+{
+	world.time++;
+    if(world.plant.length>0)
+    {
+        world.plant = world.plant.map((seed)=>
+            {
+                if(seed.type == 'seed')
+                    if(world.time%60==0)
+                        if(world.map.block[seed.position.x][seed.position.y][seed.position.z-1][0].material == 'earth')
+                        {
+                            seed.breed++;
+                            if(seed.breed>=40)
+                            {
+                                let temp = seed.birth;
+                                return(new Plant(seed.specie,seed.status,seed.birth,seed.position,seed.quality,100));
+                            }
+                        }
+                return(seed);
+            }
+        )
+    }
+}
+
 export async function Create(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices ,retry)
 {
     var result = 
@@ -163,8 +162,11 @@ export async function Create(mapsize,multiHorizontal,smooth,randomize,subdivide,
         },//types: raf(requireAnimationFrame), interval(setInterval)
         time:0,
         map:await Map(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices ,retry),
-        list:{creature:[],plant:[],item:[]}
+        creature:[],
+        plant:[],
+        item:[],
     };
+    //LOOP FUNCTIONS
     result.loop.start = (type)=>
     {
         Loop.start(result,type);
@@ -176,6 +178,14 @@ export async function Create(mapsize,multiHorizontal,smooth,randomize,subdivide,
     result.loop.switch = (type)=>
     {
         Loop.switch(result,type);
+    }
+    //SPAWN FUNCTIONS
+    result.plant.spawn = (type = 'seed', specie, status, position, quality, condition)=>
+    {
+        if(type == 'seed')
+            Life.Spawn.Seed(result,specie, status, position, quality, condition);
+        else if(type == 'plant')
+            Life.Spawn.Plant(result,specie, status, position, quality, condition);
     }
     return(result)
 }

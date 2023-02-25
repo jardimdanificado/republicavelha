@@ -1,12 +1,5 @@
 "use strict";
 var mundo, mapa, Republica, htmltxt;//declared outside debug function so we can console.log it globally
-var rAFLoopID = 0;
-var exit = false;
-
-function Exit()
-{
-	exit = true;
-}
 
 async function debug(msize,mwidth,mquality)
 {
@@ -67,5 +60,8 @@ async function debug(msize,mwidth,mquality)
 		process.stdout.write(htmltxt);
 	}
 	mundo.loop.start('interval');
+	for(let x = 0;x<mundo.map.heightmap.length;x++)
+		for(let y = 0;y<mundo.map.heightmap.length;y++)
+			mundo.plant.spawn ('seed', 'grass', 'breeding', {x:x,y:y,z:mundo.map.heightmap[x][y]}, 100, 100);
 };
 debug(64,2,1);
