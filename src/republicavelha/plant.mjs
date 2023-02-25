@@ -3,240 +3,372 @@ import { Generic } from '../republicavelha.mjs'
 
 export const species =
 {
-    grass:
-    {
-        type: 'grass',
-        fruit: 'none',
+    grass: {
+        type: 'herb',
+        fruit: null,
         size:
         {
-            min: 0, // centimeters
-            max: 10 // centimeters
+            min: 5, // centimeters
+            max: 50 // centimeters
         },
-        wood: 'none',
-        leaf: 'grass',
-        flower: 'none',
-        seed: 'nature',
+        wood: null,
+        leaf:
+        {
+            name: 'grass leaf',
+            min: 50, // leaves per plant
+            max: 500 // leaves per plant
+        },
+        flower:
+        {
+            name: 'grass flower',
+            min: 0, // flowers per plant
+            max: 0 // flowers per plant
+        },
+        seed:
+        {
+            name: 'grass seed',
+            min: 100, // seeds per plant
+            max: 1000 // seeds per plant
+        },
         place: 'outdoor',
         time:
         {
-            maturing: { min: 604800, max: 1209600 }, // 1-2 weeks
-            lifespan: { min: 4838400, max: 7257600 } // 8-12 weeks
+            maturing:
+            {
+                min: 2592000, // 1 month
+                max: 6048000 // 2 months
+            },
+            lifespan:
+            {
+                min: 60480000, // 2 years
+                max: 120960000 // 4 years
+            }
         }
     },
     cannabis:
     {
-        type: 'plant',
-        fruit: 'none',
+        type: 'herb',
+        fruit: null,
         size:
         {
             min: 60, // centimeters
-            max: 200 // centimeters
+            max: 300 // centimeters
         },
         wood: 'hemp',
-        leaf: 'cannabis leaf',
-        flower: 'marijuana',
-        seed: 'cannabis seed',
+        leaf:
+        {
+            name: 'cannabis leaf',
+            min: 50, // leaves per plant
+            max: 300 // leaves per plant
+        },
+        flower:
+        {
+            name: 'cannabis flower',
+            min: 10, // flowers per plant
+            max: 100 // flowers per plant
+        },
+        seed:
+        {
+            name: 'cannabis seed',
+            min: 10, // seeds per plant
+            max: 100 // seeds per plant
+        },
         place: 'indoor',
         time:
         {
-            maturing: { min: 604800, max: 1209600 }, // 1-2 weeks
-            lifespan: { min: 4838400, max: 7257600 } // 8-12 weeks
+            maturing:
+            {
+                min: 4838400, // 8 weeks
+                max: 7257600 // 12 weeks
+            },
+            lifespan:
+            {
+                min: 48384000, // 14 months
+                max: 72576000 // 24 months
+            }
         }
     },
-    tamarind:
-    {
-        type: 'tree',
-        fruit: 'tamarind',
-        size: { min: 1500, max: 3000 },
-        wood: 'tamarind wood',
-        leaf: 'tamarind leaf',
-        flower: 'tamarind flower',
-        seed: 'in fruit',
-        place: 'outdoor',
-        time:
-        {
-            maturing: { min: 6307200, max: 12614400 }, // 2-4 months
-            lifespan: { min: 630720000, max: 946080000 } // 20-30 years
-        }
-    },
-    beans:
-    {
-        type: 'legume',
-        fruit: 'none',
-        size: { min: 20, max: 50 }, // 20-50 cm
-        wood: 'none',
-        leaf: 'beans leaf',
-        seed: 'beans',
-        place: 'outdoor',
-        time:
-        {
-            maturing: { min: 604800, max: 1209600 }, // 1-2 weeks
-            lifespan: { min: 604800, max: 1209600 } // 1-2 weeks
-        }
-    },
-
-    rice:
-    {
-        type: 'legume',
-        fruit: 'none',
-        size: { min: 60, max: 100 }, // 60-100 cm
-        wood: 'none',
-        leaf: 'rice leaf',
-        seed: 'rice',
-        place: 'outdoor',
-        time:
-        {
-            maturing: { min: 604800, max: 1209600 }, // 1-2 weeks
-            lifespan: { min: 604800, max: 1209600 } // 1-2 weeks
-        }
-    },
-
-    cabbage:
-    {
-        type: 'vegetable',
-        fruit: 'none',
-        size: { min: 30, max: 40 }, // 30-40 cm
-        wood: 'none',
-        leaf: 'cabbage leaf',
-        seed: 'cabbage seed',
-        place: 'outdoor',
-        time:
-        {
-            maturing: { min: 1209600, max: 1814400 }, // 2-3 weeks
-            lifespan: { min: 4838400, max: 7257600 } // 8-12 weeks
-        }
-    },
-
-    tomato:
-    {
-        type: 'vegetable',
-        fruit: 'tomato',
-        size: { min: 60, max: 180 }, // 60-180 cm
-        wood: 'none',
-        leaf: 'tomato leaf',
-        seed: 'tomato seed',
-        place: 'outdoor',
-        time:
-        {
-            maturing: { min: 1209600, max: 2419200 }, // 2-4 weeks
-            lifespan: { min: 7257600, max: 9676800 } // 12-16 weeks
-        }
-    },
-    starFruit:
-    {
-        type: 'tree',
-        fruit: 'star fruit',
-        size: { min: 500, max: 700 }, // 500-700 cm
-        wood: 'star fruit wood',
-        leaf: 'star fruit leaf',
-        seed: 'star fruit seed',
-        place: 'outdoor',
-        time:
-        {
-            maturing: { min: 4838400, max: 7257600 }, // 8-12 weeks
-            lifespan: { min: 315360000, max: 473040000 } // 10-15 years
-        }
-    },
-    boldo:
-    {
-        type: 'tree',
-        fruit: 'small berry',
-        size: { min: 300, max: 500 }, 
-        wood: 'boldo wood',
-        leaf: 'boldo leaf',
-        flower: 'yellow',
-        seed: 'boldo seed',
-        place: 'outdoor',
-        time: 
-        {
-            maturing: { min: 6307200, max: 9460800 }, // 2-3 months
-            lifespan: { min: 631152000, max: 946728000 } // 20-30 years
-        }
-    },
-
-    orange:
-    {
-        type: 'tree',
-        fruit: 'orange',
-        size: { min: 400, max: 800 }, 
+    orange: {
+        type: 'fruit',
+        fruit: {
+            name: 'orange',
+            min: 3, // number of fruits per tree
+            max: 200 // number of fruits per tree
+        },
+        size: {
+            min: 5, // centimeters in diameter
+            max: 10 // centimeters in diameter
+        },
         wood: 'orange wood',
-        leaf: 'orange leaf',
-        flower: 'white',
-        seed: 'orange seed',
+        leaf: {
+            name: 'orange leaf',
+            min: 100, // number of leaves per tree
+            max: 1000 // number of leaves per tree
+        },
+        flower: {
+            name: 'orange flower',
+            min: 500, // number of flowers per tree
+            max: 5000 // number of flowers per tree
+        },
+        seed: {
+            name: 'orange seed',
+            min: 0, // number of seeds per fruit
+            max: 10 // number of seeds per fruit
+        },
         place: 'outdoor',
-        time: 
-        {
-            maturing: { min: 15768000, max: 23652000 }, // 6-9 months
-            lifespan: { min: 946080000, max: 1576800000 } // 30-50 years
+        time: {
+            maturing: {
+                min: 15552000, // sec from blossom to fruit
+                max: 25920000 // sec from blossom to fruit
+            },
+            lifespan: {
+                min: 315360000, // sec (10 years)
+                max: 630720000 // sec (20 years)
+            }
         }
     },
-
-    aroeira:
-    {
-        type: 'tree',
-        fruit: 'small berry',
-        size: { min: 600, max: 1000 },
-        wood: 'aroeira wood',
-        leaf: 'aroeira leaf',
-        flower: 'white',
-        seed: 'aroeira seed',
+    tamarind: {
+        type: 'fruit',
+        fruit: {
+          name: 'tamarind',
+          min: 5, // number of fruits per tree
+          max: 500 // number of fruits per tree
+        },
+        size: {
+          min: 2, // centimeters in length
+          max: 15 // centimeters in length
+        },
+        wood: 'tamarind wood',
+        leaf: {
+          name: 'tamarind leaf',
+          min: 500, // number of leaves per tree
+          max: 10000 // number of leaves per tree
+        },
+        flower: {
+          name: 'tamarind flower',
+          min: 1000, // number of flowers per tree
+          max: 20000 // number of flowers per tree
+        },
+        seed: {
+          name: 'tamarind seed',
+          min: 1, // number of seeds per fruit
+          max: 12 // number of seeds per fruit
+        },
         place: 'outdoor',
-        time: 
-        {
-            maturing: { min: 9460800, max: 15768000 }, // 3-6 months
-            lifespan: { min: 315360000, max: 630720000 } // 10-20 years
+        time: {
+          maturing: {
+            min: 15552000, // sec from blossom to fruit
+            max: 31536000 // sec from blossom to fruit
+          },
+          lifespan: {
+            min: 630720000, // days (20 years)
+            max: 946080000 // days (30 years)
+          }
         }
-    },
-
-    jackfruit:
-    {
-        type: 'tree',
-        fruit: 'jackfruit',
-        size: { min: 800, max: 2500 },
+      },
+      starfruit: {
+        type: 'fruit',
+        fruit: {
+          name: 'starfruit',
+          min: 50, // number of fruits per tree
+          max: 300 // number of fruits per tree
+        },
+        size: {
+          min: 7, // centimeters in length
+          max: 15 // centimeters in length
+        },
+        wood: 'starfruit wood',
+        leaf: {
+          name: 'starfruit leaf',
+          min: 500, // number of leaves per tree
+          max: 10000 // number of leaves per tree
+        },
+        flower: {
+          name: 'starfruit flower',
+          min: 1000, // number of flowers per tree
+          max: 20000 // number of flowers per tree
+        },
+        seed: {
+          name: 'starfruit seed',
+          min: 3, // number of seeds per fruit
+          max: 12 // number of seeds per fruit
+        },
+        place: 'outdoor',
+        time: {
+          maturing: {
+            min: 6912000, // seconds from blossom to fruit (80 days)
+            max: 10368000 // seconds from blossom to fruit (120 days)
+          },
+          lifespan: {
+            min: 1261440000, // seconds (40 years)
+            max: 1576800000 // seconds (50 years)
+          }
+        }
+      },
+      jackfruit: {
+        type: 'fruit',
+        fruit: {
+          name: 'jackfruit',
+          min: 1, // number of fruits per tree
+          max: 200 // number of fruits per tree
+        },
+        size: {
+          min: 30, // centimeters in diameter
+          max: 100 // centimeters in diameter
+        },
         wood: 'jackfruit wood',
-        leaf: 'jackfruit leaf',
-        flower: 'yellow',
-        seed: 'jackfruit seed',
+        leaf: {
+          name: 'jackfruit leaf',
+          min: 500, // number of leaves per tree
+          max: 10000 // number of leaves per tree
+        },
+        flower: {
+          name: 'jackfruit flower',
+          min: 1000, // number of flowers per tree
+          max: 20000 // number of flowers per tree
+        },
+        seed: {
+          name: 'jackfruit seed',
+          min: 50, // number of seeds per fruit
+          max: 500 // number of seeds per fruit
+        },
         place: 'outdoor',
-        time: 
-        {
-            maturing: { min: 7884000, max: 15768000 }, // 3-6 months
-            lifespan: { min: 630720000, max: 946080000 } // 20-30 years
+        time: {
+          maturing: {
+            min: 7776000, // seconds from blossom to fruit (90 days)
+            max: 10368000 // seconds from blossom to fruit (120 days)
+          },
+          lifespan: {
+            min: 788940000, // seconds (25 years)
+            max: 1261440000 // seconds (40 years)
+          }
         }
-    },
-
-    pitomba:
-    {
-        type: 'tree',
-        fruit: 'pitomba',
-        size: { min: 300, max: 600 }, 
-        wood: 'pitomba wood',
-        leaf: 'pitomba leaf',
-        flower: 'white',
-        seed: 'pitomba seed',
+      },
+      caju: {
+        type: 'fruit',
+        fruit: {
+          name: 'caju',
+          min: 1, // number of fruits per tree
+          max: 200 // number of fruits per tree
+        },
+        size: {
+          min: 5, // centimeters in length
+          max: 11 // centimeters in length
+        },
+        wood: 'caju wood',
+        leaf: {
+          name: 'caju leaf',
+          min: 200, // number of leaves per tree
+          max: 5000 // number of leaves per tree
+        },
+        flower: {
+          name: 'caju flower',
+          min: 100, // number of flowers per tree
+          max: 1000 // number of flowers per tree
+        },
+        seed: {
+          name: 'caju seed',
+          min: 1, // number of seeds per fruit
+          max: 3 // number of seeds per fruit
+        },
         place: 'outdoor',
-        time: 
-        {
-            maturing: { min: 7884000, max: 15768000 }, // 3-6 months
-            lifespan: { min: 315360000, max: 472972800 } // 10-15 years
+        time: {
+          maturing: {
+            min: 7776000, // seconds from blossom to fruit (90 days)
+            max: 10368000 // seconds from blossom to fruit (120 days)
+          },
+          lifespan: {
+            min: 788940000, // seconds (25 years)
+            max: 1261440000 // seconds (40 years)
+          }
         }
-    },
+      },
+      rice: {
+        type: 'grain',
+        fruit: null,
+        size: {
+          min: 2, // millimeters in length
+          max: 8 // millimeters in length
+        },
+        wood: null,
+        leaf: {
+          name: 'rice leaf',
+          min: 4, // number of leaves per plant
+          max: 20 // number of leaves per plant
+        },
+        flower: {
+          name: 'rice flower',
+          min: 1, // number of flowers per plant
+          max: 10 // number of flowers per plant
+        },
+        seed: {
+          name: 'rice seed',
+          min: 100, // number of seeds per plant
+          max: 500 // number of seeds per plant
+        },
+        place: 'paddy field',
+        time: {
+          maturing: {
+            min: 2592000, // seconds from seed to harvest (30 days)
+            max: 5184000 // seconds from seed to harvest (60 days)
+          },
+          lifespan: {
+            min: 10368000, // seconds (120 days)
+            max: 15552000 // seconds (180 days)
+          }
+        }
+      },
+      tomato: {
+        type: 'fruit',
+        fruit: {
+          name: 'tomato',
+          min: 1, // number of tomatoes per plant
+          max: 50 // number of tomatoes per plant
+        },
+        size: {
+          min: 2, // centimeters in diameter
+          max: 10 // centimeters in diameter
+        },
+        wood: null,
+        leaf: {
+          name: 'tomato leaf',
+          min: 10, // number of leaves per plant
+          max: 100 // number of leaves per plant
+        },
+        flower: {
+          name: 'tomato flower',
+          min: 10, // number of flowers per plant
+          max: 100 // number of flowers per plant
+        },
+        seed: {
+          name: 'tomato seed',
+          min: 10, // number of seeds per fruit
+          max: 500 // number of seeds per fruit
+        },
+        place: 'outdoor',
+        time: {
+          maturing: {
+            min: 604800, // seconds from seed to fruit (7 days)
+            max: 2419200 // seconds from seed to fruit (28 days)
+          },
+          lifespan: {
+            min: 15552000, // seconds (6 months)
+            max: 23328000 // seconds (9 months)
+          }
+        }
+      }      
 }
 
-export class plant extends Generic
-{
-    constructor(specie = 'cannabis', status = 'idle', birth = 0, position = Util.Vector3Zero(), quality = 100, condition = 100) 
-    {
+export class plant extends Generic {
+    constructor(specie = 'cannabis', status = 'idle', birth = 0, position = Util.Vector3Zero(), quality = 100, condition = 100) {
         super('plant', status, birth, position, quality, condition);
         this.specie = specie;
     }
 }
 
-export class seed extends Generic 
-{
-    constructor(specie = 'cannabis', status = 'idle', birth = 0, position = Util.Vector3Zero(), quality = 100, condition = 100, decayRate = 2592000/*(30days)*/) 
-    {
-        super('seed', status, birth, position, quality, condition,decayRate);
+export class seed extends Generic {
+    constructor(specie = 'cannabis', status = 'idle', birth = 0, position = Util.Vector3Zero(), quality = 100, condition = 100, decayRate = 2592000/*(30days)*/) {
+        super('seed', status, birth, position, quality, condition, decayRate);
         this.specie = specie;
     }
 }
