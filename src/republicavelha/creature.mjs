@@ -61,14 +61,14 @@ export function Tought(type,intensity,content)
 	}
 }
 
-export function Creature(specime,gender,birth,position)
+export function Creature(specie,gender,birth,position)
 {
 	return(
 		{
 			...this.Generic('creature','idle',birth,position),
-			specime:specime,//human
+			specie:specie,//human
 			gender:gender,
-			body:Body[specime][gender](),
+			body:Body[specie][gender](),
 			thought:[],
 			
 		}
