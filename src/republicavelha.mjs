@@ -72,29 +72,13 @@ export const Primitive =
 	}
 }
 
-export const Room = 
+export const World = function()
 {
-	Generic:function(objectos,collision,temperature)
-	{
-		return(	
-			{
-				map:
-				{
-					objecto:Util.defsto(objectos,[]),
-					collision:Util.defsto(collision,[]),
-					temperature:Util.defsto(temperature,[])
-				}
-			}
-		)
-	},
-}
-export const World = function(rooms)
-{
+
 	return(	
 		{
 			time:0,
 			creatures:[],
-			rooms:Util.defsto(rooms,[]),
 		}
 	)
 }

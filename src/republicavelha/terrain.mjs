@@ -114,7 +114,7 @@ export function Heightmap(size)
 	return (normalizeMatrix(diamondSquare(generateMatrix())));
 }
 
-export function randomizeHeightmap(hm)
+function randomizeHeightmap(hm)
 {
 	for(let x = 1 ;x < hm.length-1; x+=2)
 	{
@@ -151,7 +151,7 @@ export function randomizeHeightmap(hm)
 	return(hm);
 }
 
-export function subdivideHeightmap(hm)
+function subdivideHeightmap(hm)
 {
 	function grid(input)
 	{
@@ -224,7 +224,7 @@ export function subdivideHeightmap(hm)
 	return result;
 }
 
-export function expandHeightmap(heightmap) 
+function expandHeightmap(heightmap) 
 {
   // Create a new 2D array with 3 times the number of rows and columns
   var expandedHeightmap = new Array(heightmap.length * 3);
@@ -251,7 +251,7 @@ export function expandHeightmap(heightmap)
   return expandedHeightmap;
 }
 
-export function smoothBlock(hm,position)
+function smoothBlock(hm,position)
 {
 	let x = position.x;
 	let y = position.y;
@@ -302,7 +302,7 @@ export function smoothBlock(hm,position)
 	return(sum/count);
 }
 
-export function smoothHeightmap(hm,corner)
+function smoothHeightmap(hm,corner)
 {
 	corner ??= util.randi(0,3);
 	switch(corner)
@@ -357,7 +357,7 @@ export function roundHeightmap(hm)
 	return hm;
 }
 
-export function polishHeightmap(heightmap,fixedHeight)//same as smooth but different
+function polishHeightmap(heightmap,fixedHeight)//same as smooth but different
 {
 	// Define a function to be applied to each element of the matrix
 	const yCallback = function(num) 
@@ -375,7 +375,7 @@ export function polishHeightmap(heightmap,fixedHeight)//same as smooth but diffe
 	return(heightmap.map(xCallback));
 }
 
-export function autoSmoothHeightmap(hm,times)//deprecated
+function autoSmoothHeightmap(hm,times)//deprecated
 {
 	while(times>0)
 	{	
@@ -385,7 +385,7 @@ export function autoSmoothHeightmap(hm,times)//deprecated
 	return(hm);
 }
 
-export async function autoRoundHeightmap(hm,divider = 1)//deprecated
+async function autoRoundHeightmap(hm,divider = 1)//deprecated
 {
 	if(divider === 1)
 		return roundHeightmap(hm);
@@ -409,7 +409,7 @@ export async function autoRoundHeightmap(hm,divider = 1)//deprecated
 	}
 }
 
-export async function autoHeightmap(mapsize, multi) 
+async function autoHeightmap(mapsize, multi) 
 {
 	let promises = [];
 	for (let x = 0; x < multi; x++) 
@@ -485,7 +485,7 @@ export async function Terrain(map,fixedHeight = 128)
 	return(result);
 }
 
-export async function fastTerrain(hm,fixedHeight,slices)
+async function fastTerrain(hm,fixedHeight,slices)
 {
 	let divided = await util.customSplitMatrix(hm,slices);
 	let terrs = [];
@@ -541,46 +541,9 @@ function rampifyTerrain(terrain)
 			)	
 			{
 				terrain[x][y][terrain.heightmap[x][y]-1][0].amount = 50;
+				terrain[x][y][terrain.heightmap[x][y]-1].push(Republica.Primitive.Block('air',50));
 			}
 	return terrain;
-}
-
-export async function countRamps(terrain)
-{
-	let counter = 0;
-	for(let x = 0;x<terrain.length;x++)
-		for(let y = 0;y<terrain[0].length;y++)
-		{
-			if(terrain[x][y][terrain.heightmap[x][y]][0].amount == 50)
-				 
-			{
-				counter++;
-			}
-		}
-	return counter;
-}
-
-export async function fastRampify(terrain,slices)
-{
-	let dividedMap = await util.customSplitMatrix(terrain,slices);
-	let terrs = [];
-	let dividedHeightmap = await util.customSplitMatrix(terrain.heightmap,slices);
-	for(let i = 0;i<slices**2;i++)
-	{
-		dividedMap[i].heightmap = dividedHeightmap[i];
-		terrs.push(util.asyncComrade("../terrain.mjs","rampifyTerrain",[dividedMap[i]]));
-	}
-	return (
-				await Promise.all(terrs)
-				.then(async (results) => 
-					{
-						results = results.map((val) => val.data);
-						results = await util.autoOrganizeArray(results)
-						results = await util.expandMatrix(results)
-						results.heightmap = terrain.heightmap;
-						return (results);
-					})
-			)
 }
 
 function checkDifference(heightmap) 
