@@ -1,5 +1,6 @@
 export const Util = await import("./republicavelha/util.mjs");
 import * as _Terrain from "./republicavelha/terrain.mjs"
+import * as _Map from "./republicavelha/map.mjs"
 
 export const Modificator = 
 {
@@ -24,29 +25,27 @@ export const Modificator =
 	}
 }
 
-
-
-export const Terrain =
+export const Map =
 {
-	Default:(mapsize,mwidth,smooth = false,randomize = false,subdivide = false,slices = 1, retry = 0)=>
+	Generate:(mapsize,mwidth,smooth = false,randomize = false,subdivide = false,slices = 1, retry = 0)=>
 	{
-		return _Terrain.AutoTerrain(mapsize,mwidth,smooth,randomize,subdivide,slices,retry);
+		return _Map.genMap(mapsize,mwidth,smooth,randomize,subdivide,slices,retry);
 	}
 }
 
 export const Primitive =
 {
-	Generic:function(type,status,birth,position,quality,condition,mods)
+	Generic:function(type = generic,status = '',birth = 0,position = Util.Vector3Zero(),quality = 100,condition = 100,mods = [])
 	{
 		return(
 			{
-				type:Util.defsto(type,'generic'),
-				status:Util.defsto(status,''),
-				mods:Util.defsto(mods,[]),
-				quality:Util.defsto(quality,100),
-				condition:Util.defsto(condition,100),
-				position:Util.defsto(position,Util.Position(Util.Vector3Zero(),Util.Vector3Zero())),
-				birth:Util.defsto(birth,0)//birth in seconds
+				type:type,
+				status:status,
+				mods:mods,
+				quality:quality,
+				condition:condition,
+				position:position,
+				birth:birth//birth in seconds
 			}
 		);
 	},
@@ -61,13 +60,13 @@ export const Primitive =
 			}
 		);
 	},
-	Block:function(material,subtype,status,birth,position,quality,condition)
+	Block:function(material,amount = 100,status = '',birth = 0,position = Util.Vector3Zero(),quality = 100,condition = 100)
 	{
 		return(
 			{
 				...this.Generic('block',status,birth,position,quality,condition),
-				material:Util.defsto(material,'earth'),//earth,wood,rock
-				subtype:Util.defsto(subtype,'empty'),//empty,full,floor,half
+				material:material,//earth,wood,rock
+				amount:amount
 			}
 		);
 	}

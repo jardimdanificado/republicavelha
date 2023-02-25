@@ -478,8 +478,8 @@ export async function Terrain(map,fixedHeight = 128)
 			//var earthb = map[x][y];
 			//var airb = fixedHeight - earthb;
 			
-			result[x][y] = Array(map[x][y]).fill([Primitive.Block('earth','full')]);
-			result[x][y] = result[x][y].concat(Array(fixedHeight - map[x][y]).fill([Primitive.Block('air','empty')]));
+			result[x][y] = Array(map[x][y]).fill([Primitive.Block('earth',100)]);
+			result[x][y] = result[x][y].concat(Array(fixedHeight - map[x][y]).fill([Primitive.Block('air',100)]));
 		}
 	}
 	return(result);
@@ -504,46 +504,44 @@ export async function fastTerrain(hm,fixedHeight,slices)
 			)
 }
 
-export async function rampifyTerrain(terrain)
+function rampifyTerrain(terrain)
 {
 	for(let x = 0;x<terrain.length;x++)
 		for(let y = 0;y<terrain[0].length;y++)
-		{
 			if(
 				(x<terrain.length-1 &&
-				 terrain[x+1][y][terrain.heightmap[x][y]][0].subtype == "full" &&
-				 terrain[x+1][y][terrain.heightmap[x][y]+1][0].subtype == "empty")||
+				terrain[x+1][y][terrain.heightmap[x][y]][0].material == "earth" &&
+				terrain[x+1][y][terrain.heightmap[x][y]+1][0].material == "air")||
 				(x>0&&
-				 terrain[x-1][y][terrain.heightmap[x][y]][0].subtype == "full" &&
-				 terrain[x-1][y][terrain.heightmap[x][y]+1][0].subtype == "empty")||
+				terrain[x-1][y][terrain.heightmap[x][y]][0].material == "earth" &&
+				terrain[x-1][y][terrain.heightmap[x][y]+1][0].material == "air")||
 				(y<terrain.length-1 &&
-				 terrain[x][y+1][terrain.heightmap[x][y]][0].subtype == "full" &&
-				 terrain[x][y+1][terrain.heightmap[x][y]+1][0].subtype == "empty")||
+				terrain[x][y+1][terrain.heightmap[x][y]][0].material == "earth" &&
+				terrain[x][y+1][terrain.heightmap[x][y]+1][0].material == "air")||
 				(y>0 &&
-				 terrain[x][y-1][terrain.heightmap[x][y]][0].subtype == "full" &&
-				 terrain[x][y-1][terrain.heightmap[x][y]+1][0].subtype == "empty") ||
+				terrain[x][y-1][terrain.heightmap[x][y]][0].material == "earth" &&
+				terrain[x][y-1][terrain.heightmap[x][y]+1][0].material == "air") ||
 				
 				(x<terrain.length-1 &&
-				 y<terrain.length-1 &&
-				 terrain[x+1][y+1][terrain.heightmap[x][y]][0].subtype == "full" && 
-				 terrain[x+1][y+1][terrain.heightmap[x][y]+1][0].subtype == "empty")||
+				y<terrain.length-1 &&
+				terrain[x+1][y+1][terrain.heightmap[x][y]][0].material == "earth" && 
+				terrain[x+1][y+1][terrain.heightmap[x][y]+1][0].material == "air")||
 				(x>0&&
-				 y<terrain.length-1 &&
-				 terrain[x-1][y+1][terrain.heightmap[x][y]][0].subtype == "full" && 
-				 terrain[x-1][y+1][terrain.heightmap[x][y]+1][0].subtype == "empty")||
+				y<terrain.length-1 &&
+				terrain[x-1][y+1][terrain.heightmap[x][y]][0].material == "earth" && 
+				terrain[x-1][y+1][terrain.heightmap[x][y]+1][0].material == "air")||
 				(x<terrain.length-1 &&
-				 y>0 &&
-				 terrain[x+1][y-1][terrain.heightmap[x][y]][0].subtype == "full" &&
-				 terrain[x+1][y-1][terrain.heightmap[x][y]+1][0].subtype == "empty")||
+				y>0 &&
+				terrain[x+1][y-1][terrain.heightmap[x][y]][0].material == "earth" &&
+				terrain[x+1][y-1][terrain.heightmap[x][y]+1][0].material == "air")||
 				(x>0 &&
-				 y>0 &&
-				 terrain[x-1][y-1][terrain.heightmap[x][y]][0].subtype == "full" &&
-				 terrain[x-1][y-1][terrain.heightmap[x][y]+1][0].subtype == "empty")
+				y>0 &&
+				terrain[x-1][y-1][terrain.heightmap[x][y]][0].material == "earth" &&
+				terrain[x-1][y-1][terrain.heightmap[x][y]+1][0].material == "air")
 			)	
 			{
-				terrain[x][y][terrain.heightmap[x][y]][0].subtype = 'half';
+				terrain[x][y][terrain.heightmap[x][y]-1][0].amount = 50;
 			}
-		}
 	return terrain;
 }
 
@@ -553,7 +551,7 @@ export async function countRamps(terrain)
 	for(let x = 0;x<terrain.length;x++)
 		for(let y = 0;y<terrain[0].length;y++)
 		{
-			if(terrain[x][y][terrain.heightmap[x][y]][0].subtype == "half")
+			if(terrain[x][y][terrain.heightmap[x][y]][0].amount == 50)
 				 
 			{
 				counter++;
@@ -585,6 +583,53 @@ export async function fastRampify(terrain,slices)
 			)
 }
 
+function checkDifference(heightmap) 
+{
+	let counter = 0;
+  
+	for (let i = 0; i < heightmap.length; i++) 
+	{
+	  for (let j = 0; j < heightmap[i].length; j++) 
+	  {
+		const currentValue = heightmap[i][j];
+		let hasNeighbor = false;
+  
+		// Check neighbors
+		for (let x = -1; x <= 1; x++) 
+		{
+		  for (let y = -1; y <= 1; y++) 
+		  {
+			if (x === 0 && y === 0) continue;
+  
+			const neighborI = i + x;
+			const neighborJ = j + y;
+			if (
+			  neighborI >= 0 &&
+			  neighborI < heightmap.length &&
+			  neighborJ >= 0 &&
+			  neighborJ < heightmap[i].length
+			) 
+			{
+			  const neighborValue = heightmap[neighborI][neighborJ];
+			  if (Math.abs(currentValue - neighborValue) === 1) 
+			  {
+				hasNeighbor = true;
+				break;
+			  }
+			}
+		  }
+		  if (hasNeighbor) break;
+		}
+  
+		if (hasNeighbor) 
+		{
+		  counter++;
+		}
+	  }
+	}
+	return counter;
+}
+
 export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomize = false,subdivide = false,postslices = 1,retry = 0)
 {
 	if(typeof mapsize == 'undefined')
@@ -612,19 +657,17 @@ export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomi
 
 	hmap = await util.abenchy(polishHeightmap,[hmap,mapsize.h]);
 	
-	var terr = [];
-	terr = await util.abenchy(fastTerrain,[hmap,mapsize.h,postslices]);
-	terr = await util.abenchy(fastRampify,[terr,postslices]);
-
-	var rampcount = await countRamps(terr);
-	console.log("ramp count:"+ rampcount );
-	if(retry>=1&&rampcount>((mapsize.w*multiHorizontal)**2)/4)
+	if(retry>=1&&checkDifference(hmap)>((mapsize.w*multiHorizontal)**2)/2)
 	{
 		console.log("retry number " + retry);
 		retry++;
 		return(AutoTerrain(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices,retry));
 	}
 	if(retry >= 2)
-		console.log('map generated in ' + retry + ' retries.')
-	return(terr);
+		console.log('heightmap generated in ' + retry + ' retries.')
+
+	var terrain = [];
+	terrain = await util.abenchy(fastTerrain,[hmap,mapsize.h,postslices]);
+	terrain = await util.abenchy(rampifyTerrain,[terrain]);
+	return(terrain);
 }

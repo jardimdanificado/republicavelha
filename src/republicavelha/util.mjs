@@ -165,6 +165,43 @@ export async function divideMatrix(largeMatrix, slices) {
     return dividedMatrix;
 }
 
+export function create3DArray(dimX, dimY, dimZ, input) 
+{
+    const arr3D = [];
+    
+    for (let i = 0; i < dimX; i++) 
+    {
+		const arr2D = [];
+		for (let j = 0; j < dimY; j++) 
+		{
+			const arr1D = [];
+			for (let k = 0; k < dimZ; k++) 
+			{
+				if (typeof input === 'function') 
+				{
+					arr1D.push(input());
+				} 
+				else if (typeof input === 'object' || typeof input === 'number' || typeof input === 'string') 
+				{
+					arr1D.push(input);
+				} 
+				else if (typeof input === 'function' && input.prototype.constructor) 
+				{
+					arr1D.push(new input());
+				} 
+				else 
+				{
+					arr1D.push({});
+				}
+			}
+			arr2D.push(arr1D);
+		}
+      arr3D.push(arr2D);
+    }
+    
+    return arr3D;
+}
+
 export function workerPromise(worker)
 {
 	return(new Promise((resolve) => {worker.onmessage = resolve;}))
