@@ -504,54 +504,43 @@ export async function fastTerrain(hm,fixedHeight,slices)
 			)
 }
 
-function rampCheck(terrain,x,y,z)
-{
-	if(
-		(x<terrain.length-1 &&
-		 terrain[x+1][y][terrain.heightmap[x][y]][0].material == "earth" &&
-		 terrain[x+1][y][terrain.heightmap[x][y]+1][0].material == "air")||
-		(x>0&&
-		 terrain[x-1][y][terrain.heightmap[x][y]][0].material == "earth" &&
-		 terrain[x-1][y][terrain.heightmap[x][y]+1][0].material == "air")||
-		(y<terrain.length-1 &&
-		 terrain[x][y+1][terrain.heightmap[x][y]][0].material == "earth" &&
-		 terrain[x][y+1][terrain.heightmap[x][y]+1][0].material == "air")||
-		(y>0 &&
-		 terrain[x][y-1][terrain.heightmap[x][y]][0].material == "earth" &&
-		 terrain[x][y-1][terrain.heightmap[x][y]+1][0].material == "air") ||
-		
-		(x<terrain.length-1 &&
-		 y<terrain.length-1 &&
-		 terrain[x+1][y+1][terrain.heightmap[x][y]][0].material == "earth" && 
-		 terrain[x+1][y+1][terrain.heightmap[x][y]+1][0].material == "air")||
-		(x>0&&
-		 y<terrain.length-1 &&
-		 terrain[x-1][y+1][terrain.heightmap[x][y]][0].material == "earth" && 
-		 terrain[x-1][y+1][terrain.heightmap[x][y]+1][0].material == "air")||
-		(x<terrain.length-1 &&
-		 y>0 &&
-		 terrain[x+1][y-1][terrain.heightmap[x][y]][0].material == "earth" &&
-		 terrain[x+1][y-1][terrain.heightmap[x][y]+1][0].material == "air")||
-		(x>0 &&
-		 y>0 &&
-		 terrain[x-1][y-1][terrain.heightmap[x][y]][0].material == "earth" &&
-		 terrain[x-1][y-1][terrain.heightmap[x][y]+1][0].material == "air")
-	)	
-	{
-		terrain[x][y][z][0].amount = 50;
-		return true;
-	}
-	return false;
-}
-
-export async function rampifyTerrain(terrain)
+function rampifyTerrain(terrain)
 {
 	for(let x = 0;x<terrain.length;x++)
 		for(let y = 0;y<terrain[0].length;y++)
-			for(let z = 0;z<terrain[0][0].length-1;z++)
+			if(
+				(x<terrain.length-1 &&
+				terrain[x+1][y][terrain.heightmap[x][y]][0].material == "earth" &&
+				terrain[x+1][y][terrain.heightmap[x][y]+1][0].material == "air")||
+				(x>0&&
+				terrain[x-1][y][terrain.heightmap[x][y]][0].material == "earth" &&
+				terrain[x-1][y][terrain.heightmap[x][y]+1][0].material == "air")||
+				(y<terrain.length-1 &&
+				terrain[x][y+1][terrain.heightmap[x][y]][0].material == "earth" &&
+				terrain[x][y+1][terrain.heightmap[x][y]+1][0].material == "air")||
+				(y>0 &&
+				terrain[x][y-1][terrain.heightmap[x][y]][0].material == "earth" &&
+				terrain[x][y-1][terrain.heightmap[x][y]+1][0].material == "air") ||
+				
+				(x<terrain.length-1 &&
+				y<terrain.length-1 &&
+				terrain[x+1][y+1][terrain.heightmap[x][y]][0].material == "earth" && 
+				terrain[x+1][y+1][terrain.heightmap[x][y]+1][0].material == "air")||
+				(x>0&&
+				y<terrain.length-1 &&
+				terrain[x-1][y+1][terrain.heightmap[x][y]][0].material == "earth" && 
+				terrain[x-1][y+1][terrain.heightmap[x][y]+1][0].material == "air")||
+				(x<terrain.length-1 &&
+				y>0 &&
+				terrain[x+1][y-1][terrain.heightmap[x][y]][0].material == "earth" &&
+				terrain[x+1][y-1][terrain.heightmap[x][y]+1][0].material == "air")||
+				(x>0 &&
+				y>0 &&
+				terrain[x-1][y-1][terrain.heightmap[x][y]][0].material == "earth" &&
+				terrain[x-1][y-1][terrain.heightmap[x][y]+1][0].material == "air")
+			)	
 			{
-				if(rampCheck(terrain,x,y,z))
-					break;
+				terrain[x][y][terrain.heightmap[x][y]-1][0].amount = 50;
 			}
 	return terrain;
 }
@@ -679,6 +668,6 @@ export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomi
 
 	var terrain = [];
 	terrain = await util.abenchy(fastTerrain,[hmap,mapsize.h,postslices]);
-	terrain = await rampifyTerrain(terrain);
+	terrain = await util.abenchy(rampifyTerrain,[terrain]);
 	return(terrain);
 }
