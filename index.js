@@ -5,7 +5,7 @@ async function debug(msize,mwidth,mquality)
 {
 	Republica = await import("./src/republicavelha.mjs");
 	console.log(Republica);
-	console.log(Republica.Primitive.Creature('human','male'));
+	console.log(new Republica.Primitive.Creature('human','male'));
 	console.time((msize*mwidth) + "x" + (msize*mwidth) + " map generated in");
 	mundo = await Republica.World(Republica.Util.Size(msize,32),mwidth,(mwidth**mquality)*msize,0,0,1,true);
 	mapa = mundo.map.block;

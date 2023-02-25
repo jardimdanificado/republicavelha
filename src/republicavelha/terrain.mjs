@@ -228,13 +228,16 @@ function expandHeightmap(heightmap)
 {
   // Create a new 2D array with 3 times the number of rows and columns
   var expandedHeightmap = new Array(heightmap.length * 3);
-  for (var i = 0; i < expandedHeightmap.length; i++) {
+  for (var i = 0; i < expandedHeightmap.length; i++) 
+  {
     expandedHeightmap[i] = new Array(heightmap[0].length * 3);
   }
   
   // Fill the expanded array with the values from the original heightmap
-  for (var row = 0; row < heightmap.length; row++) {
-    for (var col = 0; col < heightmap[row].length; col++) {
+  for (var row = 0; row < heightmap.length; row++) 
+  {
+    for (var col = 0; col < heightmap[row].length; col++) 
+	{
       var value = heightmap[row][col];
       expandedHeightmap[row * 3][col * 3] = value;
       expandedHeightmap[row * 3 + 1][col * 3] = value;
@@ -478,8 +481,8 @@ export async function Terrain(map,fixedHeight = 128)
 			//var earthb = map[x][y];
 			//var airb = fixedHeight - earthb;
 			
-			result[x][y] = Array(map[x][y]).fill([Primitive.Block('earth',100)]);
-			result[x][y] = result[x][y].concat(Array(fixedHeight - map[x][y]).fill([Primitive.Block('air',100)]));
+			result[x][y] = Array(map[x][y]).fill([new Primitive.Block('earth',100)]);
+			result[x][y] = result[x][y].concat(Array(fixedHeight - map[x][y]).fill([new Primitive.Block('air',100)]));
 		}
 	}
 	return(result);
@@ -521,7 +524,7 @@ function rampifyTerrain(terrain)
 				(y>0 &&
 				terrain[x][y-1][terrain.heightmap[x][y]][0].material == "earth" &&
 				terrain[x][y-1][terrain.heightmap[x][y]+1][0].material == "air") ||
-				
+		
 				(x<terrain.length-1 &&
 				y<terrain.length-1 &&
 				terrain[x+1][y+1][terrain.heightmap[x][y]][0].material == "earth" && 
@@ -541,7 +544,7 @@ function rampifyTerrain(terrain)
 			)	
 			{
 				terrain[x][y][terrain.heightmap[x][y]-1][0].amount = 50;
-				terrain[x][y][terrain.heightmap[x][y]-1].push(Republica.Primitive.Block('air',50));
+				terrain[x][y][terrain.heightmap[x][y]-1].push(new Primitive.Block('air',50));
 			}
 	return terrain;
 }

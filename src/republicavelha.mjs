@@ -25,52 +25,43 @@ export const Modificator =
 	}
 }
 
-export const Primitive =
+class Generic
 {
-	Generic:function(type = generic,status = '',birth = 0,position = Util.Vector3Zero(),quality = 100,condition = 100,mods = [])
+  constructor(type = "generic",status = "",birth = 0,position = Util.Vector3Zero(),quality = 100,condition = 100,mods = []) 
+  {
+	this.type = type;
+	this.status = status;
+	this.mods = mods;
+	this.quality = quality;
+	this.condition = condition;
+	this.position = position;
+	this.birth = birth;
+  }
+}
+
+class Block extends Generic 
+{
+	constructor(material = air, amount = 100, status = '', birth = 0, position = Util.Vector3Zero(), quality = 100, condition = 100) 
 	{
-		return(
-			{
-				type:type,
-				status:status,
-				mods:mods,
-				quality:quality,
-				condition:condition,
-				position:position,
-				birth:birth//birth in seconds
-			}
-		);
-	},
-	Creature:function(specime,gender,birth,position)
+	  super('block', status, birth, position, quality, condition);
+	  this.material = material; //earth,wood,rock
+	  this.amount = amount;
+	}
+}
+ 
+class Creature extends Generic 
+{
+	constructor(specime = 'human', gender = 'female', status = '', birth = 0, position = Util.Vector3Zero(), quality = 100, condition = 100) 
 	{
-		return(
-			{
-				...this.Generic('creature','idle',birth,position),
-				specime:specime,//human
-				gender:gender,
-				body:_Creature.Body[specime][gender]()
-			}
-		);
-	},
-	Block:function(material,amount = 100,status = '',birth = 0,position = Util.Vector3Zero(),quality = 100,condition = 100)
-	{
-		return(
-			{
-				...this.Generic('block',status,birth,position,quality,condition),
-				material:material,//earth,wood,rock
-				amount:amount
-			}
-		);
+	  super('block', status, birth, position, quality, condition);
+	  this.specime = specime; //earth,wood,rock
+	  this.gender = gender;
 	}
 }
 
-export const World = async function(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices ,retry)
-{
-	return{
-		map:await _World.Map(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices,retry),
-		time:0,
-	}
-}
+export const Primitive = {Creature,Block,Generic};
+
+export const World = _World.World;
 //INTERPRETATION
 export function frame(world)
 {
