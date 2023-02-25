@@ -1,13 +1,20 @@
 "use strict";
 var mundo, mapa, Republica, htmltxt;//declared outside debug function so we can console.log it globally
+var rAFLoopID = 0;
+var exit = false;
+
+function Exit()
+{
+	exit = true;
+}
 
 async function debug(msize,mwidth,mquality)
 {
 	Republica = await import("./src/republicavelha.mjs");
 	console.log(Republica);
-	console.log(new Republica.Primitive.Creature('human','male'));
+	console.log(new Republica.Type.Creature('human','male'));
 	console.time((msize*mwidth) + "x" + (msize*mwidth) + " map generated in");
-	mundo = await Republica.World(Republica.Util.Size(msize,32),mwidth,(mwidth**mquality)*msize,0,0,1,true);
+	mundo = await Republica.World.Create(Republica.Util.Size(msize,32),mwidth,(mwidth**mquality)*msize,0,0,1,true);
 	mapa = mundo.map.block;
 	console.timeEnd((msize*mwidth) + "x" + (msize*mwidth) + " map generated in");
 	var htmltxt = '';
@@ -59,5 +66,6 @@ async function debug(msize,mwidth,mquality)
 		console.clear();
 		process.stdout.write(htmltxt);
 	}
+	mundo.loop.start('interval');
 };
 debug(64,2,1);

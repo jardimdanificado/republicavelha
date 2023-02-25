@@ -1,6 +1,3 @@
-import * as Util from './util.mjs'
-import { Generic } from '../republicavelha.mjs'
-
 export const species =
 {
     grass: {
@@ -357,18 +354,4 @@ export const species =
           }
         }
       }      
-}
-
-export class plant extends Generic {
-    constructor(specie = 'cannabis', status = 'idle', birth = 0, position = Util.Vector3Zero(), quality = 100, condition = 100) {
-        super('plant', status, birth, position, quality, condition);
-        this.specie = specie;
-    }
-}
-
-export class seed extends Generic {
-    constructor(specie = 'cannabis', status = 'idle', birth = 0, position = Util.Vector3Zero(), quality = 100, condition = 100, decayRate = 2592000/*(30days)*/) {
-        super('seed', status, birth, position, quality, condition, decayRate);
-        this.specie = specie;
-    }
 }
