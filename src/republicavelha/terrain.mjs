@@ -478,8 +478,8 @@ export async function Terrain(map,fixedHeight = 128)
 			//var earthb = map[x][y];
 			//var airb = fixedHeight - earthb;
 			
-			result[x][y] = Array(map[x][y]).fill([Primitive.Block('earth','full')]);
-			result[x][y] = result[x][y].concat(Array(fixedHeight - map[x][y]).fill([Primitive.Block('air','empty')]));
+			result[x][y] = Array(map[x][y]).fill([Primitive.Block('earth',100)]);
+			result[x][y] = result[x][y].concat(Array(fixedHeight - map[x][y]).fill([Primitive.Block('air',100)]));
 		}
 	}
 	return(result);
@@ -504,46 +504,55 @@ export async function fastTerrain(hm,fixedHeight,slices)
 			)
 }
 
+function rampCheck(terrain,x,y,z)
+{
+	if(
+		(x<terrain.length-1 &&
+		 terrain[x+1][y][terrain.heightmap[x][y]][0].material == "earth" &&
+		 terrain[x+1][y][terrain.heightmap[x][y]+1][0].material == "air")||
+		(x>0&&
+		 terrain[x-1][y][terrain.heightmap[x][y]][0].material == "earth" &&
+		 terrain[x-1][y][terrain.heightmap[x][y]+1][0].material == "air")||
+		(y<terrain.length-1 &&
+		 terrain[x][y+1][terrain.heightmap[x][y]][0].material == "earth" &&
+		 terrain[x][y+1][terrain.heightmap[x][y]+1][0].material == "air")||
+		(y>0 &&
+		 terrain[x][y-1][terrain.heightmap[x][y]][0].material == "earth" &&
+		 terrain[x][y-1][terrain.heightmap[x][y]+1][0].material == "air") ||
+		
+		(x<terrain.length-1 &&
+		 y<terrain.length-1 &&
+		 terrain[x+1][y+1][terrain.heightmap[x][y]][0].material == "earth" && 
+		 terrain[x+1][y+1][terrain.heightmap[x][y]+1][0].material == "air")||
+		(x>0&&
+		 y<terrain.length-1 &&
+		 terrain[x-1][y+1][terrain.heightmap[x][y]][0].material == "earth" && 
+		 terrain[x-1][y+1][terrain.heightmap[x][y]+1][0].material == "air")||
+		(x<terrain.length-1 &&
+		 y>0 &&
+		 terrain[x+1][y-1][terrain.heightmap[x][y]][0].material == "earth" &&
+		 terrain[x+1][y-1][terrain.heightmap[x][y]+1][0].material == "air")||
+		(x>0 &&
+		 y>0 &&
+		 terrain[x-1][y-1][terrain.heightmap[x][y]][0].material == "earth" &&
+		 terrain[x-1][y-1][terrain.heightmap[x][y]+1][0].material == "air")
+	)	
+	{
+		terrain[x][y][z][0].amount = 50;
+		return true;
+	}
+	return false;
+}
+
 export async function rampifyTerrain(terrain)
 {
 	for(let x = 0;x<terrain.length;x++)
 		for(let y = 0;y<terrain[0].length;y++)
-		{
-			if(
-				(x<terrain.length-1 &&
-				 terrain[x+1][y][terrain.heightmap[x][y]][0].subtype == "full" &&
-				 terrain[x+1][y][terrain.heightmap[x][y]+1][0].subtype == "empty")||
-				(x>0&&
-				 terrain[x-1][y][terrain.heightmap[x][y]][0].subtype == "full" &&
-				 terrain[x-1][y][terrain.heightmap[x][y]+1][0].subtype == "empty")||
-				(y<terrain.length-1 &&
-				 terrain[x][y+1][terrain.heightmap[x][y]][0].subtype == "full" &&
-				 terrain[x][y+1][terrain.heightmap[x][y]+1][0].subtype == "empty")||
-				(y>0 &&
-				 terrain[x][y-1][terrain.heightmap[x][y]][0].subtype == "full" &&
-				 terrain[x][y-1][terrain.heightmap[x][y]+1][0].subtype == "empty") ||
-				
-				(x<terrain.length-1 &&
-				 y<terrain.length-1 &&
-				 terrain[x+1][y+1][terrain.heightmap[x][y]][0].subtype == "full" && 
-				 terrain[x+1][y+1][terrain.heightmap[x][y]+1][0].subtype == "empty")||
-				(x>0&&
-				 y<terrain.length-1 &&
-				 terrain[x-1][y+1][terrain.heightmap[x][y]][0].subtype == "full" && 
-				 terrain[x-1][y+1][terrain.heightmap[x][y]+1][0].subtype == "empty")||
-				(x<terrain.length-1 &&
-				 y>0 &&
-				 terrain[x+1][y-1][terrain.heightmap[x][y]][0].subtype == "full" &&
-				 terrain[x+1][y-1][terrain.heightmap[x][y]+1][0].subtype == "empty")||
-				(x>0 &&
-				 y>0 &&
-				 terrain[x-1][y-1][terrain.heightmap[x][y]][0].subtype == "full" &&
-				 terrain[x-1][y-1][terrain.heightmap[x][y]+1][0].subtype == "empty")
-			)	
+			for(let z = 0;z<terrain[0][0].length-1;z++)
 			{
-				terrain[x][y][terrain.heightmap[x][y]][0].subtype = 'half';
+				if(rampCheck(terrain,x,y,z))
+					break;
 			}
-		}
 	return terrain;
 }
 
@@ -553,7 +562,7 @@ export async function countRamps(terrain)
 	for(let x = 0;x<terrain.length;x++)
 		for(let y = 0;y<terrain[0].length;y++)
 		{
-			if(terrain[x][y][terrain.heightmap[x][y]][0].subtype == "half")
+			if(terrain[x][y][terrain.heightmap[x][y]][0].amount == 50)
 				 
 			{
 				counter++;
@@ -630,94 +639,6 @@ function checkDifference(heightmap)
 	  }
 	}
 	return counter;
-  }
-
-export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomize = false,subdivide = false,postslices = 1,retry = 0)//deprecated & borked
-{
-	if(typeof mapsize == 'undefined')
-		mapsize = util.Size(128,64);
-	else if(typeof mapsize == 'number')
-		mapsize = util.Size(mapsize,mapsize);
-	else if(typeof mapsize == 'array')
-		mapsize = util.Size(mapsize[0],mapsize[1]);
-	
-	var hmap;
-	hmap = await util.abenchy(autoHeightmap,[mapsize.w,multiHorizontal]);
-	hmap = await util.abenchy(roundHeightmap,[hmap]);
-	hmap = await util.abenchy(
-	  	async function()
-	  	{
-		    return (await(util.Comrade('../terrain.mjs','heightmapModder',[hmap,smooth,randomize,subdivide]))
-		    	.then(resolvedValue => {
-		  	  	return resolvedValue.data;
-	      		})
-	      	)
-		},
-		[0,1],
-		"heightmapModder"
-	);
-
-	hmap = await util.abenchy(polishHeightmap,[hmap,mapsize.h]);
-	
-	var terr = [];
-	terr = await util.abenchy(fastTerrain,[hmap,mapsize.h,postslices]);
-	terr = await util.abenchy(fastRampify,[terr,postslices]);
-
-	var rampcount = await countRamps(terr);
-	console.log("ramp count:"+ rampcount );
-	if(retry>=1&&rampcount>((mapsize.w*multiHorizontal)**2)/4)
-	{
-		console.log("retry number " + retry);
-		retry++;
-		return(AutoTerrain(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices,retry));
-	}
-	if(retry >= 2)
-		console.log('map generated in ' + retry + ' retries.')
-	return(terr);
-}
-
-export async function oldAutoTerrain(mapsize,multiHorizontal,smooth = false,randomize = false,subdivide = false,postslices = 1,retry = 0)//deprecated & borked
-{
-	if(typeof mapsize == 'undefined')
-		mapsize = util.Size(128,64);
-	else if(typeof mapsize == 'number')
-		mapsize = util.Size(mapsize,mapsize);
-	else if(typeof mapsize == 'array')
-		mapsize = util.Size(mapsize[0],mapsize[1]);
-	
-	var hmap;
-	hmap = await util.abenchy(autoHeightmap,[mapsize.w,multiHorizontal]);
-	hmap = await util.abenchy(roundHeightmap,[hmap]);
-	hmap = await util.abenchy(
-	  	async function()
-	  	{
-		    return (await(util.Comrade('../terrain.mjs','heightmapModder',[hmap,smooth,randomize,subdivide]))
-		    	.then(resolvedValue => {
-		  	  	return resolvedValue.data;
-	      		})
-	      	)
-		},
-		[0,1],
-		"heightmapModder"
-	);
-
-	hmap = await util.abenchy(polishHeightmap,[hmap,mapsize.h]);
-	
-	var terr = [];
-	terr = await util.abenchy(fastTerrain,[hmap,mapsize.h,postslices]);
-	terr = await util.abenchy(fastRampify,[terr,postslices]);
-
-	var rampcount = await countRamps(terr);
-	console.log("ramp count:"+ rampcount );
-	if(retry>=1&&rampcount>((mapsize.w*multiHorizontal)**2)/4)
-	{
-		console.log("retry number " + retry);
-		retry++;
-		return(AutoTerrain(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices,retry));
-	}
-	if(retry >= 2)
-		console.log('map generated in ' + retry + ' retries.')
-	return(terr);
 }
 
 export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomize = false,subdivide = false,postslices = 1,retry = 0)
@@ -746,14 +667,18 @@ export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomi
 	);
 
 	hmap = await util.abenchy(polishHeightmap,[hmap,mapsize.h]);
-	if(retry>=1&&checkDifference(hmap)>((mapsize.w*multiHorizontal)**2)/4)
+	
+	if(retry>=1&&checkDifference(hmap)>((mapsize.w*multiHorizontal)**2)/2)
 	{
 		console.log("retry number " + retry);
 		retry++;
 		return(AutoTerrain(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices,retry));
 	}
 	if(retry >= 2)
-		console.log('map generated in ' + retry + ' retries.')
-	hmap.maxHeight = mapsize.h;
-	return(hmap);
+		console.log('heightmap generated in ' + retry + ' retries.')
+
+	var terrain = [];
+	terrain = await util.abenchy(fastTerrain,[hmap,mapsize.h,postslices]);
+	terrain = await rampifyTerrain(terrain);
+	return(terrain);
 }

@@ -1,5 +1,6 @@
 "use strict";
 var mapa, Republica, htmltxt;//declared outside debug function so we can console.log it globally
+
 async function debug()
 {
 	Republica = await import("./src/republicavelha.mjs");
@@ -9,7 +10,8 @@ async function debug()
 	let mwidth = 2;
 	let mquality = 1;
 	console.time((msize*mwidth) + "x" + (msize*mwidth) + " map generated in");
-	mapa = await Republica.Terrain.Default(Republica.Util.Size(msize,32),mwidth,(mwidth**mquality)*msize,0,0,1,true);//cool terrains
+	mapa = await Republica.Map.Generate(Republica.Util.Size(msize,32),mwidth,(mwidth**mquality)*msize,0,0,1,true);//cool terrains
+	mapa = mapa.block;
 	console.timeEnd((msize*mwidth) + "x" + (msize*mwidth) + " map generated in");
 	var htmltxt = '';
 	for(let x = 0;x<mapa.length;x++)
@@ -19,7 +21,7 @@ async function debug()
 			let ok = false;
 			for(let z = 0;z<mapa[0][0].length-1;z++)
 			{
-				if(mapa[x][y][z][0].subtype === 'half')
+				if(mapa[x][y][z][0].amount === 50)
 				{
 					let temp = (mapa.length + '').length;
 					for(let p = 0; p < temp; p++)
@@ -28,7 +30,7 @@ async function debug()
 					ok=true;
 					break;
 				}
-				else if(mapa[x][y][z][0].subtype === "full"&&mapa[x][y][z+1][0].subtype === "empty")
+				else if(mapa[x][y][z][0].material === "earth"&&mapa[x][y][z+1][0].material === "air")
 				{
 					let temp = (mapa.length  + '').length-(z+'').length;
 					for(let p = 0; p < temp; p++)
