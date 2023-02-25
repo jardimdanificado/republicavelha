@@ -64,11 +64,13 @@ export const Primitive =
 	}
 }
 
-export const World =
+export const World = async function(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices ,retry)
 {
-	Map:_World.Map,
+	return{
+		map:await _World.Map(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices,retry),
+		time:0,
+	}
 }
-
 //INTERPRETATION
 export function frame(world)
 {
