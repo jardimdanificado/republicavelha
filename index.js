@@ -6,10 +6,10 @@ async function debug(msize,mwidth,mquality)
 	Republica = await import("./src/republicavelha.mjs");
 	console.log(Republica);
 	console.log(new Republica.Type.Creature('human','male'));
-	console.time((msize*mwidth) + "x" + (msize*mwidth) + " map generated in");
-	mundo = await Republica.World.Create(Republica.Util.Size(msize,32),mwidth,(mwidth**mquality)*msize,0,0,1,true);
+	console.time((msize.w*mwidth) + "x" + (msize.w*mwidth) + " map generated in");
+	mundo = await Republica.World.Create(msize.w,mwidth,(mwidth**mquality)*(msize.w),0,0,1,true);
 	mapa = mundo.map.block;
-	console.timeEnd((msize*mwidth) + "x" + (msize*mwidth) + " map generated in");
+	console.timeEnd((msize.w*mwidth) + "x" + (msize.w*mwidth) + " map generated in");
 	var htmltxt = '';
 	for(let x = 0;x<mapa.length;x++)
 	{
@@ -59,9 +59,9 @@ async function debug(msize,mwidth,mquality)
 		console.clear();
 		process.stdout.write(htmltxt);
 	}
-	mundo.loop.start('raf');
+	mundo.loop.start('interval');
 	for(let x = 0;x<mundo.map.heightmap.length;x++)
 		for(let y = 0;y<mundo.map.heightmap[0].length;y++)
 			mundo.plant.spawn ('seed', 'grass', 'breeding', {x:x,y:y,z:mundo.map.block[0][0].length-1}, 100, 100);
 };
-debug(64,2,1);
+debug({w:256,h:128},2,1);

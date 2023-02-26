@@ -136,10 +136,10 @@ export function frame(world)
             {
                 if(seed.type == 'seed')
                 {
-                    if(seed.position.z > 1)
-                        seed.position.z -= 1;
-                    if(world.time%60==0&&typeof world.map.block[seed.position.x][seed.position.y][seed.position.z-1] !== 'undefined')
-                        if(world.map.block[seed.position.x][seed.position.y][seed.position.z-1][0].material == 'earth')
+                    if(typeof world.map.block[seed.position.x][seed.position.y][seed.position.z-1] !== 'undefined')
+                    {
+                        seed.position.z = (seed.position.z > 1 && world.map.block[seed.position.x][seed.position.y][seed.position.z-1]) ? seed.position.z-1:seed.position.z;
+                        if(world.time%60==0&&world.map.block[seed.position.x][seed.position.y][seed.position.z-1][0].material == 'earth')
                         {
                             seed.breed++;
                             if(seed.breed>=40)
@@ -148,6 +148,7 @@ export function frame(world)
                                 return(new Plant(seed.specie,seed.status,seed.birth,seed.position,seed.quality,100));
                             }
                         }
+                    }
                 }
                 return(seed);
             }
