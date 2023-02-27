@@ -126,36 +126,45 @@ export const Life =
     }
 }
 
+function gravity(blockMap,position)
+{
+    return(
+        (position.z > 1 && blockMap[position.x][position.y][position.z-1][0].material == 'air') ? {x:position.x,y:position.y,z:position.z-1}:position
+    );
+}
+
 //INTERPRETATION
 export function frame(world)
 {
 	world.time++;
     if(world.plant.length>0)
     {
-        world.plant = world.plant.map((seed)=>
+        world.plant = world.plant.map((plant)=>
             {
-                if(seed.type == 'seed')
+                if(plant.type == 'seed')
                 {
-                    if(seed.position.z > 1)
-                        seed.position.z -= 1;
-                    if(world.time%60==0&&typeof world.map.block[seed.position.x][seed.position.y][seed.position.z-1] !== 'undefined')
-                        if(world.map.block[seed.position.x][seed.position.y][seed.position.z-1][0].material == 'earth')
+                    if(typeof world.map.block[plant.position.x][plant.position.y][plant.position.z-1] !== 'undefined')
+                    {
+                        plant.position = gravity(world.map.block,plant.position);
+                        if(world.time%60==0&&world.map.block[plant.position.x][plant.position.y][plant.position.z-1][0].material == 'earth')
                         {
-                            seed.breed++;
-                            if(seed.breed>=40)
-                            {
-                                let temp = seed.birth;
-                                return(new Plant(seed.specie,seed.status,seed.birth,seed.position,seed.quality,100));
-                            }
+                            plant.germination++;
+                            plant.status = (plant.status !== 'germinating') ? 'germinating' : plant.status;
+                            if(plant.status === 'germinating')
+                                if(plant.germination >= Plants[plant.specie].time.maturing.max/10000 || (Util.roleta(1,19) == 1&& plant.germination>=(Plants[plant.specie].time.maturing.min/10000)))
+                                {
+                                    return(new Plant(plant.specie,plant.status,plant.birth,plant.position,plant.quality,100));
+                                }
                         }
+                    }
                 }
-                return(seed);
+                return(plant);
             }
         )
     }
 }
 
-export async function Create(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices ,retry)
+export async function New(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices ,retry)
 {
     var result = 
     {

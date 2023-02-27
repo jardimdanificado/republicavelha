@@ -26,11 +26,14 @@ export function Heightmap(size)
 		return matrix;
 	}
 
-	const calculateSquare = function(matrix, chunkSize, randomFactor) {
+	const calculateSquare = function(matrix, chunkSize, randomFactor) 
+	{
 		let sumComponents = 0;
 		let sum = 0;
-		for (let i = 0; i < matrix.length - 1; i += chunkSize) {
-			for (let j = 0; j < matrix.length - 1; j += chunkSize) {
+		for (let i = 0; i < matrix.length - 1; i += chunkSize) 
+		{
+			for (let j = 0; j < matrix.length - 1; j += chunkSize) 
+			{
 				const BOTTOM_RIGHT = matrix[j + chunkSize]
 					? matrix[j + chunkSize][i + chunkSize]
 					: null;
@@ -45,8 +48,10 @@ export function Heightmap(size)
 					TOP_LEFT,
 					TOP_RIGHT
 				].reduce(
-					(result, value) => {
-						if (isFinite(value) && value != null) {
+					(result, value) => 
+					{
+						if (isFinite(value) && value != null) 
+						{
 							result.sum += value;
 							result.count += 1;
 						}
@@ -60,17 +65,21 @@ export function Heightmap(size)
 		}
 	}
 
-	const calculateDiamond = function(matrix, chunkSize, randomFactor) {
+	const calculateDiamond = function(matrix, chunkSize, randomFactor) 
+	{
 		const half = chunkSize / 2;
 		for (let y = 0; y < matrix.length; y += half) {
-			for (let x = (y + half) % chunkSize; x < matrix.length; x += chunkSize) {
+			for (let x = (y + half) % chunkSize; x < matrix.length; x += chunkSize) 
+			{
 				const BOTTOM = matrix[y + half] ? matrix[y + half][x] : null;
 				const LEFT = matrix[y][x - half];
 				const TOP = matrix[y - half] ? matrix[y - half][x] : null;
 				const RIGHT = matrix[y][x + half];
 				const { count, sum } = [BOTTOM, LEFT, TOP, RIGHT].reduce(
-					(result, value) => {
-						if (isFinite(value) && value != null) {
+					(result, value) => 
+					{
+						if (isFinite(value) && value != null) 
+						{
 							result.sum += value;
 							result.count += 1;
 						}
@@ -84,11 +93,13 @@ export function Heightmap(size)
 		return matrix;
 	}
 
-	const diamondSquare = function(matrix) {
+	const diamondSquare = function(matrix) 
+	{
 		let chunkSize = MATRIX_LENGTH - 1;
 		let randomFactor = RANDOM_INITIAL_RANGE;
 
-		while (chunkSize > 1) {
+		while (chunkSize > 1) 
+		{
 			calculateSquare(matrix, chunkSize, randomFactor);
 			calculateDiamond(matrix, chunkSize, randomFactor);
 			chunkSize /= 2;
@@ -98,12 +109,15 @@ export function Heightmap(size)
 		return matrix;
 	}
 
-	const normalizeMatrix = function(matrix) {
-		const maxValue = matrix.reduce((max, row) => {
+	const normalizeMatrix = function(matrix) 
+	{
+		const maxValue = matrix.reduce((max, row) => 
+		{
 			return row.reduce((max, value) => Math.max(value, max));
 		}, -Infinity);
 
-		return matrix.map((row) => {
+		return matrix.map((row) => 
+		{
 			return row.map((val) => val / maxValue);
 		});
 	}
@@ -486,33 +500,34 @@ function checkDifference(heightmap)
 		// Check neighbors
 		for (let x = -1; x <= 1; x++) 
 		{
-		  for (let y = -1; y <= 1; y++) 
-		  {
-			if (x === 0 && y === 0) continue;
-  
-			const neighborI = i + x;
-			const neighborJ = j + y;
-			if (
-			  neighborI >= 0 &&
-			  neighborI < heightmap.length &&
-			  neighborJ >= 0 &&
-			  neighborJ < heightmap[i].length
-			) 
+			for (let y = -1; y <= 1; y++) 
 			{
-			  const neighborValue = heightmap[neighborI][neighborJ];
-			  if (Math.abs(currentValue - neighborValue) === 1) 
-			  {
-				hasNeighbor = true;
-				break;
-			  }
+				if (x === 0 && y === 0) continue;
+
+				const neighborI = i + x;
+				const neighborJ = j + y;
+				if (
+					neighborI >= 0 &&
+					neighborI < heightmap.length &&
+					neighborJ >= 0 &&
+					neighborJ < heightmap[i].length
+				) 
+				{
+					const neighborValue = heightmap[neighborI][neighborJ];
+					if (Math.abs(currentValue - neighborValue) === 1) 
+					{
+					hasNeighbor = true;
+					break;
+					}
+				}
 			}
-		  }
-		  if (hasNeighbor) break;
+			if (hasNeighbor) 
+			break;
 		}
   
 		if (hasNeighbor) 
 		{
-		  counter++;
+			counter++;
 		}
 	  }
 	}
