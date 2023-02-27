@@ -121,10 +121,31 @@ export function flattenMatrix(matrix)
 	return matrix.reduce((flatArray, currentRow) => flatArray.concat(currentRow), []);
 }
 
+function shuffleArray(arr) 
+{
+	for (let i = arr.length - 1; i > 0; i--) 
+	{
+	  const j = Math.floor(Math.random() * (i + 1));
+	  [arr[i], arr[j]] = [arr[j], arr[i]];
+	}
+	return arr;
+}
+
 export function Size(w, h) 
-{ 
+{
 	var temp = { w: w, h: h }; temp.height = temp.h; temp.width = temp.w; return temp; 
 }
+
+export function randomIntArray(start, end, size) 
+{
+	const result = [];
+	const range = end - start + 1;
+	for (let i = 0; i < size; i++) {
+	  const randomInt = Math.floor(Math.random() * range) + start;
+	  result.push(randomInt);
+	}
+	return result;
+  }
 
 export function getSizeInBytes(input) 
 {
@@ -143,7 +164,7 @@ export function roleta(...odds)
 	var roleta = []; 
 	for(let i = 0; i<odds.length;i++)
 		roleta = roleta.concat(Array(odds[i]).fill(i));
-	return(roleta[randomInRange(0, roleta.length - 1)]);
+	return(shuffleArray(roleta)[randomInRange(0, roleta.length - 1)]);
 }
 
 export function repeatWithInterval(func, args, delay) 
@@ -159,8 +180,7 @@ export function repeatWithInterval(func, args, delay)
   
 	// Return the handle to the current setInterval call
 	return intervalHandle;
-  }
-  
+}
 
 export function repeatWithAnimationFrame(func, args) 
 {

@@ -36,7 +36,7 @@ export class Creature extends Generic
 
 export class Plant extends Generic 
 {
-	constructor(specie = 'cannabis', status = 'idle', birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100) 
+	constructor(specie = 'grass', status = 'idle', birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100) 
 	{
 		super('plant', status, birth, position, quality, condition);
 		this.specie = specie;
@@ -45,10 +45,10 @@ export class Plant extends Generic
 
 export class Seed extends Generic 
 {
-	constructor(specie = 'cannabis', status = 'idle', birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100, decayRate = 2592000/*(30days)*/) 
+	constructor(specie = 'tomato', status = 'idle', birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100, decayRate = 2592000/*(30days)*/) 
 	{
 		super('seed', status, birth, position, quality, condition, decayRate);
 		this.specie = specie;
-		this.breed = 0;
+		this.germination = 0;
 	}
 }
