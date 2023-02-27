@@ -2,15 +2,27 @@
 //PRIMITIVES
 //-----------------------------------
 
-export function RGB(r, g, b) { return ({ r: r, g: g, b: b }); }
-export function RGBA(r, g, b, a) { return ({ r: r, g: g, b: b, a: a }); }
-export function HSL2RGB(h, s, l) {
+export function RGB(r, g, b) 
+{ 
+	return ({ r: r, g: g, b: b }); 
+}
+
+export function RGBA(r, g, b, a) 
+{ 
+	return ({ r: r, g: g, b: b, a: a }); 
+}
+
+export function HSL2RGB(h, s, l) 
+{
 	var r, g, b;
-	if (s == 0) {
+	if (s == 0) 
+	{
 		r = g = b = l; // achromatic
 	}
-	else {
-		var hue2rgb = function hue2rgb(p, q, t) {
+	else 
+	{
+		var hue2rgb = function hue2rgb(p, q, t) 
+		{
 			if (t < 0) t += 1;
 			if (t > 1) t -= 1;
 			if (t < 1 / 6) return p + (q - p) * 6 * t;
@@ -28,54 +40,100 @@ export function HSL2RGB(h, s, l) {
 
 	return (RGB(Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)));
 }
-export function HSL2RGBA(h, s, l) {
+
+export function HSL2RGBA(h, s, l) 
+{
 	let temp = HSL2RGB(h, s, l);
 	temp.a = 255;
 	return (temp);
-};
-export function Vector3(x, y, z) { return ({ x: x, y: y, z: z }); }
-export function Vector3Zero() { return ({ x: 0, y: 0, z: 0 }); }
-export function Vector2(x, y) { return ({ x: x, y: y }); }
-export function Vector2Zero() { return ({ x: 0, y: 0 }); }
-export function BoundingBox(min, max) { return ({ min: { x: min.x, y: min.y, z: min.z }, max: { x: max.x, y: max.y, z: max.z } }); }
-export function Position(local, global) { return ({ local: local, global: global }) };
+}
 
-export async function organizeArray(arr, parts) {
+export function Vector3(x, y, z) 
+{ 
+	return ({ x: x, y: y, z: z }); 
+}
+
+export function Vector3Zero() 
+{ 
+	return ({ x: 0, y: 0, z: 0 }); 
+}
+
+export function Vector2(x, y) 
+{ 
+	return ({ x: x, y: y }); 
+}
+
+export function Vector2Zero() 
+{ 
+	return ({ x: 0, y: 0 }); 
+}
+
+export function BoundingBox(min, max) 
+{
+	return ({ min: { x: min.x, y: min.y, z: min.z }, max: { x: max.x, y: max.y, z: max.z } }); 
+}
+
+export function Position(local, global) 
+{ 
+	return ({ local: local, global: global });
+}
+
+export async function organizeArray(arr, parts) 
+{
 	let matrix = [];
 	let chunkSize = Math.ceil(arr.length / parts);
-	for (let i = 0; i < parts; i++) {
+	for (let i = 0; i < parts; i++) 
+	{
 		matrix.push(arr.slice(i * chunkSize, (i + 1) * chunkSize));
 	}
 	return matrix;
 }
 
-export async function autoOrganizeArray(arr) {
+export async function autoOrganizeArray(arr) 
+{
 	let matrix = [];
 	let parts = Math.ceil(Math.sqrt(arr.length));
 	let chunkSize = Math.ceil(arr.length / parts);
-	for (let i = 0; i < arr.length; i += chunkSize) {
+	for (let i = 0; i < arr.length; i += chunkSize) 
+	{
 		matrix.push(arr.slice(i, i + chunkSize));
 	}
 	return matrix;
 }
 
-export function recursiveMap(arr, callback) {
-	return arr.map(function (element) {
-		if (Array.isArray(element)) {
+export function recursiveMap(arr, callback) 
+{
+	return arr.map(function (element) 
+	{
+		if (Array.isArray(element)) 
+		{
 			return recursiveMap(element, callback);
-		} else {
+		} 
+		else 
+		{
 			return callback(element);
 		}
 	});
 }
 
-export function flattenMatrix(matrix) {
+export function flattenMatrix(matrix) 
+{
 	return matrix.reduce((flatArray, currentRow) => flatArray.concat(currentRow), []);
 }
 
-export function Size(w, h) { var temp = { w: w, h: h }; temp.height = temp.h; temp.width = temp.w; return temp; };
+export function Size(w, h) 
+{ 
+	var temp = { w: w, h: h }; temp.height = temp.h; temp.width = temp.w; return temp; 
+}
 
-export function getSizeInBytes(input) { if (typeof input == 'function') return (input.toString().length); else return (JSON.stringify(input).length); }
+export function getSizeInBytes(input) 
+{
+	if (typeof input == 'function') 
+		return (input.toString().length); 
+	else 
+		return (JSON.stringify(input).length); 
+}
+
 //-----------------------------------
 //UTILS
 //-----------------------------------
@@ -85,12 +143,13 @@ export function roleta(...odds)
 	var roleta = []; 
 	for(let i = 0; i<odds.length;i++)
 		roleta = roleta.concat(Array(odds[i]).fill(i));
-	return [random,roleta[randomInRange(0, roleta.length - 1)]];
+	return(roleta[randomInRange(0, roleta.length - 1)]);
 }
 
 export function repeatWithInterval(func, args, delay) 
 {
-	function runFunc() {
+	function runFunc() 
+	{
 	  // Call the function with the provided arguments
 	  func.apply(null, args);
 	}
@@ -105,7 +164,8 @@ export function repeatWithInterval(func, args, delay)
 
 export function repeatWithAnimationFrame(func, args) 
 {
-	function runFunc() {
+	function runFunc() 
+	{
 	  // Call the function with the provided arguments
 	  func.apply(null, args);
   
@@ -118,17 +178,23 @@ export function repeatWithAnimationFrame(func, args)
   
 	// Return the handle to the current requestAnimationFrame call
 	return animationFrameHandle;
-  }
+}
 
-export async function expandMatrix(matrix) {
+export async function expandMatrix(matrix) 
+{
 	let finalMatrix = [];
 	let currentRow = 0;
 	//console.log(matrix)
-	for (let i = 0; i < matrix.length; i++) {
-		for (let j = 0; j < matrix[i].length; j++) {
-			for (let x = 0; x < matrix[i][j].length; x++) {
-				for (let y = 0; y < matrix[i][j][x].length; y++) {
-					if (!finalMatrix[currentRow + x]) {
+	for (let i = 0; i < matrix.length; i++) 
+	{
+		for (let j = 0; j < matrix[i].length; j++) 
+		{
+			for (let x = 0; x < matrix[i][j].length; x++) 
+			{
+				for (let y = 0; y < matrix[i][j][x].length; y++) 
+				{
+					if (!finalMatrix[currentRow + x]) 
+					{
 						finalMatrix[currentRow + x] = [];
 					}
 					finalMatrix[currentRow + x][y + matrix[i][j][x].length * j] = matrix[i][j][x][y];
@@ -140,7 +206,8 @@ export async function expandMatrix(matrix) {
 	return finalMatrix;
 }
 
-export async function splitMatrix(matrix) {
+export async function splitMatrix(matrix) 
+{
 	let subMatrixSize = Math.ceil(matrix.length / 2);
 	let subMatrix1 = matrix.slice(0, subMatrixSize).map(x => x.slice(0, subMatrixSize));
 	let subMatrix2 = matrix.slice(0, subMatrixSize).map(x => x.slice(subMatrixSize));
@@ -149,11 +216,14 @@ export async function splitMatrix(matrix) {
 	return [[subMatrix1, subMatrix2], [subMatrix3, subMatrix4]];
 }
 
-export async function customSplitMatrix(matrix, slices) {
+export async function customSplitMatrix(matrix, slices) 
+{
 	let subMatrixSize = Math.ceil(matrix.length / slices);
 	let subMatrices = [];
-	for (let i = 0; i < slices; i++) {
-		for (let j = 0; j < slices; j++) {
+	for (let i = 0; i < slices; i++) 
+	{
+		for (let j = 0; j < slices; j++) 
+		{
 			let subMatrix = matrix.slice(i * subMatrixSize, (i + 1) * subMatrixSize).map(x => x.slice(j * subMatrixSize, (j + 1) * subMatrixSize));
 			subMatrices.push(subMatrix);
 		}
@@ -161,7 +231,8 @@ export async function customSplitMatrix(matrix, slices) {
 	return subMatrices;
 }
 
-export async function customMarginalSplitMatrix(matrix, slices = 2, margin = 0) {
+export async function customMarginalSplitMatrix(matrix, slices = 2, margin = 0) 
+{
 	let subMatrixSize = Math.ceil(matrix.length / slices);
 	let subMatrix1 = matrix.slice(0, subMatrixSize + margin).map(x => x.slice(0, subMatrixSize + margin));
 	let subMatrix2 = matrix.slice(0, subMatrixSize + margin).map(x => x.slice(subMatrixSize - margin));
@@ -170,7 +241,8 @@ export async function customMarginalSplitMatrix(matrix, slices = 2, margin = 0) 
 	return [[subMatrix1, subMatrix2], [subMatrix3, subMatrix4]];
 }
 
-export async function marginalSplitMatrix(matrix, margin = 8) {
+export async function marginalSplitMatrix(matrix, margin = 8) 
+{
 	let subMatrixSize = Math.ceil(matrix.length / 2);
 	let subMatrix1 = matrix.slice(0, subMatrixSize + margin).map(x => x.slice(0, subMatrixSize + margin));
 	let subMatrix2 = matrix.slice(0, subMatrixSize + margin).map(x => x.slice(subMatrixSize - margin));
@@ -179,13 +251,16 @@ export async function marginalSplitMatrix(matrix, margin = 8) {
 	return [[subMatrix1, subMatrix2], [subMatrix3, subMatrix4]];
 }
 
-export async function divideMatrix(largeMatrix, slices) {
+export async function divideMatrix(largeMatrix, slices) 
+{
 	let dividedMatrix = [];
 	let sliceSize = Math.floor(largeMatrix.length / slices);
-	for (let i = 0; i < largeMatrix.length; i += sliceSize) {
+	for (let i = 0; i < largeMatrix.length; i += sliceSize) 
+	{
 		let row = largeMatrix.slice(i, i + sliceSize);
 		let dividedRow = [];
-		for (let j = 0; j < row[0].length; j += sliceSize) {
+		for (let j = 0; j < row[0].length; j += sliceSize) 
+		{
 			let subMatrix = row.map(x => x.slice(j, j + sliceSize));
 			dividedRow.push(subMatrix);
 		}
@@ -194,24 +269,32 @@ export async function divideMatrix(largeMatrix, slices) {
 	return dividedMatrix;
 }
 
-export function create3DArray(dimX, dimY, dimZ, input) {
+export function create3DArray(dimX, dimY, dimZ, input) 
+{
 	const arr3D = [];
 
-	for (let i = 0; i < dimX; i++) {
+	for (let i = 0; i < dimX; i++) 
+	{
 		const arr2D = [];
-		for (let j = 0; j < dimY; j++) {
+		for (let j = 0; j < dimY; j++) 
+		{
 			const arr1D = [];
-			for (let k = 0; k < dimZ; k++) {
-				if (typeof input === 'function') {
+			for (let k = 0; k < dimZ; k++) 
+			{
+				if (typeof input === 'function') 
+				{
 					arr1D.push(input());
 				}
-				else if (typeof input === 'object' || typeof input === 'number' || typeof input === 'string') {
+				else if (typeof input === 'object' || typeof input === 'number' || typeof input === 'string') 
+				{
 					arr1D.push(input);
 				}
-				else if (typeof input === 'function' && input.prototype.constructor) {
+				else if (typeof input === 'function' && input.prototype.constructor) 
+				{
 					arr1D.push(new input());
 				}
-				else {
+				else 
+				{
 					arr1D.push({});
 				}
 			}
@@ -219,11 +302,11 @@ export function create3DArray(dimX, dimY, dimZ, input) {
 		}
 		arr3D.push(arr2D);
 	}
-
 	return arr3D;
 }
 
-export function workerPromise(worker) {
+export function workerPromise(worker) 
+{
 	return (new Promise((resolve) => { worker.onmessage = resolve; }))
 }
 
@@ -329,9 +412,11 @@ export function Retry(condition, func, args, delay)//deprecated, avoid it
 	return (txt);
 }
 
-export function manualLength(arr) {
+export function manualLength(arr) 
+{
 	var count = 0;
-	while (true) {
+	while (true) 
+	{
 		if (typeof arr[count] != 'undefined')
 			count++;
 		else
@@ -340,13 +425,15 @@ export function manualLength(arr) {
 }
 
 //A QUICK IMPLEMENTATIONS TO DEFAULT ARGS
-export function DefaultsTo(target, def) {
+export function DefaultsTo(target, def) 
+{
 	target ??= def;
 	return target;
 }
 export const defsto = DefaultsTo;
 
-export function LimitItTo(value, min, max) {
+export function LimitItTo(value, min, max) 
+{
 	if (value > max) {
 		while (value > max)
 			value -= max - min;
@@ -360,9 +447,10 @@ export function LimitItTo(value, min, max) {
 export const limito = LimitItTo;
 
 var pendingList = [];
-export function Pending(frames, func, args) {
-
-	if (typeof frames != 'undefined' && typeof func != 'undefined') {
+export function Pending(frames, func, args) 
+{
+	if (typeof frames != 'undefined' && typeof func != 'undefined') 
+	{
 		let temp = {};
 		temp.frames = frames;
 		temp.func = func;
@@ -371,11 +459,12 @@ export function Pending(frames, func, args) {
 		pendingList.push(temp);
 	}
 	else {
-		for (let i = 0; i < pendingList.length; i++) {
-
+		for (let i = 0; i < pendingList.length; i++) 
+		{
 			if (pendingList[i].frames > 0)
 				pendingList[i].frames--;
-			else {
+			else 
+			{
 				if (typeof pendingList[i].args == 'undefined')
 					pendingList[i].func();
 				else
@@ -389,16 +478,28 @@ export const pendent = Pending;
 export const pend = Pending;
 export const pending = Pending;
 
-export const randomInRange = function (min, max) { return Math.floor(Math.random() * (max - min + 1) + min); }
+export const randomInRange = function (min, max) 
+{ 
+	return Math.floor(Math.random() * (max - min + 1) + min); 
+}
 export const randi = randomInRange;
 
 //-----------------------------------
 //CALCULATE
 //-----------------------------------
 
-export function DifferenceFloat(a, b) { return ((a + b + Math.abs(a - b)) / 2); }
-export function DifferenceVec3(vec1, vec2) { return (Vector3(DifferenceFloat(vec1.x, vec2.x), DifferenceFloat(vec1.y, vec2.y), DifferenceFloat(vec1.z, vec2.z))); }
-export function RotateAroundPivot(point, pivot, angle) {
+export function DifferenceFloat(a, b) 
+{ 
+	return ((a + b + Math.abs(a - b)) / 2); 
+}
+
+export function DifferenceVec3(vec1, vec2) 
+{ 
+	return (Vector3(DifferenceFloat(vec1.x, vec2.x), DifferenceFloat(vec1.y, vec2.y), DifferenceFloat(vec1.z, vec2.z))); 
+}
+
+export function RotateAroundPivot(point, pivot, angle) 
+{
 	angle = (angle) * (Math.PI / 180); // Convert to radians
 	var rotatedX = Math.cos(angle) * (point.x - pivot.x) - Math.sin(angle) * (point.z - pivot.z) + pivot.x;
 	var rotatedZ = Math.sin(angle) * (point.x - pivot.x) + Math.cos(angle) * (point.z - pivot.z) + pivot.z;
@@ -409,7 +510,8 @@ export function RotateAroundPivot(point, pivot, angle) {
 //DEBUG
 //-----------------------------------
 
-export function benchy(callback, args, optName = "unamed") {
+export function benchy(callback, args, optName = "unamed") 
+{
 	callback.name ??= optName;
 	console.time(callback.name);
 	result = callback.apply(this, args);
@@ -417,7 +519,8 @@ export function benchy(callback, args, optName = "unamed") {
 	return (result);
 }
 
-export async function abenchy(callback, args, optName = "unamed") {
+export async function abenchy(callback, args, optName = "unamed") 
+{
 	if (optName == "unamed" && callback.name.length > 0)
 		optName = callback.name;
 	console.time(optName);

@@ -1,6 +1,7 @@
 export const species =
 {
-    grass: {
+    grass: 
+    {
         type: 'herb',
         fruit: null,
         size:
@@ -15,12 +16,7 @@ export const species =
             min: 50, // leaves per plant
             max: 500 // leaves per plant
         },
-        flower:
-        {
-            name: 'grass flower',
-            min: 0, // flowers per plant
-            max: 0 // flowers per plant
-        },
+        flower: null,
         seed:
         {
             name: 'grass seed',

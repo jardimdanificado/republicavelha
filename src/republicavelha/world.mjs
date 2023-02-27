@@ -132,25 +132,24 @@ export function frame(world)
 	world.time++;
     if(world.plant.length>0)
     {
-        world.plant = world.plant.map((seed)=>
+        world.plant = world.plant.map((plant)=>
             {
-                if(seed.type == 'seed')
+                if(plant.type == 'seed')
                 {
-                    if(typeof world.map.block[seed.position.x][seed.position.y][seed.position.z-1] !== 'undefined')
+                    if(typeof world.map.block[plant.position.x][plant.position.y][plant.position.z-1] !== 'undefined')
                     {
-                        seed.position.z = (seed.position.z > 1 && world.map.block[seed.position.x][seed.position.y][seed.position.z-1]) ? seed.position.z-1:seed.position.z;
-                        if(world.time%60==0&&world.map.block[seed.position.x][seed.position.y][seed.position.z-1][0].material == 'earth')
+                        plant.position.z = (plant.position.z > 1 && world.map.block[plant.position.x][plant.position.y][plant.position.z-1]) ? plant.position.z-1:plant.position.z;//gravity
+                        if(world.time%60==0&&world.map.block[plant.position.x][plant.position.y][plant.position.z-1][0].material == 'earth')
                         {
-                            seed.breed++;
-                            if(seed.breed>=(1440/1.25))
+                            plant.breed++;
+                            if(plant.breed >= Plants.species[plant.specie].time.maturing.max/10000 || (Util.roleta(1,19) == 1&& plant.breed>=(Plants.species[plant.specie].time.maturing.min/10000)))
                             {
-                                let temp = seed.birth;
-                                return(new Plant(seed.specie,seed.status,seed.birth,seed.position,seed.quality,100));
+                                return(new Plant(plant.specie,plant.status,plant.birth,plant.position,plant.quality,100));
                             }
                         }
                     }
                 }
-                return(seed);
+                return(plant);
             }
         )
     }
