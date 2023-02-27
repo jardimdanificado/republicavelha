@@ -142,7 +142,7 @@ export function frame(world)
                         if(world.time%60==0&&world.map.block[seed.position.x][seed.position.y][seed.position.z-1][0].material == 'earth')
                         {
                             seed.breed++;
-                            if(seed.breed>=40)
+                            if(seed.breed>=(1440/1.25))
                             {
                                 let temp = seed.birth;
                                 return(new Plant(seed.specie,seed.status,seed.birth,seed.position,seed.quality,100));

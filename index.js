@@ -64,4 +64,4 @@ async function debug(msize,mwidth,mquality)
 		for(let y = 0;y<mundo.map.heightmap[0].length;y++)
 			mundo.plant.spawn ('seed', 'grass', 'breeding', {x:x,y:y,z:mundo.map.block[0][0].length-1}, 100, 100);
 };
-debug({w:256,h:128},2,1);
+debug({w:64,h:128},2,1);

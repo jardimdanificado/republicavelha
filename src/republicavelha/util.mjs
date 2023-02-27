@@ -80,7 +80,16 @@ export function getSizeInBytes(input) { if (typeof input == 'function') return (
 //UTILS
 //-----------------------------------
 
-export function repeatWithInterval(func, args, delay) {
+export function roleta(...odds) 
+{
+	var roleta = []; 
+	for(let i = 0; i<odds.length;i++)
+		roleta = roleta.concat(Array(odds[i]).fill(i));
+	return [random,roleta[randomInRange(0, roleta.length - 1)]];
+}
+
+export function repeatWithInterval(func, args, delay) 
+{
 	function runFunc() {
 	  // Call the function with the provided arguments
 	  func.apply(null, args);
@@ -94,7 +103,8 @@ export function repeatWithInterval(func, args, delay) {
   }
   
 
-export function repeatWithAnimationFrame(func, args) {
+export function repeatWithAnimationFrame(func, args) 
+{
 	function runFunc() {
 	  // Call the function with the provided arguments
 	  func.apply(null, args);
