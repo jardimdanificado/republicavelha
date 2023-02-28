@@ -330,6 +330,13 @@ export function workerPromise(worker)
 	return (new Promise((resolve) => { worker.onmessage = resolve; }))
 }
 
+export function ComradePromise(workerPath,...args)
+{
+	var worker = new Worker(workerPath);
+	worker.postMessage(args[0]);
+	return (workerPromise(worker));
+}
+
 export function Comrade(modulePath, functionName, args)//this create a worker and return a promise which will become the worker's return
 {
 	var worker = new Worker("./src/republicavelha/comrade/comrade.worker.js", { type: 'module' });

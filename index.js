@@ -24,7 +24,7 @@ function grassify(mundo)
 				100
 			);
 
-			if(Republica.Util.roleta(50,Republica.Util.randomInRange(1,50)))
+			if(Republica.Util.roleta(50,Republica.Util.randomInRange(1,50)))//if roleta == 1
 			{	
 				let temptype = Object.keys(Republica.Encyclopedia.Plants)
 				[
@@ -38,7 +38,7 @@ function grassify(mundo)
 					)
 				]
 				if(temptype !== 'grass')
-					mundo.plant.spawn(//this spawns a random seed at each xy position
+					mundo.plant.spawn(//this spawns a random seed at the xy position
 						'seed', 
 						temptype,
 						'idle', 
