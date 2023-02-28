@@ -339,57 +339,215 @@ export function ComradePromise(workerPath,...args)
 
 export function Comrade(modulePath, functionName, args)//this create a worker and return a promise which will become the worker's return
 {
-	var worker = new Worker("./src/republicavelha/comrade/comrade.worker.js", { type: 'module' });
+	const workerCode = `
+	"use strict";
+
+	onmessage = async function(event) 
+	{
+		postMessage((await import(event.data[0]))[event.data[1]].apply(null,event.data[2]));
+		self.close();
+	};
+	`;
+	// create a Blob object containing the worker code
+	const blob = new Blob([workerCode], { type: 'application/javascript' });
+
+	// create a URL that references the Blob object
+	const blobUrl = URL.createObjectURL(blob);
+	// create a new worker using the URL
+	const worker = new Worker(blobUrl);
 	worker.postMessage([modulePath, functionName, args]);
 	return (workerPromise(worker));
 }
 
-export function wComrade(modulePath, functionName, args)//this create a worker and return a promise which will become the worker's return
+export function wComrade(modulePath, functionName, args)//this create a worker and return it
 {
-	var worker = new Worker("./src/republicavelha/comrade/comrade.worker.js", { type: 'module' });
+	const workerCode = `
+	"use strict";
+
+	onmessage = async function(event) 
+	{
+		postMessage((await import(event.data[0]))[event.data[1]].apply(null,event.data[2]));
+		self.close();
+	};
+	`;
+	// create a Blob object containing the worker code
+	const blob = new Blob([workerCode], { type: 'application/javascript' });
+
+	// create a URL that references the Blob object
+	const blobUrl = URL.createObjectURL(blob);
+	// create a new worker using the URL
+	const worker = new Worker(blobUrl);
 	worker.postMessage([modulePath, functionName, args]);
-	return ((worker));
+	return (worker);
 }
 
 export function asyncComrade(modulePath, functionName, args)//this create a worker and return a promise which will become the worker's return
 {
-	var worker = new Worker("./src/republicavelha/comrade/acomrade.worker.js", { type: 'module' });
+	const workerCode = `
+	"use strict";
+
+	onmessage = async function(event) 
+	{
+		const lib = await import(event.data[0]);
+		postMessage(await lib[event.data[1]].apply(null,event.data[2]));
+		self.close();
+	};
+	`;
+	// create a Blob object containing the worker code
+	const blob = new Blob([workerCode], { type: 'application/javascript' });
+
+	// create a URL that references the Blob object
+	const blobUrl = URL.createObjectURL(blob);
+	// create a new worker using the URL
+	const worker = new Worker(blobUrl);
 	worker.postMessage([modulePath, functionName, args]);
 	return (workerPromise(worker));
 }
 
 export function wasyncComrade(modulePath, functionName, args)//this create a worker and return a promise which will become the worker's return
 {
-	var worker = new Worker("./src/republicavelha/comrade/acomrade.worker.js", { type: 'module' });
+	const workerCode = `
+	"use strict";
+
+	onmessage = async function(event) 
+	{
+		const lib = await import(event.data[0]);
+		postMessage(await lib[event.data[1]].apply(null,event.data[2]));
+		self.close();
+	};
+	`;
+	// create a Blob object containing the worker code
+	const blob = new Blob([workerCode], { type: 'application/javascript' });
+
+	// create a URL that references the Blob object
+	const blobUrl = URL.createObjectURL(blob);
+	// create a new worker using the URL
+	const worker = new Worker(blobUrl);
 	worker.postMessage([modulePath, functionName, args]);
-	return ((worker));
+	return (worker);
 }
 
-export function Comrades(modulePath, functionName, args, times, optresult)//the same, but repeated x times, values are stored in a array
+export function Comrades(modulePath, functionName, args)//this create a worker and return a promise which will become the worker's return
 {
-	var worker = new Worker("./src/republicavelha/comrade/comrades.worker.js", { type: 'module' });
-	worker.postMessage([modulePath, functionName, args, times, optresult]);
+	const workerCode = `
+	"use strict";
+	onmessage = async function(event) 
+	{
+		const modul = await import(event.data[0]);
+		let result;
+		if(typeof event.data[4] !== 'undefined')
+			result = event.data[4];
+		let counter = 0;
+		while(counter<event.data[3])
+		{
+			result = modul[event.data[1]].apply(this,event.data[2]);
+			counter++;
+		}
+		postMessage(result);
+		self.close();
+	};
+	`;
+	// create a Blob object containing the worker code
+	const blob = new Blob([workerCode], { type: 'application/javascript' });
+
+	// create a URL that references the Blob object
+	const blobUrl = URL.createObjectURL(blob);
+	// create a new worker using the URL
+	const worker = new Worker(blobUrl);
+	worker.postMessage([modulePath, functionName, args]);
 	return (workerPromise(worker));
 }
 
-export function wComrades(modulePath, functionName, args, times, optresult)//the same, but repeated x times, values are stored in a array
+export function wComrades(modulePath, functionName, args)//this create a worker and return a promise which will become the worker's return
 {
-	var worker = new Worker("./src/republicavelha/comrade/comrades.worker.js", { type: 'module' });
-	worker.postMessage([modulePath, functionName, args, times, optresult]);
-	return ((worker));
+	const workerCode = `
+	"use strict";
+	onmessage = async function(event) 
+	{
+		const modul = await import(event.data[0]);
+		let result;
+		if(typeof event.data[4] !== 'undefined')
+			result = event.data[4];
+		let counter = 0;
+		while(counter<event.data[3])
+		{
+			result = modul[event.data[1]].apply(this,event.data[2]);
+			counter++;
+		}
+		postMessage(result);
+		self.close();
+	};
+	`;
+	// create a Blob object containing the worker code
+	const blob = new Blob([workerCode], { type: 'application/javascript' });
+
+	// create a URL that references the Blob object
+	const blobUrl = URL.createObjectURL(blob);
+	// create a new worker using the URL
+	const worker = new Worker(blobUrl);
+	worker.postMessage([modulePath, functionName, args]);
+	return (worker);
 }
 
-export function asyncComrades(modulePath, functionName, args, times, optresult)//the same, but repeated x times, values are stored in a array
+export function asyncComrades(modulePath, functionName, args)//this create a worker and return a promise which will become the worker's return
 {
-	var worker = new Worker("./src/republicavelha/comrade/acomrades.worker.js", { type: 'module' });
-	worker.postMessage([modulePath, functionName, args, times, optresult]);
+	const workerCode = `
+	"use strict";
+	onmessage = async function(event) 
+	{
+		const modul = await import(event.data[0]);
+		let result;
+		if(typeof event.data[4] !== 'undefined')
+			result = event.data[4];
+		let counter = 0;
+		while(counter<event.data[3])
+		{
+			result = modul[event.data[1]].apply(this,event.data[2]);
+			counter++;
+		}
+		postMessage(await Promise.all(result).then((results)=>{return results}));
+		self.close();
+	};
+	`;
+	// create a Blob object containing the worker code
+	const blob = new Blob([workerCode], { type: 'application/javascript' });
+
+	// create a URL that references the Blob object
+	const blobUrl = URL.createObjectURL(blob);
+	// create a new worker using the URL
+	const worker = new Worker(blobUrl);
+	worker.postMessage([modulePath, functionName, args]);
 	return (workerPromise(worker));
 }
 
-export function wasyncComrades(modulePath, functionName, args, times, optresult)//the same, but repeated x times, values are stored in a array
+export function wasyncComrades(modulePath, functionName, args)//this create a worker and return a promise which will become the worker's return
 {
-	var worker = new Worker("./src/republicavelha/comrade/acomrades.worker.js", { type: 'module' });
-	worker.postMessage([modulePath, functionName, args, times, optresult]);
+	const workerCode = `
+	"use strict";
+	onmessage = async function(event) 
+	{
+		const modul = await import(event.data[0]);
+		let result;
+		if(typeof event.data[4] !== 'undefined')
+			result = event.data[4];
+		let counter = 0;
+		while(counter<event.data[3])
+		{
+			result = modul[event.data[1]].apply(this,event.data[2]);
+			counter++;
+		}
+		postMessage(await Promise.all(result).then((results)=>{return results}));
+		self.close();
+	};
+	`;
+	// create a Blob object containing the worker code
+	const blob = new Blob([workerCode], { type: 'application/javascript' });
+
+	// create a URL that references the Blob object
+	const blobUrl = URL.createObjectURL(blob);
+	// create a new worker using the URL
+	const worker = new Worker(blobUrl);
+	worker.postMessage([modulePath, functionName, args]);
 	return ((worker));
 }
 
