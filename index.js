@@ -1,5 +1,6 @@
 "use strict";
-var mundo, Republica;//declared outside debug function so we can console.log it globally
+var mundo;//declared outside debug function so we can console.log it globally
+var Republica;
 
 function plantCount(specie = 'caju')
 {
@@ -9,11 +10,51 @@ function plantCount(specie = 'caju')
 	}))
 }
 
+function grassify(mundo)
+{
+	for(let x = 0;x<mundo.map.heightmap.length;x++)
+		for(let y = 0;y<mundo.map.heightmap[0].length;y++)
+		{
+			mundo.plant.spawn(//this spawns a grass seed at each xy position
+				'seed',
+				'grass',
+				'idle', 
+				{x:x,y:y,z:mundo.map.block[0][0].length-1}, 
+				100, 
+				100
+			);
+
+			if(Republica.Util.roleta(50,Republica.Util.randomInRange(1,50)))
+			{	
+				let temptype = Object.keys(Republica.Encyclopedia.Plants)
+				[
+					Republica.Util.roleta.apply(
+						this,
+						Republica.Util.randomIntArray(
+							1,
+							10,
+							Object.keys(Republica.Encyclopedia.Plants).length
+						)
+					)
+				]
+				if(temptype !== 'grass')
+					mundo.plant.spawn(//this spawns a random seed at each xy position
+						'seed', 
+						temptype,
+						'idle', 
+						{x:x,y:y,z:mundo.map.block[0][0].length-1}, 
+						100, 
+						100
+					);
+			}
+		}
+	return mundo;
+}
+
 async function debug(msize,mwidth,mquality)
 {
 	Republica = await import("./src/republicavelha.mjs");
 	console.log(Republica);
-	console.log(new Republica.Type.Creature('human','male'));
 	console.time((msize.w*mwidth) + "x" + (msize.w*mwidth) + " map generated in");
 	mundo = await Republica.World.New(msize.w,mwidth,(mwidth**mquality)*(msize.w),0,0,1,true);
 	console.timeEnd((msize.w*mwidth) + "x" + (msize.w*mwidth) + " map generated in");
@@ -67,25 +108,6 @@ async function debug(msize,mwidth,mquality)
 		process.stdout.write(htmltxt);
 	}
 	mundo.loop.start('interval');
-	for(let x = 0;x<mundo.map.heightmap.length;x++)
-		for(let y = 0;y<mundo.map.heightmap[0].length;y++)
-			mundo.plant.spawn(//this spawns a random seed at each xy position
-				'seed', 
-				Object.keys(Republica.Encyclopedia.Plants)
-				[
-					Republica.Util.roleta.apply(
-						this,
-						Republica.Util.randomIntArray(
-							1,
-							10,
-							Object.keys(Republica.Encyclopedia.Plants).length
-						)
-					)
-				], 
-				'idle', 
-				{x:x,y:y,z:mundo.map.block[0][0].length-1}, 
-				100, 
-				100
-			);
+	mundo = grassify(mundo);
 };
 debug({w:64,h:128},2,1);
