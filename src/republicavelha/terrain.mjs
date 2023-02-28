@@ -369,7 +369,7 @@ async function autoHeightmap(mapsize, multi)
 	{
 		for (let y = 0; y < multi; y++) 
 		{
-			promises.push(ComradePromise('./src/republicavelha/heightmap.worker.js',mapsize));
+			promises.push(ComradePromise('./src/republicavelha/worker/heightmap.js',mapsize));
 		}
 	}
 	return (await Promise.all(promises)
@@ -430,7 +430,7 @@ async function fastTerrain(hm,fixedHeight,slices)
 	let divided = await customSplitMatrix(hm,slices);
 	let terrs = [];
 	for(let i = 0;i<slices**2;i++)
-		terrs.push(ComradePromise("./src/republicavelha/terrain.worker.js",[divided[i],fixedHeight]));
+		terrs.push(ComradePromise("./src/republicavelha/worker/terrain.js",[divided[i],fixedHeight]));
 	return (
 				await Promise.all(terrs)
 				.then(async (results) => 
@@ -549,7 +549,7 @@ export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomi
 	hmap = await abenchy(
 	  	async function()
 	  	{
-		    return (ComradePromise('./src/republicavelha/heightmapmodder.worker.js',[hmap,smooth,randomize,subdivide])
+		    return (ComradePromise('./src/republicavelha/worker/heightmapmodder.js',[hmap,smooth,randomize,subdivide])
 		    	.then(resolvedValue => {
 		  	  	return resolvedValue.data;
 	      		})
