@@ -1,6 +1,6 @@
 import * as Util from "./util.mjs";
 import { AutoTerrain } from "./terrain.mjs";
-import { Creature, Plant, Seed } from "./types.mjs";
+import { Creature, Plant, Seed , Leaf, Trunk, Branch, Fruit, Flower} from "./types.mjs";
 import * as Plants from "./plants.mjs";
 
 function getHourOfDay(totalSeconds) 
@@ -46,65 +46,6 @@ export async function Map(mapsize,multiHorizontal,smooth,randomize,subdivide,pos
     };
 }
 
-export const Loop = 
-{
-    stop:(world)=>
-    {
-        if(world.loop.type == 'raf')
-        {
-            cancelAnimationFrame(world.loop.id);
-            world.loop.id = null;
-        }
-        else if (world.loop.type == 'interval')
-        {
-            clearInterval(world.loop.id);
-            world.loop.id = null;
-        }
-    },
-    start:(world,type)=>
-    {
-        if(typeof type == 'undefined'||(type !== 'raf'&&type !== 'interval'))
-        {
-            if(world.loop.type == 'raf')
-            {
-                if(world.loop.id != null)
-                    Loop.stop(world);
-                world.loop.id = Util.repeatWithAnimationFrame(Republica.World.frame,[mundo]);
-            }
-            else if (world.loop.type == 'interval')
-            {
-                if(world.loop.id != null)
-                    Loop.stop(world);
-                world.loop.id = Util.repeatWithInterval(Republica.World.frame,[mundo],4);
-            }
-        }
-        else if(type == 'raf')
-        {
-            if(world.loop.id != null)
-                Loop.stop(world);
-            world.loop.type = 'raf';
-            world.loop.id = Util.repeatWithAnimationFrame(Republica.World.frame,[mundo]);
-        }
-        else if (type == 'interval')
-        {
-            if(world.loop.id != null)
-                Loop.stop(world);
-            world.loop.type = 'interval';
-            world.loop.id = Util.repeatWithInterval(Republica.World.frame,[mundo],4);
-        }
-    },
-    switch:(world,type)=>
-    {
-        if(typeof type == 'undefined'||(type !== 'raf'&&type !== 'interval'))
-        {
-            if(world.loop.type === 'raf')
-                world.loop.type = 'interval'
-            else if (world.loop.type === 'interval')
-                world.loop.type = 'raf';
-        }
-    }
-};
-
 export const Life = 
 {
     Spawn:
@@ -144,7 +85,7 @@ function seedFrame(world,plant)
             plant.status = (plant.status !== 'germinating') ? 'germinating' : plant.status;
             if(plant.status === 'germinating')
                 if(plant.germination >= Plants[plant.specie].time.maturing.max/10000 || (Util.roleta(1,19) == 1&& plant.germination>=(Plants[plant.specie].time.maturing.min/10000)))
-                    return(new Plant(plant.specie,plant.status,world.time,plant.position,plant.quality,100,plant.birth));
+                    return(new Plant(plant.specie,plant.status,world.time,plant.position,plant.quality,100));
         }
     }
     return(plant);
@@ -157,13 +98,15 @@ function plantFrame(world,plant)
     {
         case 'herb':
         {
-            if(world.time % (Plants[plant.specie]/100000)===0)
+            if(world.time % (Plants[plant.specie].time.maturing/100000)===0)
             {
-                plant.leaf
+                if(plant.leaf.length < Plants[plant.specie].leaf.max)
+                    plant.leaf.push(new Leaf(plant.specie,'idle',world.time,plant.position,plant.quality,plant.condition));
             }
         }
         break;
     }
+    return(plant);
 }
 
 //INTERPRETATION
@@ -179,12 +122,91 @@ export function frame(world)
                     return(seedFrame(world,plant));
                 }
                 if(plant.type == 'plant')
-
+                {
+                    return(plantFrame(world,plant));
+                }
                 return(plant);
             }
         )
     }
 }
+
+export const Loop = 
+{
+    stop:(wLoop)=>
+    {
+        if(wLoop.type == 'raf')
+        {
+            cancelAnimationFrame(wLoop.id);
+            wLoop.id = null;
+        }
+        else if (wLoop.type == 'interval')
+        {
+            clearInterval(wLoop.id);
+            wLoop.id = null;
+        }
+    },
+    start:(wLoop,type)=>
+    {
+        if(typeof type === 'number')
+        {
+            if(wLoop.id != null)
+                Loop.stop(world);
+            wLoop.cooldown = 4;
+            wLoop.id = Util.repeatWithInterval(Republica.World.frame,[mundo],wLoop.cooldown);
+        }
+        else if(typeof type == 'undefined'||(type !== 'raf'&&type !== 'interval'))
+        {
+            if(wLoop.type == 'raf')
+            {
+                if(wLoop.id != null)
+                    Loop.stop(world);
+                wLoop.id = Util.repeatWithAnimationFrame(Republica.World.frame,[mundo]);
+            }
+            else if (wLoop.type == 'interval')
+            {
+                if(wLoop.id != null)
+                    Loop.stop(world);
+                wLoop.id = Util.repeatWithInterval(Republica.World.frame,[mundo],wLoop.cooldown);
+            }
+        }
+        else if(type == 'raf')
+        {
+            if(wLoop.id != null)
+                Loop.stop(world);
+            wLoop.type = 'raf';
+            wLoop.id = Util.repeatWithAnimationFrame(Republica.World.frame,[mundo]);
+        }
+        else if (type == 'interval')
+        {
+            if(wLoop.id != null)
+                Loop.stop(world);
+            wLoop.type = 'interval';
+            wLoop.id = Util.repeatWithInterval(Republica.World.frame,[mundo],wLoop.cooldown);
+        }
+    },
+    reboot:(wLoop)=>
+    {
+        Loop.stop(wLoop);
+        Loop.start(wLoop);
+    },
+    switch:(wLoop,type)=>
+    {
+        if(typeof type === 'number')
+        {
+            wLoop.type = 'interval';
+            wLoop.cooldown = type;
+            Loop.reboot(wLoop);
+        }
+        else if(typeof type == 'undefined'||(type !== 'raf'&&type !== 'interval'))
+        {
+            if(wLoop.type === 'raf')
+                wLoop.type = 'interval'
+            else if (wLoop.type === 'interval')
+                wLoop.type = 'raf';
+        }
+    }
+};
 
 export async function New(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices ,retry)
 {
@@ -194,6 +216,7 @@ export async function New(mapsize,multiHorizontal,smooth,randomize,subdivide,pos
         {
             id:null,
             type:'raf',
+            cooldown:4//only for interval
         },//types: raf(requireAnimationFrame), interval(setInterval)
         time:0,
         map:await Map(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices ,retry),
