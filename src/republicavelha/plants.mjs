@@ -128,8 +128,8 @@ export const tamarind =
     max: 500 // number of fruits per tree
   },
   size: {
-    min: 2, // centimeters in length
-    max: 15 // centimeters in length
+    min: 2000, // centimeters in length
+    max: 15000 // centimeters in length
   },
   wood: 'tamarind wood',
   leaf: {
@@ -150,7 +150,7 @@ export const tamarind =
   place: 'outdoor',
   time: {
     maturing: {
-      min: 15552000, // sec from blossom to fruit
+      min: 15552, // sec from blossom to fruit
       max: 31536000 // sec from blossom to fruit
     },
     lifespan: {
@@ -168,8 +168,8 @@ export const starfruit =
     max: 300 // number of fruits per tree
   },
   size: {
-    min: 7, // centimeters in length
-    max: 15 // centimeters in length
+    min: 7000, // centimeters in length
+    max: 15000 // centimeters in length
   },
   wood: 'starfruit wood',
   leaf: {
@@ -208,8 +208,8 @@ export const jackfruit =
     max: 200 // number of fruits per tree
   },
   size: {
-    min: 30, // centimeters in diameter
-    max: 100 // centimeters in diameter
+    min: 10000, // centimeters in diameter
+    max: 25000 // centimeters in diameter
   },
   wood: 'jackfruit wood',
   leaf: {

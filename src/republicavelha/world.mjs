@@ -91,21 +91,60 @@ function seedFrame(world,plant)
     return(plant);
 }
 
+function growLeaf(plant)
+{
+    if(plant.leaf.length < Plants[plant.specie].leaf.max)
+        plant.leaf += 1;
+    return plant;
+}
+
+function growBranch(plant,time)
+{
+    if(plant.branch.length < Plants[plant.specie].leaf/10)
+    {
+        plant.branch.push(new Branch(plant.specie,'idle',time,plant.position,plant.quality,plant.condition));
+    }
+    return plant;
+}
+
+function growTrunk(plant,time)
+{
+    
+    if(plant.trunk.length < Plants[plant.specie].size.max/1000)
+    {
+        plant.trunk.push(new Trunk(plant.specie,'idle',time,{...plant.position,z:plant.position.z+(plant.trunk.length +1)},plant.quality,plant.condition));
+    }
+    return plant;
+}
+
 function plantFrame(world,plant)
 {
-
-    switch(plant.type)
+    
+    if(world.time % (Plants[plant.specie].time.maturing.min/100000)===0)
     {
-        case 'herb':
-        {
-            if(world.time % (Plants[plant.specie].time.maturing/100000)===0)
-            {
-                if(plant.leaf.length < Plants[plant.specie].leaf.max)
-                    plant.leaf.push(new Leaf(plant.specie,'idle',world.time,plant.position,plant.quality,plant.condition));
-            }
-        }
-        break;
+        plant = growLeaf(plant);
     }
+
+    if(Plants[plant.specie].type == 'herb')
+    {
+
+    }
+    else if(Plants[plant.specie].type == 'plant')
+    {
+        if(world.time % (Plants[plant.specie].time.maturing.min/10000)===0)
+        {
+            plant = growBranch(plant,world.time);
+        }
+    }
+    else if(Plants[plant.specie].type == 'tree'||Plants[plant.specie].type == 'fruit tree')
+    {
+        if(world.time % Util.LimitItTo(Plants[plant.specie].time.maturing.min,1,1000)===0)
+        {
+            plant = growBranch(plant,world.time);
+            plant = growTrunk(plant,world.time);
+        }
+    }
+    
     return(plant);
 }
 
