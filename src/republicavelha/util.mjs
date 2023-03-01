@@ -551,7 +551,8 @@ export function wasyncComrades(modulePath, functionName, args)//this create a wo
 	return ((worker));
 }
 
-export function Assign(reference, array) {
+export function Assign(reference, array) 
+{
 	Object.assign(reference, array, { length: array.length });
 }
 

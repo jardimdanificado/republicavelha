@@ -36,10 +36,13 @@ export class Creature extends Generic
 
 export class Plant extends Generic 
 {
-	constructor(specie = 'grass', status = 'idle', birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100) 
+	constructor(specie = 'grass', status = 'idle', birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100,germinateTime) 
 	{
 		super('plant', status, birth, position, quality, condition);
 		this.specie = specie;
+		this.germinateTime = Util.defsto(germinateTime,birth);
+		this.leaf = [];
+		this.flower = [];
 	}
 }
 

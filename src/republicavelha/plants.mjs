@@ -36,7 +36,7 @@ export const grass =
       }
   }
 };
-export const cannabis=
+export const cannabis =
 {
   type: 'herb',
   fruit: null,
@@ -79,9 +79,9 @@ export const cannabis=
       }
   }
 };
-export const orange= 
+export const orange = 
 {
-  type: 'fruit',
+  type: 'fruit tree',
   fruit: {
       name: 'orange',
       min: 3, // number of fruits per tree
@@ -119,9 +119,9 @@ export const orange=
       }
   }
 };
-export const tamarind= 
+export const tamarind = 
 {
-  type: 'fruit',
+  type: 'fruit tree',
   fruit: {
     name: 'tamarind',
     min: 5, // number of fruits per tree
@@ -159,9 +159,9 @@ export const tamarind=
     }
   }
 };
-export const starfruit=
+export const starfruit =
 {
-  type: 'fruit',
+  type: 'fruit tree',
   fruit: {
     name: 'starfruit',
     min: 50, // number of fruits per tree
@@ -199,9 +199,9 @@ export const starfruit=
     }
   }
 };
-export const jackfruit=
+export const jackfruit =
 {
-  type: 'fruit',
+  type: 'fruit tree',
   fruit: {
     name: 'jackfruit',
     min: 1, // number of fruits per tree
@@ -241,7 +241,7 @@ export const jackfruit=
 };
 export const caju =
 {
-  type: 'fruit',
+  type: 'fruit tree',
   fruit: 
   {
     name: 'caju',
@@ -330,7 +330,7 @@ export const rice =
 };
 export const tomato =
 {
-  type: 'fruit',
+  type: 'fruit plant',
   fruit: 
   {
     name: 'tomato',

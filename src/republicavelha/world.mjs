@@ -133,6 +133,39 @@ function gravity(blockMap,position)
     );
 }
 
+function seedFrame(world,plant)
+{
+    if(typeof world.map.block[plant.position.x][plant.position.y][plant.position.z-1] !== 'undefined')
+    {
+        plant.position = gravity(world.map.block,plant.position);
+        if(world.time%60==0&&world.map.block[plant.position.x][plant.position.y][plant.position.z-1][0].material == 'earth')
+        {
+            plant.germination++;
+            plant.status = (plant.status !== 'germinating') ? 'germinating' : plant.status;
+            if(plant.status === 'germinating')
+                if(plant.germination >= Plants[plant.specie].time.maturing.max/10000 || (Util.roleta(1,19) == 1&& plant.germination>=(Plants[plant.specie].time.maturing.min/10000)))
+                    return(new Plant(plant.specie,plant.status,world.time,plant.position,plant.quality,100,plant.birth));
+        }
+    }
+    return(plant);
+}
+
+function plantFrame(world,plant)
+{
+
+    switch(plant.type)
+    {
+        case 'herb':
+        {
+            if(world.time % (Plants[plant.specie]/100000)===0)
+            {
+                plant.leaf
+            }
+        }
+        break;
+    }
+}
+
 //INTERPRETATION
 export function frame(world)
 {
@@ -143,21 +176,10 @@ export function frame(world)
             {
                 if(plant.type == 'seed')
                 {
-                    if(typeof world.map.block[plant.position.x][plant.position.y][plant.position.z-1] !== 'undefined')
-                    {
-                        plant.position = gravity(world.map.block,plant.position);
-                        if(world.time%60==0&&world.map.block[plant.position.x][plant.position.y][plant.position.z-1][0].material == 'earth')
-                        {
-                            plant.germination++;
-                            plant.status = (plant.status !== 'germinating') ? 'germinating' : plant.status;
-                            if(plant.status === 'germinating')
-                                if(plant.germination >= Plants[plant.specie].time.maturing.max/10000 || (Util.roleta(1,19) == 1&& plant.germination>=(Plants[plant.specie].time.maturing.min/10000)))
-                                {
-                                    return(new Plant(plant.specie,plant.status,plant.birth,plant.position,plant.quality,100));
-                                }
-                        }
-                    }
+                    return(seedFrame(world,plant));
                 }
+                if(plant.type == 'plant')
+
                 return(plant);
             }
         )
