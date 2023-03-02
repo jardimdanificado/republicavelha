@@ -162,38 +162,46 @@ export const tamarind =
 export const starfruit =
 {
   type: 'fruit tree',
-  fruit: {
+  fruit: 
+  {
     name: 'starfruit',
     min: 50, // number of fruits per tree
     max: 300 // number of fruits per tree
   },
-  size: {
+  size: 
+  {
     min: 7000, // centimeters in length
     max: 15000 // centimeters in length
   },
   wood: 'starfruit wood',
-  leaf: {
+  leaf: 
+  {
     name: 'starfruit leaf',
     min: 500, // number of leaves per tree
     max: 10000 // number of leaves per tree
   },
-  flower: {
+  flower: 
+  {
     name: 'starfruit flower',
     min: 1000, // number of flowers per tree
     max: 20000 // number of flowers per tree
   },
-  seed: {
+  seed: 
+  {
     name: 'starfruit seed',
     min: 3, // number of seeds per fruit
     max: 12 // number of seeds per fruit
   },
   place: 'outdoor',
-  time: {
-    maturing: {
+  time: 
+  {
+    maturing: 
+    {
       min: 6912000, // seconds from blossom to fruit (80 days)
       max: 10368000 // seconds from blossom to fruit (120 days)
     },
-    lifespan: {
+    lifespan: 
+    {
       min: 1261440000, // seconds (40 years)
       max: 1576800000 // seconds (50 years)
     }
@@ -202,38 +210,46 @@ export const starfruit =
 export const jackfruit =
 {
   type: 'fruit tree',
-  fruit: {
+  fruit: 
+  {
     name: 'jackfruit',
     min: 1, // number of fruits per tree
     max: 200 // number of fruits per tree
   },
-  size: {
+  size: 
+  {
     min: 10000, // centimeters in diameter
     max: 25000 // centimeters in diameter
   },
   wood: 'jackfruit wood',
-  leaf: {
+  leaf: 
+  {
     name: 'jackfruit leaf',
     min: 500, // number of leaves per tree
     max: 10000 // number of leaves per tree
   },
-  flower: {
+  flower: 
+  {
     name: 'jackfruit flower',
     min: 1000, // number of flowers per tree
     max: 20000 // number of flowers per tree
   },
-  seed: {
+  seed: 
+  {
     name: 'jackfruit seed',
     min: 50, // number of seeds per fruit
     max: 500 // number of seeds per fruit
   },
   place: 'outdoor',
-  time: {
-    maturing: {
+  time: 
+  {
+    maturing: 
+    {
       min: 7776000, // seconds from blossom to fruit (90 days)
       max: 10368000 // seconds from blossom to fruit (120 days)
     },
-    lifespan: {
+    lifespan: 
+    {
       min: 788940000, // seconds (25 years)
       max: 1261440000 // seconds (40 years)
     }
@@ -330,7 +346,7 @@ export const rice =
 };
 export const tomato =
 {
-  type: 'fruit plant',
+  type: 'plant',
   fruit: 
   {
     name: 'tomato',

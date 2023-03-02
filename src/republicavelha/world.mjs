@@ -84,7 +84,7 @@ function seedFrame(world,plant)
             plant.germination++;
             plant.status = (plant.status !== 'germinating') ? 'germinating' : plant.status;
             if(plant.status === 'germinating')
-                if(plant.germination >= Plants[plant.specie].time.maturing.max/10000 || (Util.roleta(1,19) == 1&& plant.germination>=(Plants[plant.specie].time.maturing.min/10000)))
+                if(plant.germination >= Plants[plant.specie].time.maturing.max/10000 || (Util.roleta(19,1) == 1&& plant.germination>=(Plants[plant.specie].time.maturing.min/10000)))
                     return(new Plant(plant.specie,plant.status,world.time,plant.position,plant.quality,100));
         }
     }
@@ -94,7 +94,8 @@ function seedFrame(world,plant)
 function growLeaf(plant)
 {
     if(plant.leaf.length < Plants[plant.specie].leaf.max)
-        plant.leaf += 1;
+        if(Util.roleta(14,1) == 1)
+            plant.leaf += 1;
     return plant;
 }
 
@@ -102,7 +103,8 @@ function growBranch(plant,time)
 {
     if(plant.branch.length < Plants[plant.specie].leaf/10)
     {
-        plant.branch.push(new Branch(plant.specie,'idle',time,plant.position,plant.quality,plant.condition));
+        if(Util.roleta(29,1) == 1)
+            plant.branch.push(new Branch(plant.specie,'idle',time,plant.position,plant.quality,plant.condition));
     }
     return plant;
 }
@@ -112,7 +114,8 @@ function growTrunk(plant,time)
     
     if(plant.trunk.length < Plants[plant.specie].size.max/1000)
     {
-        plant.trunk.push(new Trunk(plant.specie,'idle',time,{...plant.position,z:plant.position.z+(plant.trunk.length +1)},plant.quality,plant.condition));
+        if(Util.roleta(47,1) == 1)
+            plant.trunk.push(new Trunk(plant.specie,'idle',time,{...plant.position,z:plant.position.z+(plant.trunk.length +1)},plant.quality,plant.condition));
     }
     return plant;
 }
