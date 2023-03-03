@@ -188,43 +188,43 @@ export const Loop =
             wLoop.id = null;
         }
     },
-    start:(wLoop,type)=>
+    start:(world,type)=>
     {
         if(typeof type === 'number')
         {
-            if(wLoop.id != null)
+            if(world.loop.id != null)
                 Loop.stop(world);
-            wLoop.cooldown = 4;
-            wLoop.id = Util.repeatWithInterval(Republica.World.frame,[mundo],wLoop.cooldown);
+            world.loop.cooldown = 4;
+            world.loop.id = Util.repeatWithInterval(frame,[world],world.loop.cooldown);
         }
         else if(typeof type == 'undefined'||(type !== 'raf'&&type !== 'interval'))
         {
-            if(wLoop.type == 'raf')
+            if(world.loop.type == 'raf')
             {
-                if(wLoop.id != null)
+                if(world.loop.id != null)
                     Loop.stop(world);
-                wLoop.id = Util.repeatWithAnimationFrame(Republica.World.frame,[mundo]);
+                world.loop.id = Util.repeatWithAnimationFrame(frame,[world]);
             }
-            else if (wLoop.type == 'interval')
+            else if (world.loop.type == 'interval')
             {
-                if(wLoop.id != null)
+                if(world.loop.id != null)
                     Loop.stop(world);
-                wLoop.id = Util.repeatWithInterval(Republica.World.frame,[mundo],wLoop.cooldown);
+                world.loop.id = Util.repeatWithInterval(frame,[world],world.loop.cooldown);
             }
         }
         else if(type == 'raf')
         {
-            if(wLoop.id != null)
+            if(world.loop.id != null)
                 Loop.stop(world);
-            wLoop.type = 'raf';
-            wLoop.id = Util.repeatWithAnimationFrame(Republica.World.frame,[mundo]);
+            world.loop.type = 'raf';
+            world.loop.id = Util.repeatWithAnimationFrame(frame,[world]);
         }
         else if (type == 'interval')
         {
-            if(wLoop.id != null)
+            if(world.loop.id != null)
                 Loop.stop(world);
-            wLoop.type = 'interval';
-            wLoop.id = Util.repeatWithInterval(Republica.World.frame,[mundo],wLoop.cooldown);
+            world.loop.type = 'interval';
+            world.loop.id = Util.repeatWithInterval(frame,[world],world.loop.cooldown);
         }
     },
     reboot:(wLoop)=>
@@ -273,11 +273,11 @@ export async function New(mapsize,multiHorizontal,smooth,randomize,subdivide,pos
     };
     result.loop.stop = ()=>
     {
-        Loop.stop(result);
+        Loop.stop(result.loop);
     };
     result.loop.switch = (type)=>
     {
-        Loop.switch(result,type);
+        Loop.switch(result.loop,type);
     }
     //SPAWN FUNCTIONS
     result.plant.spawn = (type = 'seed', specie, status, position, quality, condition)=>

@@ -2,6 +2,9 @@
 var mundo;//declared outside debug function so we can console.log it globally
 var Republica;
 
+if(typeof process !== 'undefined')
+	var exit = process.exit;
+
 function plantCount(specie = 'caju')
 {
 	return(mundo.plant.filter((element) => 
@@ -51,13 +54,8 @@ function grassify(mundo)
 	return mundo;
 }
 
-async function debug(msize,mwidth,mquality)
+function HTMLRender(mundo)
 {
-	Republica = await import("./src/republicavelha.mjs");
-	console.log(Republica);
-	console.time((msize.w*mwidth) + "x" + (msize.w*mwidth) + " map generated in");
-	mundo = await Republica.World.New(msize.w,mwidth,(mwidth**mquality)*(msize.w),0,0,1,true);
-	console.timeEnd((msize.w*mwidth) + "x" + (msize.w*mwidth) + " map generated in");
 	var htmltxt = '';
 	for(let x = 0;x<mundo.map.block.length;x++)
 	{
@@ -99,15 +97,32 @@ async function debug(msize,mwidth,mquality)
 		else if(typeof process !== 'undefined')
 			htmltxt += '\n';
 	}
-	
+	document.getElementById("console-screen").innerHTML = htmltxt;
+}
+
+async function debug(msize,mwidth,mquality)
+{
+	Republica = await import("./src/republicavelha.mjs");
+	console.log(Republica);
+	console.time((msize.w*mwidth) + "x" + (msize.w*mwidth) + " map generated in");
+	var mundo = await Republica.World.New(msize.w,mwidth,(mwidth**mquality)*(msize.w),0,0,1,true);
+	console.timeEnd((msize.w*mwidth) + "x" + (msize.w*mwidth) + " map generated in");
 	if(typeof window !== 'undefined')
-		document.getElementById("console-screen").innerHTML = htmltxt;
+		HTMLRender(mundo);
 	else if(typeof process !== 'undefined')
 	{
-		console.clear();
-		process.stdout.write(htmltxt);
+		let repl = require('repl');
+		repl.start('> ')
+		console.log('type "exit()" to exit.');
 	}
 	mundo.loop.start('interval');
 	mundo = grassify(mundo);
+	return mundo;
 };
-debug({w:64,h:128},2,1);
+
+var mundo = debug({w:64,h:128},2,1);
+
+global.mundo = mundo;
+global.plantCount = plantCount;
+global.Republica = Republica;
+global.exit = exit;

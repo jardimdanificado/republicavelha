@@ -2,12 +2,12 @@
 //PRIMITIVES
 //-----------------------------------
 
-export function RGB(r, g, b) 
+export function RGB(r, g, b)
 { 
 	return ({ r: r, g: g, b: b }); 
 }
 
-export function RGBA(r, g, b, a) 
+export function RGBA(r, g, b, a)
 { 
 	return ({ r: r, g: g, b: b, a: a }); 
 }
@@ -327,14 +327,83 @@ export function create3DArray(dimX, dimY, dimZ, input)
 
 export function workerPromise(worker) 
 {
-	return (new Promise((resolve) => { worker.onmessage = resolve; }))
+
+	if(typeof process !== 'undefined')
+		return new Promise((resolve) => {
+			worker.on('message', resolve);
+		});
+	else
+		return (new Promise((resolve) => { worker.onmessage = resolve; }))
 }
 
-export function ComradePromise(workerPath,...args)
+export async function ComradePromise(workerPath,...args)
 {
-	var worker = new Worker(workerPath);
+	let worker = 0;
+	if(typeof process !== 'undefined' && typeof process.nextTick === 'function')
+	{
+		const {Worker} = await import('worker_threads');
+		worker = new Worker(workerPath);
+	}
+	else
+		worker = new Worker(workerPath);
+
 	worker.postMessage(args[0]);
 	return (workerPromise(worker));
+}
+
+export class ComradeWorker //this class replace all the comrade functions
+{
+    constructor(workerPath, workerData) 
+	{
+        const { isMainThread, Worker } = require('worker_threads');
+
+        if (isMainThread) 
+		{
+            this.worker = new Worker(workerPath);
+        } 
+		else 
+		{
+            this.worker = workerData.worker;
+        }
+
+        this.worker.on('message', (message) => 
+		{
+            this.resolve(message);
+        });
+
+        this.worker.on('error', (error) => 
+		{
+            this.reject(error);
+        });
+
+        this.worker.on('exit', (code) => 
+		{
+            if (code !== 0) 
+			{
+                this.reject(new Error(`Worker stopped with exit code ${code}`));
+            }
+        });
+
+        this.promise = new Promise((resolve, reject) => 
+		{
+            this.resolve = resolve;
+            this.reject = reject;
+            if (isMainThread) 
+			{
+                this.worker.postMessage(workerData);
+            }
+        });
+    }
+
+    async start() //this returns the promise
+	{
+        return this.promise;
+    }
+
+    close() //this closes the worker
+	{
+        this.worker.terminate();
+    }
 }
 
 export function Comrade(modulePath, functionName, args)//this create a worker and return a promise which will become the worker's return
