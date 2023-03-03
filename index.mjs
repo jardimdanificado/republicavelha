@@ -1,9 +1,6 @@
-"use strict";
+import * as Republica from './src/republicavelha.mjs';
 var mundo;//declared outside debug function so we can console.log it globally
-var Republica;
 
-if(typeof process !== 'undefined')
-	var exit = process.exit;
 
 function plantCount(specie = 'caju')
 {
@@ -100,29 +97,36 @@ function HTMLRender(mundo)
 	document.getElementById("console-screen").innerHTML = htmltxt;
 }
 
-async function debug(msize,mwidth,mquality)
+async function setupREPL()
 {
-	Republica = await import("./src/republicavelha.mjs");
-	console.log(Republica);
-	console.time((msize.w*mwidth) + "x" + (msize.w*mwidth) + " map generated in");
-	var mundo = await Republica.World.New(msize.w,mwidth,(mwidth**mquality)*(msize.w),0,0,1,true);
-	console.timeEnd((msize.w*mwidth) + "x" + (msize.w*mwidth) + " map generated in");
+	let repl = await import('repl');
+	repl.start('mqq> ');
+	console.log('Running under NodeJS REPL,type "exit()" to exit.');
+	return;
+}
+
+async function main(msize,mwidth,mquality,postslices,retry)
+{
+	var mundo = await Republica.World.New(msize.w,mwidth,(mwidth**mquality)*(msize.w),postslices,retry);
 	if(typeof window !== 'undefined')
 		HTMLRender(mundo);
 	else if(typeof process !== 'undefined')
 	{
-		let repl = require('repl');
-		repl.start('> ')
-		console.log('type "exit()" to exit.');
+		setupREPL();
 	}
 	mundo.loop.start('interval');
 	mundo = grassify(mundo);
 	return mundo;
 };
 
-var mundo = debug({w:64,h:128},2,1);
+var mundo = 0;
 
-global.mundo = mundo;
-global.plantCount = plantCount;
-global.Republica = Republica;
-global.exit = exit;
+mundo = Republica.Util.abenchy(main,[{w:64,h:128},2,1,1,true]);//equivalent to main(...) but benchmarking it
+
+if(typeof process!=='undefined')
+{
+	global.mundo = mundo;
+	global.plantCount = plantCount;
+	global.Republica = Republica;
+	global.exit = process.exit;
+}

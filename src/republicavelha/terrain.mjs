@@ -1,4 +1,4 @@
-import {randomInRange,Vector2,limito,Comrade,ComradePromise,autoOrganizeArray,organizeArray,expandMatrix,customSplitMatrix,asyncComrade,Size,abenchy,} from "./util.mjs"
+import {randomInRange,Vector2,limito,autoOrganizeArray,organizeArray,expandMatrix,customSplitMatrix,Size,abenchy} from "./util.mjs"
 import { Block } from "./types.mjs" 
 
 //-----------------------------------
@@ -384,21 +384,9 @@ async function autoHeightmap(mapsize, multi)
 	)
 }
 
-export function heightmapModder(hm,smooth,randomize,subdivide)
+export function autoSmoothHeightmap(hm,smooth)
 {
-	let condition = function(im){return(im>0)};
-	
-	while(condition(randomize))
-	{
-		hm = randomizeHeightmap(hm);
-		randomize-=1;
-	}
-	while(condition(subdivide))
-	{
-		hm = subdivideHeightmap(hm);
-		subdivide-=1;
-	}
-	while(condition(smooth))
+	while(smooth>0)
 	{
 		hm = smoothHeightmap(hm,randomInRange(0,3));
 		smooth-=1;
@@ -534,7 +522,7 @@ function checkDifference(heightmap)
 	return counter;
 }
 
-export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomize = false,subdivide = false,postslices = 1,retry = 0)
+export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,postslices = 1,retry = 0)
 {
 	if(typeof mapsize == 'undefined')
 		mapsize = Size(128,64);
@@ -543,28 +531,24 @@ export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomi
 	else if(typeof mapsize == 'array')
 		mapsize = Size(mapsize[0],mapsize[1]);
 	var hmap;
-	hmap = await abenchy(autoHeightmap,[mapsize.w,multiHorizontal]);
-	hmap = await abenchy(roundHeightmap,[hmap]);
-	hmap = await abenchy(
-	  	async function()
-	  	{
-		    return (heightmapModder(hmap,smooth,randomize,subdivide))
-		}
-	);
+	hmap = await autoHeightmap(mapsize.w,multiHorizontal);
+	hmap = await roundHeightmap(hmap);
+	hmap = await autoSmoothHeightmap(hmap,smooth);
 
-	hmap = await abenchy(polishHeightmap,[hmap,mapsize.h]);
+	hmap = polishHeightmap(hmap,mapsize.h);
 	
 	if(retry>=1&&checkDifference(hmap)>((mapsize.w*multiHorizontal)**2)/2)
 	{
-		console.log("retry number " + retry);
+		if(retry > 1)
+			console.log("retry number " + retry);
 		retry++;
-		return(AutoTerrain(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices,retry));
+		return(AutoTerrain(mapsize,multiHorizontal,smooth,postslices,retry));
 	}
 	if(retry >= 2)
 		console.log('heightmap generated in ' + retry + ' retries.')
 
 	var terrain = [];
-	terrain = await abenchy(fastTerrain,[hmap,mapsize.h,postslices]);
-	terrain = await abenchy(rampifyTerrain,[terrain]);
+	terrain = await fastTerrain(hmap,mapsize.h,postslices);
+	terrain = await rampifyTerrain(terrain);
 	return(terrain);
 }
