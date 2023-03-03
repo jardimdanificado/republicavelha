@@ -100,8 +100,10 @@ function HTMLRender(mundo)
 async function setupREPL()
 {
 	let repl = await import('repl');
-	repl.start('mqq> ');
-	console.log('Running under NodeJS REPL,type "exit()" to exit.');
+	let os = await import("os");
+	let username = os.userInfo().username;
+	console.log('system> Running under a NodeJS REPL, you can use "exit()" to exit.');
+	repl.start(username + '> ');//username> 
 	return;
 }
 
@@ -111,22 +113,25 @@ async function main(msize,mwidth,mquality,postslices,retry)
 	if(typeof window !== 'undefined')
 		HTMLRender(mundo);
 	else if(typeof process !== 'undefined')
-	{
 		setupREPL();
-	}
 	mundo.loop.start('interval');
 	mundo = grassify(mundo);
+
+	if(typeof process!=='undefined')
+	{
+		global.mundo = mundo;
+		global.plantCount = plantCount;
+		global.Republica = Republica;
+		global.exit = process.exit;
+	}
+	else if(typeof window != undefined)
+	{
+		window.mundo = mundo;
+		window.plantCount = plantCount;
+		window.Republica = Republica;
+	};
+	
 	return mundo;
 };
 
-var mundo = 0;
-
-mundo = Republica.Util.abenchy(main,[{w:64,h:128},2,1,1,true]);//equivalent to main(...) but benchmarking it
-
-if(typeof process!=='undefined')
-{
-	global.mundo = mundo;
-	global.plantCount = plantCount;
-	global.Republica = Republica;
-	global.exit = process.exit;
-}
+var mundo = await Republica.Util.abenchy(main,[{w:64,h:128},2,1,1,true]);//equivalent to main(...) but benchmarking it

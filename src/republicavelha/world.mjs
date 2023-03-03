@@ -31,6 +31,70 @@ function getSunIntensity(minHour, maxHour, seconds)
     return intensity;
 }
 
+function findAirBlockAbove(blockMap,position)//this try to find a air block in the 9 above blocks
+{
+    let x = position.x;
+    let y = position.y;
+    let z = position.z;
+    if(blockMap[x][y][z+1][0].material !== 'air')//5
+        return {
+            x:x,
+            y:y,
+            z:z+1
+        };
+    else if(world.map.block[x-1][y][z+1][0].material == 'air')//4
+        return {
+            x:x-1,
+            y:y,
+            z:z+1
+        };
+    else if(world.map.block[x+1][y][z+1][0].material == 'air')//6
+        return {
+            x:x+1,
+            y:y,
+            z:z+1
+        };
+    else if(world.map.block[x+1][y+1][z+1][0].material == 'air')//3
+        return {
+            x:x+1,
+            y:y+1,
+            z:z+1
+        };
+    else if(world.map.block[x-1][y+1][z+1][0].material == 'air')//1
+        return {
+            x:x-1,
+            y:y+1,
+            z:z+1
+        };
+    else if(world.map.block[x][y+1][z+1][0].material == 'air')//2
+        return {
+            x:x,
+            y:y+1,
+            z:z+1
+        };
+    else if(world.map.block[x][y-1][z+1][0].material == 'air')//8
+        return {
+            x:x,
+            y:y-1,
+            z:z+1
+        };
+    else if(world.map.block[x+1][y-1][z+1][0].material == 'air')//9
+        return {
+            x:x+1,
+            y:y-1,
+            z:z+1
+        };
+    else if(world.map.block[x-1][y-1][z+1][0].material == 'air')//7
+        return {
+            x:x-1,
+            y:y-1,
+            z:z+1
+        };
+    else 
+        return null;
+}
+
+
 export async function Map(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices ,retry)
 {
     var block = await AutoTerrain(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices ,retry);
@@ -109,14 +173,13 @@ function growBranch(plant,time)
     return plant;
 }
 
-function growTrunk(plant,time)
+function growTrunk(plant,time,position)
 {
-    
-    if(plant.trunk.length < Plants[plant.specie].size.max/1000)
-    {
+    if(typeof position == 'undefined'||position==null)
+        return plant;
+    else if(plant.trunk.length < Plants[plant.specie].size.max/1000)
         if(Util.roleta(47,1) == 1)
-            plant.trunk.push(new Trunk(plant.specie,'idle',time,{...plant.position,z:plant.position.z+(plant.trunk.length +1)},plant.quality,plant.condition));
-    }
+            plant.trunk.push(new Trunk(plant.specie,'idle',time,position,plant.quality,plant.condition));
     return plant;
 }
 
@@ -141,11 +204,15 @@ function plantFrame(world,plant)
     }
     else if(Plants[plant.specie].type == 'tree'||Plants[plant.specie].type == 'fruit tree')
     {
-        if(world.time % Util.LimitItTo(Plants[plant.specie].time.maturing.min,1,1000)===0)
+        if(plant.trunk.length > 0)
         {
-            plant = growBranch(plant,world.time);
-            plant = growTrunk(plant,world.time);
-        }
+            let lastTrunkPosition = plant.trunk[plant.trunk.length-1].position;
+            if(world.time % Util.LimitItTo(Plants[plant.specie].time.maturing.min,1,1000)===0 && lastTrunkPosition.x < world.map.block[0][0].length-1)
+            {
+                plant = growBranch(plant,world.time);
+                plant = growTrunk(plant,world.time,findAirBlockAbove(world.map.block,plant.position));
+            }
+        }    
     }
     
     return(plant);
