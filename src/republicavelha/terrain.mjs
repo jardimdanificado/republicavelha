@@ -539,7 +539,8 @@ export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,postsli
 	
 	if(retry>=1&&checkDifference(hmap)>((mapsize.w*multiHorizontal)**2)/2)
 	{
-		console.log("retry number " + retry);
+		if(retry > 1)
+			console.log("retry number " + retry);
 		retry++;
 		return(AutoTerrain(mapsize,multiHorizontal,smooth,postslices,retry));
 	}
