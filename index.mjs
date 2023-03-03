@@ -134,7 +134,4 @@ async function main(msize,mwidth,mquality,postslices,retry)
 	return mundo;
 };
 
-var mundo = 0;
-
-mundo = await Republica.Util.abenchy(main,[{w:64,h:128},2,1,1,true]);//equivalent to main(...) but benchmarking it
-
+var mundo = await Republica.Util.abenchy(main,[{w:64,h:128},2,1,1,true]);//equivalent to main(...) but benchmarking it
