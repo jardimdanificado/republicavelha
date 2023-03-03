@@ -365,17 +365,18 @@ function polishHeightmap(heightmap,fixedHeight)//same as round but different
 async function autoHeightmap(mapsize, multi) 
 {
 	let promises = [];
+
 	for (let x = 0; x < multi; x++) 
 	{
 		for (let y = 0; y < multi; y++) 
 		{
-			promises.push(ComradePromise('./src/republicavelha/worker/heightmap.js',mapsize));
+			promises.push(Heightmap(mapsize));
 		}
 	}
+	
 	return (await Promise.all(promises)
 			.then(async (results) => 
 			{
-				results = results.map(val => val.data);
 				results = await organizeArray(results,multi);
 				return(expandMatrix(results));
 			}
@@ -430,12 +431,11 @@ async function fastTerrain(hm,fixedHeight,slices)
 	let divided = await customSplitMatrix(hm,slices);
 	let terrs = [];
 	for(let i = 0;i<slices**2;i++)
-		terrs.push(ComradePromise("./src/republicavelha/worker/terrain.js",[divided[i],fixedHeight]));
+		terrs.push(Terrain(divided[i],fixedHeight));
 	return (
 				await Promise.all(terrs)
 				.then(async (results) => 
 					{
-						results = results.map((val) => val.data);
 						results = await autoOrganizeArray(results);
 						results = await expandMatrix(results);
 						results.heightmap = hm;
@@ -542,18 +542,13 @@ export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,randomi
 		mapsize = Size(mapsize,mapsize);
 	else if(typeof mapsize == 'array')
 		mapsize = Size(mapsize[0],mapsize[1]);
-	
 	var hmap;
 	hmap = await abenchy(autoHeightmap,[mapsize.w,multiHorizontal]);
 	hmap = await abenchy(roundHeightmap,[hmap]);
 	hmap = await abenchy(
 	  	async function()
 	  	{
-		    return (ComradePromise('./src/republicavelha/worker/heightmapmodder.js',[hmap,smooth,randomize,subdivide])
-		    	.then(resolvedValue => {
-		  	  	return resolvedValue.data;
-	      		})
-	      	)
+		    return (heightmapModder(hmap,smooth,randomize,subdivide))
 		}
 	);
 

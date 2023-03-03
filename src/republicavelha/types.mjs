@@ -1,3 +1,5 @@
+import * as Plants from './plants.mjs';
+
 export class Generic 
 {
 	constructor(type = "generic", status = "", birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100, decayRate = 0, mods = []) 
@@ -26,7 +28,7 @@ export class Block extends Generic
 
 export class Creature extends Generic 
 {
-	constructor(specie = 'human', gender = 'female', status = '', birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100) 
+	constructor(specie = 'human', gender = 'female', status = 'idle', birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100) 
 	{
 		super('block', status, birth, position, quality, condition);
 		this.specie = specie; //earth,wood,rock
@@ -40,6 +42,11 @@ export class Plant extends Generic
 	{
 		super('plant', status, birth, position, quality, condition);
 		this.specie = specie;
+		this.leaf = (Plants[this.specie].leaf !== null) ? []:null;
+		this.flower = (Plants[this.specie].flower !== null) ? []:null;
+		this.branch = (Plants[this.specie].type !== 'herb') ? []:null;
+		this.trunk = (Plants[this.specie].wood !== null) ? []:null;
+		this.fruit = (Plants[this.specie].fruit !== null) ? []:null;
 	}
 }
 
@@ -50,5 +57,53 @@ export class Seed extends Generic
 		super('seed', status, birth, position, quality, condition, decayRate);
 		this.specie = specie;
 		this.germination = 0;
+	}
+}
+
+export class Leaf extends Generic
+{
+	constructor(specie = 'grass', status = 'idle', birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100) 
+	{
+		super('leaf', status, birth, position, quality, condition);
+		this.specie = specie;
+	}
+}
+
+export class Trunk extends Generic
+{
+	constructor(specie = 'tamarind', status = 'idle', birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100) 
+	{
+		super('trunk', status, birth, position, quality, condition);
+		this.specie = specie;
+	}
+}
+
+export class Branch extends Generic
+{
+	constructor(specie = 'tamarind', status = 'idle', birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100) 
+	{
+		super('branch', status, birth, position, quality, condition);
+		this.specie = specie;
+	}
+}
+
+export class Flower extends Generic
+{
+	constructor(specie = 'cannabis', status = 'idle', birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100) 
+	{
+		super('flower', status, birth, position, quality, condition);
+		this.specie = specie;
+		this.flowering = 0;
+	}
+}
+
+export class Fruit extends Generic
+{
+	constructor(specie = 'tomato', status = 'idle', birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100) 
+	{
+		super('fruit', status, birth, position, quality, condition);
+		this.specie = specie;
+		this.maturation = 0;
+		this.seed = 1;
 	}
 }
