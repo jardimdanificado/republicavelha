@@ -101,7 +101,7 @@ export async function autoOrganizeArray(arr)
 	return matrix;
 }
 
-export function recursiveMap(arr, callback) 
+export function recursiveMap2D(arr, callback) 
 {
 	return arr.map(function (element) 
 	{
@@ -115,6 +115,21 @@ export function recursiveMap(arr, callback)
 		}
 	});
 }
+
+export function recursiveMap(arr, callback) 
+{
+	return arr.map(function(element) 
+	{
+	  if (Array.isArray(element)) 
+	  {
+		return recursiveMap(element, callback);
+	  } 
+	  else 
+	  {
+		return callback(element);
+	  }
+	});
+}  
 
 export function flattenMatrix(matrix) 
 {

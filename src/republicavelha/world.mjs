@@ -46,49 +46,49 @@ function findAirBlockAbove(blockMap,position)//this try to find a air block in t
         return {
             x:x-1,
             y:y,
-            z:z+1
+            z:z
         };
     else if(world.map.block[x+1][y][z+1][0].material == 'air')//6
         return {
             x:x+1,
             y:y,
-            z:z+1
+            z:z
         };
     else if(world.map.block[x+1][y+1][z+1][0].material == 'air')//3
         return {
             x:x+1,
             y:y+1,
-            z:z+1
+            z:z
         };
     else if(world.map.block[x-1][y+1][z+1][0].material == 'air')//1
         return {
             x:x-1,
             y:y+1,
-            z:z+1
+            z:z
         };
     else if(world.map.block[x][y+1][z+1][0].material == 'air')//2
         return {
             x:x,
             y:y+1,
-            z:z+1
+            z:z
         };
     else if(world.map.block[x][y-1][z+1][0].material == 'air')//8
         return {
             x:x,
             y:y-1,
-            z:z+1
+            z:z
         };
     else if(world.map.block[x+1][y-1][z+1][0].material == 'air')//9
         return {
             x:x+1,
             y:y-1,
-            z:z+1
+            z:z
         };
     else if(world.map.block[x-1][y-1][z+1][0].material == 'air')//7
         return {
             x:x-1,
             y:y-1,
-            z:z+1
+            z:z
         };
     else 
         return null;
@@ -102,11 +102,28 @@ export async function Map(mapsize,multiHorizontal,smooth,randomize,subdivide,pos
     delete block.heightmap;
     var temperature = Util.create3DArray(block.length,block[0].length,block[0][0].length,29);
     var plant = Util.create3DArray(block.length,block[0].length,block[0][0].length,[]);
+    var collision = block.map((value)=>
+    {
+        return (
+                value.map((value)=>
+                {
+                    return (
+                            value.map((value)=>
+                            {
+                                return (
+                                    (value[0].material !== 'air')?value[0].amount:0
+                                )
+                            })
+                    )
+                })
+        )
+    })
     return {
       block,
       heightmap,
       temperature,
       plant,
+      collision,
     };
 }
 
