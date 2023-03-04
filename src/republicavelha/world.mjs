@@ -148,7 +148,7 @@ function seedFrame(world,plant)
             plant.germination++;
             plant.status = (plant.status !== 'germinating') ? 'germinating' : plant.status;
             if(plant.status === 'germinating')
-                if(plant.germination >= Plants[plant.specie].time.maturing.max/10000 || (Util.roleta(19,1) == 1&& plant.germination>=(Plants[plant.specie].time.maturing.min/10000)))
+                if(plant.germination >= Plants[plant.specie].time.maturing.max/100000 || (Util.roleta(19,1) == 1&& plant.germination>=(Plants[plant.specie].time.maturing.min/100000)))
                     return(new Plant(plant.specie,plant.status,world.time,plant.position,plant.quality,100));
         }
     }
@@ -177,7 +177,7 @@ function growTrunk(plant,time,position)
 {
     if(typeof position == 'undefined'||position==null)
         return plant;
-    else if(plant.trunk.length < Plants[plant.specie].size.max/1000)
+    else if(plant.trunk.length < Plants[plant.specie].size.max/10000)
         if(Util.roleta(47,1) == 1)
             plant.trunk.push(new Trunk(plant.specie,'idle',time,position,plant.quality,plant.condition));
     return plant;
@@ -186,7 +186,7 @@ function growTrunk(plant,time,position)
 function plantFrame(world,plant)
 {
     
-    if(world.time % (Plants[plant.specie].time.maturing.min/100000)===0)
+    if(world.time % (Plants[plant.specie].time.maturing.min/1000000)===0)
     {
         plant = growLeaf(plant);
     }
@@ -197,7 +197,7 @@ function plantFrame(world,plant)
     }
     else if(Plants[plant.specie].type == 'plant')
     {
-        if(world.time % (Plants[plant.specie].time.maturing.min/10000)===0)
+        if(world.time % (Plants[plant.specie].time.maturing.min/100000)===0)
         {
             plant = growBranch(plant,world.time);
         }
@@ -207,7 +207,7 @@ function plantFrame(world,plant)
         if(plant.trunk.length > 0)
         {
             let lastTrunkPosition = plant.trunk[plant.trunk.length-1].position;
-            if(world.time % Util.LimitItTo(Plants[plant.specie].time.maturing.min,1,1000)===0 && lastTrunkPosition.x < world.map.block[0][0].length-1)
+            if(world.time % Util.LimitItTo(Plants[plant.specie].time.maturing.min,1,10000)===0 && lastTrunkPosition.x < world.map.block[0][0].length-1)
             {
                 plant = growBranch(plant,world.time);
                 plant = growTrunk(plant,world.time,findAirBlockAbove(world.map.block,plant.position));
@@ -324,7 +324,7 @@ export async function New(mapsize,multiHorizontal,smooth,randomize,subdivide,pos
         loop:
         {
             id:null,
-            type:'raf',
+            type:'interval',
             cooldown:4//only for interval
         },//types: raf(requireAnimationFrame), interval(setInterval)
         time:0,
