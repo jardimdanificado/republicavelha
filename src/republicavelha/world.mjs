@@ -95,7 +95,7 @@ function findAirBlockAbove(blockMap,position)//this try to find a air block in t
 }
 
 
-export async function Map(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices ,retry)
+export async function Map(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices ,retry)//create the map
 {
     var block = await AutoTerrain(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices ,retry);
     var heightmap = block.heightmap;
