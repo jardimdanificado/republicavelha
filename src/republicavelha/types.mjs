@@ -1,8 +1,85 @@
-import * as Plants from './plants.mjs';
+import * as Plants from './plants.mjs';//plants info
+
+//-----------------------------------------------------
+//MATH CLASSES
+//-----------------------------------------------------
+
+export class Vector3
+{ 
+	constructor(x=0, y=0, z=0) 
+	{
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
+}
+
+export class Vector2
+{ 
+	constructor(x=0, y=0)
+	{
+		this.x = x;
+		this.y = y;
+	}
+}
+
+export class BoundingBox
+{ 
+	constructor(minX=0,minY=0,minZ=0,maxX=0,maxY=0,maxZ=0) 
+	{
+		if(typeof minX == 'object')
+		{
+			this.min = {...minX};
+			this.max = {...minY};
+		}
+		else
+		{
+			this.min = {minX,minY,minZ};
+			this.max = {maxX,maxY,maxZ};
+		}
+	}
+}
+
+//-----------------------------------------------------
+//COLOR CLASSES
+//-----------------------------------------------------
+
+export class HSL
+{ 
+	constructor(h=0, s=0, l=0) 
+	{
+		this.h = h;
+		this.s = s;
+		this.l = l;
+	}
+}
+
+export class RGB
+{ 
+	constructor(r=0, g=0, b=0) 
+	{
+		this.r = r;
+		this.g = g;
+		this.b = b;
+	}
+}
+
+export class RGBA extends RGB
+{ 
+	constructor(r=0, g=0, b=0, a=0) 
+	{
+		super(r,g,b);
+		this.a = a;
+	}
+}
+
+//-----------------------------------------------------
+//SIMULATION CLASSES
+//-----------------------------------------------------
 
 export class Generic 
 {
-	constructor(type = "generic", status = "", birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100, decayRate = 0, mods = []) 
+	constructor(type = "generic", status = "", birth = 0, position = new Vector3(), quality = 100, condition = 100, decayRate = 0, mods = []) 
 	{
 		this.type = type;
 		this.status = status;
@@ -17,7 +94,7 @@ export class Generic
 
 export class Block extends Generic 
 {
-	constructor(material = air, status = 'idle', birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100) 
+	constructor(material = air, status = 'idle', birth = 0, position = new Vector3(), quality = 100, condition = 100) 
 	{
 		super('block', status, birth, position, quality, condition);
 		this.material = material; //earth,wood,rock
@@ -26,7 +103,7 @@ export class Block extends Generic
 
 export class Creature extends Generic 
 {
-	constructor(specie = 'human', gender = 'female', status = 'idle', birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100) 
+	constructor(specie = 'human', gender = 'female', status = 'idle', birth = 0, position = new Vector3(), quality = 100, condition = 100) 
 	{
 		super('block', status, birth, position, quality, condition);
 		this.specie = specie; //earth,wood,rock
@@ -36,7 +113,7 @@ export class Creature extends Generic
 
 export class Plant extends Generic 
 {
-	constructor(specie = 'grass', status = 'idle', birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100) 
+	constructor(specie = 'grass', status = 'idle', birth = 0, position = new Vector3(), quality = 100, condition = 100) 
 	{
 		super('plant', status, birth, position, quality, condition);
 		this.specie = specie;
@@ -50,7 +127,7 @@ export class Plant extends Generic
 
 export class Seed extends Generic 
 {
-	constructor(specie = 'tomato', status = 'idle', birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100, decayRate = 2592000/*(30days)*/) 
+	constructor(specie = 'tomato', status = 'idle', birth = 0, position = new Vector3(), quality = 100, condition = 100, decayRate = 2592000/*(30days)*/) 
 	{
 		super('seed', status, birth, position, quality, condition, decayRate);
 		this.specie = specie;
@@ -60,7 +137,7 @@ export class Seed extends Generic
 
 export class Leaf extends Generic
 {
-	constructor(specie = 'grass', status = 'idle', birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100) 
+	constructor(specie = 'grass', status = 'idle', birth = 0, position = new Vector3(), quality = 100, condition = 100) 
 	{
 		super('leaf', status, birth, position, quality, condition);
 		this.specie = specie;
@@ -69,7 +146,7 @@ export class Leaf extends Generic
 
 export class Trunk extends Generic
 {
-	constructor(specie = 'tamarind', status = 'idle', birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100) 
+	constructor(specie = 'tamarind', status = 'idle', birth = 0, position = new Vector3(), quality = 100, condition = 100) 
 	{
 		super('trunk', status, birth, position, quality, condition);
 		this.specie = specie;
@@ -78,7 +155,7 @@ export class Trunk extends Generic
 
 export class Branch extends Generic
 {
-	constructor(specie = 'tamarind', status = 'idle', birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100) 
+	constructor(specie = 'tamarind', status = 'idle', birth = 0, position = new Vector3(), quality = 100, condition = 100) 
 	{
 		super('branch', status, birth, position, quality, condition);
 		this.specie = specie;
@@ -87,7 +164,7 @@ export class Branch extends Generic
 
 export class Flower extends Generic
 {
-	constructor(specie = 'cannabis', status = 'idle', birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100) 
+	constructor(specie = 'cannabis', status = 'idle', birth = 0, position = new Vector3(), quality = 100, condition = 100) 
 	{
 		super('flower', status, birth, position, quality, condition);
 		this.specie = specie;
@@ -97,7 +174,7 @@ export class Flower extends Generic
 
 export class Fruit extends Generic
 {
-	constructor(specie = 'tomato', status = 'idle', birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100) 
+	constructor(specie = 'tomato', status = 'idle', birth = 0, position = new Vector3(), quality = 100, condition = 100) 
 	{
 		super('fruit', status, birth, position, quality, condition);
 		this.specie = specie;

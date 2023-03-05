@@ -223,7 +223,7 @@ function plantFrame(world,plant)
         if(plant.trunk.length > 0)
         {
             let lastTrunkPosition = plant.trunk[plant.trunk.length-1].position;
-            if(world.time % Util.LimitItTo(Plants[plant.specie].time.maturing.min,1,10000)===0 && lastTrunkPosition.x < world.map.block[0][0].length-1)
+            if(world.time % Util.LimitTo(Plants[plant.specie].time.maturing.min,1,10000)===0 && lastTrunkPosition.x < world.map.block[0][0].length-1)
             {
                 plant = growBranch(plant,world.time);
                 plant = growTrunk(plant,world.map.collision,world.time);
