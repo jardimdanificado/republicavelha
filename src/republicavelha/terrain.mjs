@@ -165,7 +165,7 @@ function randomizeHeightmap(hm)
 	return(hm);
 }
 
-function subdivideHeightmap(hm)
+function subdivideHeightmap(hm)//deprecated
 {
 	function grid(input)
 	{
@@ -391,7 +391,6 @@ export function autoSmoothHeightmap(hm,smooth)
 		hm = smoothHeightmap(hm,randomInRange(0,3));
 		smooth-=1;
 	}
-	
 	return hm;
 }
 
@@ -430,47 +429,6 @@ async function fastTerrain(hm,fixedHeight,slices)
 						return (results);
 					})
 			)
-}
-
-function verifyRampss(terrain,hmap)
-{
-	for(let x = 0;x<terrain.length;x++)
-		for(let y = 0;y<terrain[0].length;y++)
-			if(
-				(x<terrain.length-1 &&
-				terrain[x+1][y][terrain.heightmap[x][y]].material == "earth" &&
-				terrain[x+1][y][terrain.heightmap[x][y]+1].material == "air")||
-				(x>0&&
-				terrain[x-1][y][terrain.heightmap[x][y]].material == "earth" &&
-				terrain[x-1][y][terrain.heightmap[x][y]+1].material == "air")||
-				(y<terrain.length-1 &&
-				terrain[x][y+1][terrain.heightmap[x][y]].material == "earth" &&
-				terrain[x][y+1][terrain.heightmap[x][y]+1].material == "air")||
-				(y>0 &&
-				terrain[x][y-1][terrain.heightmap[x][y]].material == "earth" &&
-				terrain[x][y-1][terrain.heightmap[x][y]+1].material == "air") ||
-		
-				(x<terrain.length-1 &&
-				y<terrain.length-1 &&
-				terrain[x+1][y+1][terrain.heightmap[x][y]].material == "earth" && 
-				terrain[x+1][y+1][terrain.heightmap[x][y]+1].material == "air")||
-				(x>0&&
-				y<terrain.length-1 &&
-				terrain[x-1][y+1][terrain.heightmap[x][y]].material == "earth" && 
-				terrain[x-1][y+1][terrain.heightmap[x][y]+1].material == "air")||
-				(x<terrain.length-1 &&
-				y>0 &&
-				terrain[x+1][y-1][terrain.heightmap[x][y]].material == "earth" &&
-				terrain[x+1][y-1][terrain.heightmap[x][y]+1].material == "air")||
-				(x>0 &&
-				y>0 &&
-				terrain[x-1][y-1][terrain.heightmap[x][y]].material == "earth" &&
-				terrain[x-1][y-1][terrain.heightmap[x][y]+1].material == "air")
-			)	
-			{
-				return true;
-			}
-	return terrain;
 }
 
 function checkDifference(heightmap) 

@@ -399,6 +399,14 @@ export function manualLength(arr)
 	}
 }
 
+export function customFilter(array,property,value)
+{
+	return(array.filter((element) => 
+	{
+ 		return element[property] === value;
+	}))
+}
+
 //A QUICK IMPLEMENTATIONS TO DEFAULT ARGS
 export function DefaultsTo(target, def) 
 {
@@ -489,8 +497,10 @@ export function benchy(callback, args, optName = "unamed")
 {
 	callback.name ??= optName;
 	console.time(callback.name);
-	result = callback.apply(this, args);
+	const result = callback.apply(this, args);
 	console.timeEnd(callback.name);
+	if(typeof result == 'undefined')
+		return null;
 	return (result);
 }
 
@@ -499,7 +509,9 @@ export async function abenchy(callback, args, optName = "unamed")
 	if (optName == "unamed" && callback.name.length > 0)
 		optName = callback.name;
 	console.time(optName);
-	var result = await callback.apply(this, args);
+	const result = await callback.apply(this, args);
 	console.timeEnd(optName);
+	if(typeof result == 'undefined')
+		return null;
 	return (result)
 }
