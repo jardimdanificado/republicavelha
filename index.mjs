@@ -61,7 +61,7 @@ function HTMLRender(mundo)
 			let ok = false;
 			for(let z = 0;z<mundo.map.block[0][0].length-1;z++)
 			{
-				if(mundo.map.block[x][y][z][0].amount === 50)
+				if(mundo.map.block[x][y][z].amount === 50)
 				{
 					let temp = (mundo.map.block.length + '').length;
 					for(let p = 0; p < temp; p++)
@@ -70,7 +70,7 @@ function HTMLRender(mundo)
 					ok=true;
 					break;
 				}
-				else if(mundo.map.block[x][y][z][0].material === "earth"&&mundo.map.block[x][y][z+1][0].material === "air")
+				else if(mundo.map.block[x][y][z].material === "earth"&&mundo.map.block[x][y][z+1].material === "air")
 				{
 					let temp = (mundo.map.block.length  + '').length-(z+'').length;
 					for(let p = 0; p < temp; p++)

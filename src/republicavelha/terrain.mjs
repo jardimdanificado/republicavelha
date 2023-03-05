@@ -407,8 +407,8 @@ export async function Terrain(map,fixedHeight = 128)
 			//var earthb = map[x][y];
 			//var airb = fixedHeight - earthb;
 			
-			result[x][y] = Array(map[x][y]).fill([new Block('earth',100)]);
-			result[x][y] = result[x][y].concat(Array(fixedHeight - map[x][y]).fill([new Block('air',100)]));
+			result[x][y] = Array(map[x][y]).fill(new Block('earth'));
+			result[x][y] = result[x][y].concat(Array(fixedHeight - map[x][y]).fill(new Block('air')));
 		}
 	}
 	return(result);
@@ -432,44 +432,43 @@ async function fastTerrain(hm,fixedHeight,slices)
 			)
 }
 
-function rampifyTerrain(terrain)
+function verifyRampss(terrain,hmap)
 {
 	for(let x = 0;x<terrain.length;x++)
 		for(let y = 0;y<terrain[0].length;y++)
 			if(
 				(x<terrain.length-1 &&
-				terrain[x+1][y][terrain.heightmap[x][y]][0].material == "earth" &&
-				terrain[x+1][y][terrain.heightmap[x][y]+1][0].material == "air")||
+				terrain[x+1][y][terrain.heightmap[x][y]].material == "earth" &&
+				terrain[x+1][y][terrain.heightmap[x][y]+1].material == "air")||
 				(x>0&&
-				terrain[x-1][y][terrain.heightmap[x][y]][0].material == "earth" &&
-				terrain[x-1][y][terrain.heightmap[x][y]+1][0].material == "air")||
+				terrain[x-1][y][terrain.heightmap[x][y]].material == "earth" &&
+				terrain[x-1][y][terrain.heightmap[x][y]+1].material == "air")||
 				(y<terrain.length-1 &&
-				terrain[x][y+1][terrain.heightmap[x][y]][0].material == "earth" &&
-				terrain[x][y+1][terrain.heightmap[x][y]+1][0].material == "air")||
+				terrain[x][y+1][terrain.heightmap[x][y]].material == "earth" &&
+				terrain[x][y+1][terrain.heightmap[x][y]+1].material == "air")||
 				(y>0 &&
-				terrain[x][y-1][terrain.heightmap[x][y]][0].material == "earth" &&
-				terrain[x][y-1][terrain.heightmap[x][y]+1][0].material == "air") ||
+				terrain[x][y-1][terrain.heightmap[x][y]].material == "earth" &&
+				terrain[x][y-1][terrain.heightmap[x][y]+1].material == "air") ||
 		
 				(x<terrain.length-1 &&
 				y<terrain.length-1 &&
-				terrain[x+1][y+1][terrain.heightmap[x][y]][0].material == "earth" && 
-				terrain[x+1][y+1][terrain.heightmap[x][y]+1][0].material == "air")||
+				terrain[x+1][y+1][terrain.heightmap[x][y]].material == "earth" && 
+				terrain[x+1][y+1][terrain.heightmap[x][y]+1].material == "air")||
 				(x>0&&
 				y<terrain.length-1 &&
-				terrain[x-1][y+1][terrain.heightmap[x][y]][0].material == "earth" && 
-				terrain[x-1][y+1][terrain.heightmap[x][y]+1][0].material == "air")||
+				terrain[x-1][y+1][terrain.heightmap[x][y]].material == "earth" && 
+				terrain[x-1][y+1][terrain.heightmap[x][y]+1].material == "air")||
 				(x<terrain.length-1 &&
 				y>0 &&
-				terrain[x+1][y-1][terrain.heightmap[x][y]][0].material == "earth" &&
-				terrain[x+1][y-1][terrain.heightmap[x][y]+1][0].material == "air")||
+				terrain[x+1][y-1][terrain.heightmap[x][y]].material == "earth" &&
+				terrain[x+1][y-1][terrain.heightmap[x][y]+1].material == "air")||
 				(x>0 &&
 				y>0 &&
-				terrain[x-1][y-1][terrain.heightmap[x][y]][0].material == "earth" &&
-				terrain[x-1][y-1][terrain.heightmap[x][y]+1][0].material == "air")
+				terrain[x-1][y-1][terrain.heightmap[x][y]].material == "earth" &&
+				terrain[x-1][y-1][terrain.heightmap[x][y]+1].material == "air")
 			)	
 			{
-				terrain[x][y][terrain.heightmap[x][y]-1][0].amount = 50;
-				terrain[x][y][terrain.heightmap[x][y]-1].push(new Block('air',50));
+				return true;
 			}
 	return terrain;
 }
@@ -549,6 +548,6 @@ export async function AutoTerrain(mapsize,multiHorizontal,smooth = false,postsli
 
 	var terrain = [];
 	terrain = await fastTerrain(hmap,mapsize.h,postslices);
-	terrain = await rampifyTerrain(terrain);
+	//terrain = await rampifyTerrain(terrain);
 	return(terrain);
 }

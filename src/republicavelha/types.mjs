@@ -17,12 +17,10 @@ export class Generic
 
 export class Block extends Generic 
 {
-	constructor(material = air, amount = 100, status = '', birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100) 
+	constructor(material = air, status = 'idle', birth = 0, position = { x: 0, y: 0, z: 0 }, quality = 100, condition = 100) 
 	{
 		super('block', status, birth, position, quality, condition);
 		this.material = material; //earth,wood,rock
-		this.amount = amount;
-		this.velocityZ = 0;
 	}
 }
 
