@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<style>
+		html, body 
+		{
+			border: 0px; 
+			margin: 0px;
+			padding: 0px;
+			height: 100%;
+			width: 100%;
+			font-family:'Lucida Console', monospace;
+			font-size: 80%;
+			white-space: nowrap;
+		}
+		canvas
+		{
+			display: block;
+			position: absolute;
+			left: 0;
+			top: 0;
+		}
+	</style>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>republicavelha</title>
+	<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+</head>
+
+<body>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js""></script>
+	<script>
+		var started = false;
+		var world, fns = [];
+		var getMap = async (fn,args)=>
+		{
+			return fn.apply(this,args);
+		}
+
+		async function setup() 
+		{
+			createCanvas(710, 400, WEBGL);
+			frameRate(60);
+			angleMode(DEGREES)
+			var {main} = await import("../../index.mjs");
+			var {LimitTo,findMinMax,ScaleTo} = await import("../republicavelha/util.mjs");
+			fns.findMinMax = findMinMax;
+			fns.LimitTo = LimitTo;
+			fns.ScaleTo = ScaleTo;
+			world = await getMap(main,[{w:64,h:32},2,1,1,true,true]);
+			started = true;
+			return;
+		}
+
+		function draw() 
+		{
+			if(started==true)
+			{
+				let {min,max} = fns.findMinMax(world.map.heightmap);
+				max = max - min;
+				camera(
+					-25,
+					0,
+					max+min,
+					world.map.collision.length/2,
+					world.map.collision[0].length/2,
+					-world.map.collision[0][0].length-(world.map.collision[0][0].length*2),
+					0,
+					0,
+					-190
+				);
+
+				orbitControl(1,1,1);
+				if(frameCount %60===0)
+				{
+					clear();
+					background(2);
+					
+					world.map.heightmap.map(
+						(value,x)=>
+						{
+							value.map(
+								(value,y)=>
+							{
+								push();
+								translate(x*5, y*5, (world.map.heightmap[x][y]-(world.map.collision[0][0].length*2))*5);
+								let sfactor = fns.ScaleTo(world.map.heightmap[x][y],0,255);
+								fill(
+									sfactor*1.7,
+									255-sfactor*1.7,
+									0
+								)
+								box(5, 5, 5);
+								pop();
+							})
+						}
+					)
+				}
+				
+			}
+		}
+
+	</script>
+</body>
+
+</html>

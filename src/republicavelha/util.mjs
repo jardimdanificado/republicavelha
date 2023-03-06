@@ -283,6 +283,41 @@ export function create3DArray(dimX, dimY, dimZ, input)
 	return arr3D;
 }
 
+function regraDeTres(a, b, d) 
+{
+	const c = (a * d) / b;
+	return c;
+}
+
+export function findMinMax(arr) 
+{
+	let min = Infinity;
+	let max = -Infinity;
+  
+	if (Array.isArray(arr[0])) 
+	{
+	  // Recursive case: array contains arrays
+	  for (let i = 0; i < arr.length; i++) 
+	  {
+		const subArrayMinMax = findMinMax(arr[i]);
+		min = Math.min(min, subArrayMinMax.min);
+		max = Math.max(max, subArrayMinMax.max);
+	  }
+	} 
+	else 
+	{
+	  // Base case: array contains values
+	  for (let i = 0; i < arr.length; i++) 
+	  {
+		min = Math.min(min, arr[i]);
+		max = Math.max(max, arr[i]);
+	  }
+	}
+  
+	return { min, max };
+  }
+  
+
 export function manualLength(arr) 
 {
 	var count = 0;
@@ -313,6 +348,20 @@ export function LimitTo(value, min, max)
 		while (value < min)
 			value += max - min;
 	}
+	return value;
+}
+
+export function ScaleTo(value, min, max) 
+{
+	if (value > max) {
+		while (value > max)
+			value -= max - min;
+	}
+	if (value < min) {
+		while (value < min)
+			value += max - min;
+	}
+	value = regraDeTres(max-min,100,value-min);
 	return value;
 }
 

@@ -8,7 +8,7 @@ function plantCount(specie = 'caju')
 
 export function verifyRamps(blockMap,hmap,position)
 {
-	const {x, y} = {...position};
+	const {x, y} = position;
 	if(
 		(x<blockMap.length-1 &&
 		blockMap[x+1][y][hmap[x][y]].material == "earth" &&
@@ -132,31 +132,32 @@ async function setupNodeJSREPL()
 	return;
 }
 
-async function main(msize,mwidth,mquality,postslices,retry)
+export async function main(msize,mwidth,mquality,postslices,retry,isCustomCall=false)
 {
-	var mundo = await Republica.World.New(msize.w,mwidth,(mwidth**mquality)*(msize.w),postslices,retry);
-	if(typeof window !== 'undefined')
-		HTMLRender(mundo);
+	var world = await Republica.World.New(msize.w,mwidth,(mwidth**mquality)*(msize.w),postslices,retry);
+
+	if(typeof window !== 'undefined'&&isCustomCall !== true)
+		HTMLRender(world);
 	else if(typeof process !== 'undefined')
 		setupNodeJSREPL();
-	mundo.loop.start('interval');
-	mundo = grassify(mundo);
+	world.loop.start('interval');
+	world = grassify(world);
 
 	if(typeof process!=='undefined')
 	{
-		global.mundo = mundo;
 		global.plantCount = plantCount;
 		global.Republica = Republica;
 		global.exit = process.exit;
 	}
 	else if(typeof window !== 'undefined')
 	{
-		window.mundo = mundo;
+		window.world = world;
 		window.plantCount = plantCount;
 		window.Republica = Republica;
 	};
 	
-	return mundo;
+	return world;
 };
 
-var mundo = await Republica.Util.abenchy(main,[{w:64,h:128},2,1,1,true]);//equivalent to main(...) but benchmarking it
+if(typeof process !== 'undefined')
+	global.world = await main({w:64,h:128},2,1,1,true);
