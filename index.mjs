@@ -1,14 +1,51 @@
 import * as Republica from './src/republicavelha.mjs';
 var mundo;//declared outside debug function so we can console.log it globally
 
-
 function plantCount(specie = 'caju')
 {
-	return(mundo.plant.filter((element) => 
-	{
- 		return element.specie === specie;
-	}))
+	return Republica.Util.customFilter(mundo.plant,'specie',specie);
 }
+
+export function verifyRamps(blockMap,hmap,position)
+{
+	const {x, y} = position;
+	if(
+		(x<blockMap.length-1 &&
+		blockMap[x+1][y][hmap[x][y]].material == "earth" &&
+		blockMap[x+1][y][hmap[x][y]+1].material == "air")||
+		(x>0&&
+		blockMap[x-1][y][hmap[x][y]].material == "earth" &&
+		blockMap[x-1][y][hmap[x][y]+1].material == "air")||
+		(y<blockMap.length-1 &&
+		blockMap[x][y+1][hmap[x][y]].material == "earth" &&
+		blockMap[x][y+1][hmap[x][y]+1].material == "air")||
+		(y>0 &&
+		blockMap[x][y-1][hmap[x][y]].material == "earth" &&
+		blockMap[x][y-1][hmap[x][y]+1].material == "air") ||
+
+		(x<blockMap.length-1 &&
+		y<blockMap.length-1 &&
+		blockMap[x+1][y+1][hmap[x][y]].material == "earth" && 
+		blockMap[x+1][y+1][hmap[x][y]+1].material == "air")||
+		(x>0&&
+		y<blockMap.length-1 &&
+		blockMap[x-1][y+1][hmap[x][y]].material == "earth" && 
+		blockMap[x-1][y+1][hmap[x][y]+1].material == "air")||
+		(x<blockMap.length-1 &&
+		y>0 &&
+		blockMap[x+1][y-1][hmap[x][y]].material == "earth" &&
+		blockMap[x+1][y-1][hmap[x][y]+1].material == "air")||
+		(x>0 &&
+		y>0 &&
+		blockMap[x-1][y-1][hmap[x][y]].material == "earth" &&
+		blockMap[x-1][y-1][hmap[x][y]+1].material == "air")
+	)	
+	{
+		return true;
+	}
+	return false;
+}
+
 
 function grassify(mundo)
 {
@@ -53,51 +90,39 @@ function grassify(mundo)
 
 function HTMLRender(mundo)
 {
-	var htmltxt = '';
+	let htmltxt = '';
+	let temp;
 	for(let x = 0;x<mundo.map.block.length;x++)
 	{
 		for(let y = 0;y<mundo.map.block[0].length;y++)
 		{
-			let ok = false;
 			for(let z = 0;z<mundo.map.block[0][0].length-1;z++)
 			{
-				if(mundo.map.block[x][y][z][0].amount === 50)
+				if(verifyRamps(mundo.map.block,mundo.map.heightmap,{x:x,y:y})==true)
 				{
-					let temp = (mundo.map.block.length + '').length;
+					temp = (mundo.map.block.length + '').length;
 					for(let p = 0; p < temp; p++)
 						htmltxt += '>';
 					htmltxt += ' ';
-					ok=true;
 					break;
 				}
-				else if(mundo.map.block[x][y][z][0].material === "earth"&&mundo.map.block[x][y][z+1][0].material === "air")
+				else if(mundo.map.block[x][y][z].material === "earth"&&mundo.map.block[x][y][z+1].material === "air")
 				{
-					let temp = (mundo.map.block.length  + '').length-(z+'').length;
+					temp = (mundo.map.block.length  + '').length-(z+'').length;
 					for(let p = 0; p < temp; p++)
 						htmltxt += '0';
 					htmltxt += z;
 					htmltxt += ' ';
-					ok = true;
 					break;
 				}
 			}
-			if(!ok)
-			{
-				let temp = (mundo.map.block.length + '').length;
-				for(let p = 0; p < temp; p++)
-					htmltxt += 'J';
-				htmltxt += ' ';
-			}
 		}
-		if(typeof window !== 'undefined')
-			htmltxt += '<br>';
-		else if(typeof process !== 'undefined')
-			htmltxt += '\n';
+		htmltxt += '<br>';
 	}
 	document.getElementById("console-screen").innerHTML = htmltxt;
 }
 
-async function setupREPL()
+async function setupNodeJSREPL()
 {
 	let repl = await import('repl');
 	let os = await import("os");
@@ -107,31 +132,32 @@ async function setupREPL()
 	return;
 }
 
-async function main(msize,mwidth,mquality,postslices,retry)
+export async function main(msize,mwidth,mquality,postslices,retry,isCustomCall=false)
 {
-	var mundo = await Republica.World.New(msize.w,mwidth,(mwidth**mquality)*(msize.w),postslices,retry);
-	if(typeof window !== 'undefined')
-		HTMLRender(mundo);
+	var world = await Republica.World.New(msize.w,mwidth,(mwidth**mquality)*(msize.w),postslices,retry);
+
+	if(typeof window !== 'undefined'&&isCustomCall !== true)
+		HTMLRender(world);
 	else if(typeof process !== 'undefined')
-		setupREPL();
-	mundo.loop.start('interval');
-	mundo = grassify(mundo);
+		setupNodeJSREPL();
+	world.loop.start('interval');
+	world = grassify(world);
 
 	if(typeof process!=='undefined')
 	{
-		global.mundo = mundo;
 		global.plantCount = plantCount;
 		global.Republica = Republica;
 		global.exit = process.exit;
 	}
-	else if(typeof window != undefined)
+	else if(typeof window !== 'undefined')
 	{
-		window.mundo = mundo;
+		window.world = world;
 		window.plantCount = plantCount;
 		window.Republica = Republica;
 	};
 	
-	return mundo;
+	return world;
 };
 
-var mundo = await Republica.Util.abenchy(main,[{w:64,h:128},2,1,1,true]);//equivalent to main(...) but benchmarking it
+if(typeof process !== 'undefined')
+	global.world = await main({w:64,h:128},2,1,1,true);

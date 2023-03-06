@@ -6,4 +6,4 @@ export const Encyclopedia =
     Plants:await import("./republicavelha/plants.mjs"),
     Materials:await import("./republicavelha/materials.mjs"),
 }
-import * as _Creature from "./republicavelha/creature.mjs"
+import * as Creature from "./republicavelha/creature.mjs"

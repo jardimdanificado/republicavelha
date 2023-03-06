@@ -31,82 +31,96 @@ function getSunIntensity(minHour, maxHour, seconds)
     return intensity;
 }
 
-function findAirBlockAbove(blockMap,position)//this try to find a air block in the 9 above blocks
+function findTrunkGrowPosition(collisionMap,position)//this try to find a air block in the 9 above blocks
 {
-    let x = position.x;
-    let y = position.y;
-    let z = position.z;
-    if(blockMap[x][y][z+1][0].material !== 'air')//5
+    const {x,y,z} = {...position};
+    if(collisionMap[x][y][z+1]  <= 0)//5
         return {
             x:x,
             y:y,
             z:z+1
         };
-    else if(world.map.block[x-1][y][z+1][0].material == 'air')//4
+    else if(collisionMap[x-1][y][z+1]  <= 0)//4
         return {
             x:x-1,
             y:y,
-            z:z+1
+            z:z
         };
-    else if(world.map.block[x+1][y][z+1][0].material == 'air')//6
+    else if(collisionMap[x+1][y][z+1]  <= 0)//6
         return {
             x:x+1,
             y:y,
-            z:z+1
+            z:z
         };
-    else if(world.map.block[x+1][y+1][z+1][0].material == 'air')//3
+    else if(collisionMap[x+1][y+1][z+1]  <= 0)//3
         return {
             x:x+1,
             y:y+1,
-            z:z+1
+            z:z
         };
-    else if(world.map.block[x-1][y+1][z+1][0].material == 'air')//1
+    else if(collisionMap[x-1][y+1][z+1]  <= 0)//1
         return {
             x:x-1,
             y:y+1,
-            z:z+1
+            z:z
         };
-    else if(world.map.block[x][y+1][z+1][0].material == 'air')//2
+    else if(collisionMap[x][y+1][z+1]  <= 0)//2
         return {
             x:x,
             y:y+1,
-            z:z+1
+            z:z
         };
-    else if(world.map.block[x][y-1][z+1][0].material == 'air')//8
+    else if(collisionMap[x][y-1][z+1]  <= 0)//8
         return {
             x:x,
             y:y-1,
-            z:z+1
+            z:z
         };
-    else if(world.map.block[x+1][y-1][z+1][0].material == 'air')//9
+    else if(collisionMap[x+1][y-1][z+1]  <= 0)//9
         return {
             x:x+1,
             y:y-1,
-            z:z+1
+            z:z
         };
-    else if(world.map.block[x-1][y-1][z+1][0].material == 'air')//7
+    else if(collisionMap[x-1][y-1][z+1]  <= 0)//7
         return {
             x:x-1,
             y:y-1,
-            z:z+1
+            z:z
         };
     else 
         return null;
 }
 
-
-export async function Map(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices ,retry)
+export async function Map(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices ,retry)//create the map
 {
     var block = await AutoTerrain(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices ,retry);
     var heightmap = block.heightmap;
     delete block.heightmap;
     var temperature = Util.create3DArray(block.length,block[0].length,block[0][0].length,29);
     var plant = Util.create3DArray(block.length,block[0].length,block[0][0].length,[]);
+    var collision = block.map((value)=>
+    {
+        return (
+                value.map((value)=>
+                {
+                    return (
+                            value.map((value)=>
+                            {
+                                return (
+                                    (value.material !== 'air')?100:0
+                                )
+                            })
+                    )
+                })
+        )
+    })
     return {
       block,
       heightmap,
       temperature,
       plant,
+      collision,
     };
 }
 
@@ -131,10 +145,10 @@ export const Life =
     }
 }
 
-function gravity(blockMap,position)
+function gravity(collisionMap,position)
 {
     return(
-        (position.z > 1 && blockMap[position.x][position.y][position.z-1][0].material == 'air') ? {x:position.x,y:position.y,z:position.z-1}:position
+        (position.z > 1 && collisionMap[position.x][position.y][position.z-1]<75) ? {x:position.x,y:position.y,z:position.z-1}:position
     );
 }
 
@@ -142,8 +156,8 @@ function seedFrame(world,plant)
 {
     if(typeof world.map.block[plant.position.x][plant.position.y][plant.position.z-1] !== 'undefined')
     {
-        plant.position = gravity(world.map.block,plant.position);
-        if(world.time%60==0&&world.map.block[plant.position.x][plant.position.y][plant.position.z-1][0].material == 'earth')
+        plant.position = gravity(world.map.collision,plant.position);
+        if(world.time%60==0&&world.map.block[plant.position.x][plant.position.y][plant.position.z-1].material == 'earth')
         {
             plant.germination++;
             plant.status = (plant.status !== 'germinating') ? 'germinating' : plant.status;
@@ -173,8 +187,10 @@ function growBranch(plant,time)
     return plant;
 }
 
-function growTrunk(plant,time,position)
+function growTrunk(plant,collisionMap,time)
 {
+    const position = findTrunkGrowPosition(collisionMap,plant.position)
+
     if(typeof position == 'undefined'||position==null)
         return plant;
     else if(plant.trunk.length < Plants[plant.specie].size.max/10000)
@@ -207,12 +223,12 @@ function plantFrame(world,plant)
         if(plant.trunk.length > 0)
         {
             let lastTrunkPosition = plant.trunk[plant.trunk.length-1].position;
-            if(world.time % Util.LimitItTo(Plants[plant.specie].time.maturing.min,1,10000)===0 && lastTrunkPosition.x < world.map.block[0][0].length-1)
+            if(world.time % Util.LimitTo(Plants[plant.specie].time.maturing.min,1,10000)===0 && lastTrunkPosition.x < world.map.block[0][0].length-1)
             {
                 plant = growBranch(plant,world.time);
-                plant = growTrunk(plant,world.time,findAirBlockAbove(world.map.block,plant.position));
+                plant = growTrunk(plant,world.map.collision,world.time);
             }
-        }    
+        }
     }
     
     return(plant);

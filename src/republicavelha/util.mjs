@@ -1,16 +1,4 @@
-//-----------------------------------
-//PRIMITIVES
-//-----------------------------------
-
-export function RGB(r, g, b)
-{ 
-	return ({ r: r, g: g, b: b }); 
-}
-
-export function RGBA(r, g, b, a)
-{ 
-	return ({ r: r, g: g, b: b, a: a }); 
-}
+import { Vector3 } from "./types.mjs";
 
 export function HSL2RGB(h, s, l) 
 {
@@ -48,36 +36,6 @@ export function HSL2RGBA(h, s, l)
 	return (temp);
 }
 
-export function Vector3(x, y, z) 
-{ 
-	return ({ x: x, y: y, z: z }); 
-}
-
-export function Vector3Zero() 
-{ 
-	return ({ x: 0, y: 0, z: 0 }); 
-}
-
-export function Vector2(x, y) 
-{ 
-	return ({ x: x, y: y }); 
-}
-
-export function Vector2Zero() 
-{ 
-	return ({ x: 0, y: 0 }); 
-}
-
-export function BoundingBox(min, max) 
-{
-	return ({ min: { x: min.x, y: min.y, z: min.z }, max: { x: max.x, y: max.y, z: max.z } }); 
-}
-
-export function Position(local, global) 
-{ 
-	return ({ local: local, global: global });
-}
-
 export async function organizeArray(arr, parts) 
 {
 	let matrix = [];
@@ -103,18 +61,18 @@ export async function autoOrganizeArray(arr)
 
 export function recursiveMap(arr, callback) 
 {
-	return arr.map(function (element) 
+	return arr.map(function(element) 
 	{
-		if (Array.isArray(element)) 
-		{
-			return recursiveMap(element, callback);
-		} 
-		else 
-		{
-			return callback(element);
-		}
+	  if (Array.isArray(element)) 
+	  {
+		return recursiveMap(element, callback);
+	  } 
+	  else 
+	  {
+		return callback(element);
+	  }
 	});
-}
+} 
 
 export function flattenMatrix(matrix) 
 {
@@ -325,52 +283,40 @@ export function create3DArray(dimX, dimY, dimZ, input)
 	return arr3D;
 }
 
-export function Assign(reference, array) 
+function regraDeTres(a, b, d) 
 {
-	Object.assign(reference, array, { length: array.length });
+	const c = (a * d) / b;
+	return c;
 }
 
-export function Retry(condition, func, args, delay)//deprecated, avoid it
+export function findMinMax(arr) 
 {
-	args ??= '[]';
-	delay ??= 1000;
-	let id = Date.now();
-	var fname = 'func' + id;
-	var fargs = 'args' + id;
-	var txt = '';
-
-	txt +=
-		`
-  	var timeout = function()
+	let min = Infinity;
+	let max = -Infinity;
+  
+	if (Array.isArray(arr[0])) 
 	{
-	   	if($condition)
-			setTimeout.apply(this,[timeout,$delay].concat($args))
-	   	else
-		{
-  			let $fname = $func 
-			let $fargs = $args
-   
-  			if($fargs.length > 0)
-				$fname.apply(this,$fargs)
-			else
-   			$fname();
- 		}
-	};
- 	timeout();
- `
-
-	txt = txt.replace("$condition", condition);
-	txt = txt.replace("$func", func);
-	while (txt.includes("$args"))
-		txt = txt.replace("$args", args);
-	while (txt.includes("$delay"))
-		txt = txt.replace("$delay", delay);
-	while (txt.includes("$fname"))
-		txt = txt.replace("$fname", fname);
-	while (txt.includes("$fargs"))
-		txt = txt.replace("$fargs", fargs);
-	return (txt);
-}
+	  // Recursive case: array contains arrays
+	  for (let i = 0; i < arr.length; i++) 
+	  {
+		const subArrayMinMax = findMinMax(arr[i]);
+		min = Math.min(min, subArrayMinMax.min);
+		max = Math.max(max, subArrayMinMax.max);
+	  }
+	} 
+	else 
+	{
+	  // Base case: array contains values
+	  for (let i = 0; i < arr.length; i++) 
+	  {
+		min = Math.min(min, arr[i]);
+		max = Math.max(max, arr[i]);
+	  }
+	}
+  
+	return { min, max };
+  }
+  
 
 export function manualLength(arr) 
 {
@@ -384,15 +330,15 @@ export function manualLength(arr)
 	}
 }
 
-//A QUICK IMPLEMENTATIONS TO DEFAULT ARGS
-export function DefaultsTo(target, def) 
+export function customFilter(array,property,value)
 {
-	target ??= def;
-	return target;
+	return(array.filter((element) => 
+	{
+ 		return element[property] === value;
+	}))
 }
-export const defsto = DefaultsTo;
 
-export function LimitItTo(value, min, max) 
+export function LimitTo(value, min, max) 
 {
 	if (value > max) {
 		while (value > max)
@@ -404,10 +350,22 @@ export function LimitItTo(value, min, max)
 	}
 	return value;
 }
-export const limito = LimitItTo;
 
-var pendingList = [];
-export function Pending(frames, func, args) 
+export function ScaleTo(value, min, max) 
+{
+	if (value > max) {
+		while (value > max)
+			value -= max - min;
+	}
+	if (value < min) {
+		while (value < min)
+			value += max - min;
+	}
+	value = regraDeTres(max-min,100,value-min);
+	return value;
+}
+
+export function Pending(pendingList,frames, func, args) 
 {
 	if (typeof frames != 'undefined' && typeof func != 'undefined') 
 	{
@@ -434,28 +392,24 @@ export function Pending(frames, func, args)
 		}
 	}
 }
-export const pendent = Pending;
-export const pend = Pending;
-export const pending = Pending;
 
 export const randomInRange = function (min, max) 
 { 
 	return Math.floor(Math.random() * (max - min + 1) + min); 
 }
-export const randi = randomInRange;
 
 //-----------------------------------
 //CALCULATE
 //-----------------------------------
 
-export function DifferenceFloat(a, b) 
+export function FloatDifference(a, b) 
 { 
 	return ((a + b + Math.abs(a - b)) / 2); 
 }
 
-export function DifferenceVec3(vec1, vec2) 
+export function Vector3Difference(vec1, vec2) 
 { 
-	return (Vector3(DifferenceFloat(vec1.x, vec2.x), DifferenceFloat(vec1.y, vec2.y), DifferenceFloat(vec1.z, vec2.z))); 
+	return (new Vector3(FloatDifference(vec1.x, vec2.x), FloatDifference(vec1.y, vec2.y), FloatDifference(vec1.z, vec2.z))); 
 }
 
 export function RotateAroundPivot(point, pivot, angle) 
@@ -463,7 +417,7 @@ export function RotateAroundPivot(point, pivot, angle)
 	angle = (angle) * (Math.PI / 180); // Convert to radians
 	var rotatedX = Math.cos(angle) * (point.x - pivot.x) - Math.sin(angle) * (point.z - pivot.z) + pivot.x;
 	var rotatedZ = Math.sin(angle) * (point.x - pivot.x) + Math.cos(angle) * (point.z - pivot.z) + pivot.z;
-	return Vector3(rotatedX, point.y, rotatedZ);
+	return (new Vector3(rotatedX, point.y, rotatedZ));
 }
 
 //-----------------------------------
@@ -474,8 +428,10 @@ export function benchy(callback, args, optName = "unamed")
 {
 	callback.name ??= optName;
 	console.time(callback.name);
-	result = callback.apply(this, args);
+	const result = callback.apply(this, args);
 	console.timeEnd(callback.name);
+	if(typeof result == 'undefined')
+		return null;
 	return (result);
 }
 
@@ -484,7 +440,9 @@ export async function abenchy(callback, args, optName = "unamed")
 	if (optName == "unamed" && callback.name.length > 0)
 		optName = callback.name;
 	console.time(optName);
-	var result = await callback.apply(this, args);
+	const result = await callback.apply(this, args);
 	console.timeEnd(optName);
+	if(typeof result == 'undefined')
+		return null;
 	return (result)
 }
