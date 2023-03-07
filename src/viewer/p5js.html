@@ -33,23 +33,148 @@
 	<script>
 		var started = false;
 		var world, fns = [];
+		var kmera = 
+		{
+			position:{},
+			target:{},
+			map:{},
+			currentPosition:3,
+		}
+
 		var getMap = async (fn,args)=>
 		{
 			return fn.apply(this,args);
 		}
 
+		function cyclePosition(kmera,suboradd=0)
+		{
+			const posit = 
+			[
+				{
+					position:
+					{
+						x:0,
+						y:0
+					},
+					target:
+					{
+						x:kmera.map.length*5,
+						y:kmera.map[0].length*5
+					}
+				},
+				{
+					position:
+					{
+						x:0,
+						y:kmera.map[0].length*5
+					},
+					target:
+					{
+						x:kmera.map.length*5,
+						y:0
+					}
+				},
+				{
+					position:
+					{
+						x:kmera.map.length*5,
+						y:kmera.map[0].length*5
+					},
+					target:
+					{
+						x:0,
+						y:0
+					}
+				},
+				{
+					position:
+					{
+						x:kmera.map.length*5,
+						y:0
+					},
+					target:
+					{
+						x:0,
+						y:kmera.map[0].length*5
+					}
+				},
+			]
+			if(suboradd == 'sub'||suboradd == 0)
+			{
+				if(kmera.currentPosition==0)
+					kmera.currentPosition = 3;
+				else
+					kmera.currentPosition--;
+			}
+			else
+			{
+				if(kmera.currentPosition==3)
+					kmera.currentPosition = 0;
+				else
+					kmera.currentPosition++;
+			}
+			kmera.position.x = posit[kmera.currentPosition].position.x;
+			kmera.position.y = posit[kmera.currentPosition].position.y;
+
+			kmera.target.x = posit[kmera.currentPosition].target.x;
+			kmera.target.y = posit[kmera.currentPosition].target.y;
+			return kmera;
+		}
+
+		function keyPressed() 
+		{
+			if (keyCode === LEFT_ARROW) 
+			{
+				kmera = cyclePosition(kmera,'sub');
+			}
+			else if (keyCode === RIGHT_ARROW) 
+			{
+				kmera = cyclePosition(kmera,'add');
+			}
+			else if (keyCode === 33) //PGUP
+			{
+				kmera.position.z += 50;
+			}
+			else if (keyCode === 34) //PGDOWN
+			{
+				kmera.position.z -= 50;
+			}
+			else if (keyCode === UP_ARROW) 
+			{
+				kmera.target.z += 50;
+			}
+			else if (keyCode === DOWN_ARROW) 
+			{
+				kmera.target.z -= 50;
+			}
+		}
+
 		async function setup() 
 		{
-			createCanvas(710, 400, WEBGL);
-			frameRate(60);
-			angleMode(DEGREES)
+			setAttributes('antialias', true);
+			createCanvas(windowWidth, windowHeight, WEBGL);
+			frameRate(1);
+			angleMode(DEGREES);
 			var {main} = await import("../../index.mjs");
-			var {LimitTo,findMinMax,ScaleTo} = await import("../republicavelha/util.mjs");
-			fns.findMinMax = findMinMax;
-			fns.LimitTo = LimitTo;
+			var {ScaleTo} = await import("../republicavelha/util.mjs");
 			fns.ScaleTo = ScaleTo;
-			world = await getMap(main,[{w:64,h:32},2,1,1,true,true]);
+			world = await getMap(main,[{w:64,h:16},4,1,1,true,true],world);
+			
+			kmera.map = world.map.collision;
+			kmera.position = 
+			{
+				x:kmera.map.length*5,
+				y:kmera.map[0].length*5,
+				z:kmera.map[0][0].length*5+100
+			}
+			kmera.target = 
+			{
+				x:0,
+				y:0,
+				z:(kmera.map[0][0].length*-5)+100
+			}
 			started = true;
+			strokeWeight(1)
 			return;
 		}
 
@@ -57,47 +182,40 @@
 		{
 			if(started==true)
 			{
-				let {min,max} = fns.findMinMax(world.map.heightmap);
-				max = max - min;
 				camera(
-					-25,
+					kmera.position.x,//x 2dhorizozntal
+					kmera.position.y,//y 2dvertical
+					kmera.position.z,//z altura
+					kmera.target.x,//taget x
+					kmera.target.y,//target y
+					kmera.target.z,//target z
+					0,//direction up on z
 					0,
-					max+min,
-					world.map.collision.length/2,
-					world.map.collision[0].length/2,
-					-world.map.collision[0][0].length-(world.map.collision[0][0].length*2),
-					0,
-					0,
-					-190
+					-1
 				);
-
-				orbitControl(1,1,1);
-				if(frameCount %60===0)
-				{
-					clear();
-					background(2);
-					
-					world.map.heightmap.map(
-						(value,x)=>
-						{
-							value.map(
-								(value,y)=>
+				clear();
+				background(0,100,125);
+				
+				world.map.heightmap.map(
+					(value,x)=>
+					{
+						value.map(
+							(value,y)=>
 							{
 								push();
-								translate(x*5, y*5, (world.map.heightmap[x][y]-(world.map.collision[0][0].length*2))*5);
+								translate(x*5, y*5,world.map.heightmap[x][y]*5);
 								let sfactor = fns.ScaleTo(world.map.heightmap[x][y],0,255);
 								fill(
-									sfactor*1.7,
-									255-sfactor*1.7,
+									sfactor*2,
+									255-sfactor*0.7,
 									0
 								)
 								box(5, 5, 5);
 								pop();
-							})
-						}
-					)
-				}
-				
+							}
+						)
+					}
+				)
 			}
 		}
 

@@ -134,7 +134,7 @@ async function setupNodeJSREPL()
 
 export async function main(msize,mwidth,mquality,postslices,retry,isCustomCall=false)
 {
-	var world = await Republica.World.New(msize.w,mwidth,(mwidth**mquality)*(msize.w),postslices,retry);
+	var world = await Republica.World.New(msize,mwidth,(mwidth**mquality)*(msize.w),postslices,retry);
 
 	if(typeof window !== 'undefined'&&isCustomCall !== true)
 		HTMLRender(world);
