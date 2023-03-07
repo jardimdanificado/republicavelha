@@ -283,7 +283,7 @@ export function create3DArray(dimX, dimY, dimZ, input)
 	return arr3D;
 }
 
-function regraDeTres(a, b, d) 
+export function regraDeTres(a, b, d) 
 {
 	const c = (a * d) / b;
 	return c;
