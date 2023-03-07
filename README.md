@@ -8,5 +8,10 @@ supports ES2020+, NodeJS & more.
 
 
 
-avaliable on:
-https://jardimdanificado.github.io/republicavelha/
+p5js viewer avaliable on:
+https://jardimdanificado.github.io/republicavelha/src/viewer/p5js.html
+
+
+
+html text viewer avaliable on:
+https://jardimdanificado.github.io/republicavelha/src/viewer/html5.html
