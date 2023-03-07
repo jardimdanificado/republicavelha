@@ -131,11 +131,11 @@
 			{
 				kmera = cyclePosition(kmera,'add');
 			}
-			else if (keyCode === 34) //PGDOWN
+			else if (keyCode === 33) //PGUP
 			{
 				kmera.position.z += 50;
 			}
-			else if (keyCode === 33) //PGUP
+			else if (keyCode === 34) //PGDOWN
 			{
 				kmera.position.z -= 50;
 			}
@@ -158,7 +158,7 @@
 			var {main} = await import("../../index.mjs");
 			var {ScaleTo} = await import("../republicavelha/util.mjs");
 			fns.ScaleTo = ScaleTo;
-			world = await getMap(main,[{w:64,h:32},2,1,1,true,true],world);
+			world = await getMap(main,[{w:64,h:16},4,1,1,true,true],world);
 			
 			kmera.map = world.map.collision;
 			kmera.position = 
@@ -174,7 +174,7 @@
 				z:(kmera.map[0][0].length*-5)+100
 			}
 			started = true;
-			strokeWeight(0.8)
+			strokeWeight(1)
 			return;
 		}
 
