@@ -31,14 +31,28 @@
 <body>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js""></script>
 	<script>
-		var started = false;
+		var started = false,needRedraw = true;
 		var world, fns = [];
-		var kmera = 
+
+		var kmera =
 		{
 			position:{},
 			target:{},
 			map:{},
-			currentPosition:3,
+			currentPosition:0,
+			theme:0,
+		}
+
+		function getColorTheme(currentTheme,sfactor,optIntensity)
+		{
+			let letra = (['rgb', 'rbg', 'grb', 'gbr', 'brg', 'bgr'])[currentTheme].split('');
+			let rgb = 
+			{
+				r:sfactor*30,
+				g:255-sfactor*15,
+				b:(typeof optIntensity !== 'undefined') ? optIntensity : false,
+			};
+			return[rgb[letra[0]],rgb[letra[1]],rgb[letra[2]]];
 		}
 
 		var getMap = async (fn,args)=>
@@ -66,11 +80,35 @@
 					position:
 					{
 						x:0,
+						y:kmera.map[0].length*5/2
+					},
+					target:
+					{
+						x:kmera.map.length*5,
+						y:kmera.map.length*5/2
+					}
+				},
+				{
+					position:
+					{
+						x:0,
 						y:kmera.map[0].length*5
 					},
 					target:
 					{
 						x:kmera.map.length*5,
+						y:0
+					}
+				},
+				{
+					position:
+					{
+						x:kmera.map.length*5/2,
+						y:kmera.map[0].length*5
+					},
+					target:
+					{
+						x:kmera.map.length*5/2,
 						y:0
 					}
 				},
@@ -90,11 +128,35 @@
 					position:
 					{
 						x:kmera.map.length*5,
+						y:kmera.map[0].length*5/2
+					},
+					target:
+					{
+						x:0,
+						y:kmera.map[0].length*5/2
+					}
+				},
+				{
+					position:
+					{
+						x:kmera.map.length*5,
 						y:0
 					},
 					target:
 					{
 						x:0,
+						y:kmera.map[0].length*5
+					}
+				},
+				{
+					position:
+					{
+						x:kmera.map.length*5/2,
+						y:0
+					},
+					target:
+					{
+						x:kmera.map.length*5/2,
 						y:kmera.map[0].length*5
 					}
 				},
@@ -102,13 +164,13 @@
 			if(suboradd == 'sub'||suboradd == 0)
 			{
 				if(kmera.currentPosition==0)
-					kmera.currentPosition = 3;
+					kmera.currentPosition = 7;
 				else
 					kmera.currentPosition--;
 			}
 			else
 			{
-				if(kmera.currentPosition==3)
+				if(kmera.currentPosition==7)
 					kmera.currentPosition = 0;
 				else
 					kmera.currentPosition++;
@@ -139,6 +201,20 @@
 			{
 				kmera.position.z -= 50;
 			}
+			else if (keyCode === 35) //END
+			{
+				if(kmera.theme==0)
+					kmera.theme = 5;
+				else
+					kmera.theme--;
+			}
+			else if (keyCode === 36) //HOME
+			{
+				if(kmera.theme==5)
+					kmera.theme = 0;
+				else
+					kmera.theme++;
+			}
 			else if (keyCode === UP_ARROW) 
 			{
 				kmera.target.z += 50;
@@ -147,20 +223,21 @@
 			{
 				kmera.target.z -= 50;
 			}
+			needRedraw = true;
 		}
 
 		async function setup() 
 		{
 			setAttributes('antialias', true);
 			createCanvas(windowWidth, windowHeight, WEBGL);
-			frameRate(1);
+			frameRate(60);
 			angleMode(DEGREES);
 			var {main} = await import("../../index.mjs");
 			var {ScaleTo,findMinMax,regraDeTres} = await import("../republicavelha/util.mjs");
 			fns.ScaleTo = ScaleTo;
 			fns.findMinMax = findMinMax;
 			fns.regraDeTres = regraDeTres;
-			world = await getMap(main,[{w:64,h:48},2,1,1,true,true]);
+			world = await getMap(main,[{w:64,h:64},2,1,1,true,true]);
 			
 			kmera.map = world.map.collision;
 			kmera.position = 
@@ -182,8 +259,9 @@
 
 		function draw() 
 		{
-			if(started==true)
+			if(started==true&&needRedraw == true)
 			{
+
 				camera(
 					kmera.position.x,//x 2dhorizozntal
 					kmera.position.y,//y 2dvertical
@@ -198,6 +276,13 @@
 				clear();
 				background(0,100,125);
 				let {min,max} = fns.findMinMax(kmera.map);
+				
+				let extra = 0;
+				if(max<kmera.map[0][0].length/2)
+					extra = kmera.map[0][0].length/8;
+				else if(max>kmera.map[0][0].length/2)
+					extra = -kmera.map[0][0].length/8;
+				
 				max = max - min;
 				world.map.heightmap.map(
 					(value,x)=>
@@ -208,17 +293,14 @@
 								push();
 								translate(x*5, y*5,world.map.heightmap[x][y]*5);
 								let sfactor = fns.regraDeTres(max,255,fns.ScaleTo(world.map.heightmap[x][y]-min,0,max));
-								fill(
-									sfactor*15,
-									255-sfactor*10,
-									0
-								)
+								fill.apply(this,getColorTheme(kmera.theme,sfactor+extra));
 								box(5, 5, 5);
 								pop();
 							}
 						)
 					}
 				)
+				needRedraw = false;
 			}
 		}
 
