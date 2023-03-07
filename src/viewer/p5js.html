@@ -43,14 +43,14 @@
 			theme:0,
 		}
 
-		function getColorTheme(currentTheme,sfactor,optIntensity)
+		function getColorTheme(currentTheme,sfactor)
 		{
 			let letra = (['rgb', 'rbg', 'grb', 'gbr', 'brg', 'bgr'])[currentTheme].split('');
 			let rgb = 
 			{
 				r:sfactor*30,
 				g:255-sfactor*15,
-				b:(typeof optIntensity !== 'undefined') ? optIntensity : false,
+				b:0
 			};
 			return[rgb[letra[0]],rgb[letra[1]],rgb[letra[2]]];
 		}
