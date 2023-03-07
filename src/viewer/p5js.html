@@ -33,12 +33,26 @@
 	<script>
 		var started = false,needRedraw = true;
 		var world, fns = [];
-		var kmera = 
+
+		var kmera =
 		{
 			position:{},
 			target:{},
 			map:{},
-			currentPosition:6,
+			currentPosition:0,
+			theme:0,
+		}
+
+		function getColorTheme(currentTheme,sfactor,optIntensity)
+		{
+			let letra = (['rgb', 'rbg', 'grb', 'gbr', 'brg', 'bgr'])[currentTheme].split('');
+			let rgb = 
+			{
+				r:sfactor*30,
+				g:255-sfactor*15,
+				b:(typeof optIntensity !== 'undefined') ? optIntensity : false,
+			};
+			return[rgb[letra[0]],rgb[letra[1]],rgb[letra[2]]];
 		}
 
 		var getMap = async (fn,args)=>
@@ -187,6 +201,20 @@
 			{
 				kmera.position.z -= 50;
 			}
+			else if (keyCode === 35) //END
+			{
+				if(kmera.theme==0)
+					kmera.theme = 5;
+				else
+					kmera.theme--;
+			}
+			else if (keyCode === 36) //HOME
+			{
+				if(kmera.theme==5)
+					kmera.theme = 0;
+				else
+					kmera.theme++;
+			}
 			else if (keyCode === UP_ARROW) 
 			{
 				kmera.target.z += 50;
@@ -248,6 +276,13 @@
 				clear();
 				background(0,100,125);
 				let {min,max} = fns.findMinMax(kmera.map);
+				
+				let extra = 0;
+				if(max<kmera.map[0][0].length/2)
+					extra = kmera.map[0][0].length/8;
+				else if(max>kmera.map[0][0].length/2)
+					extra = -kmera.map[0][0].length/8;
+				
 				max = max - min;
 				world.map.heightmap.map(
 					(value,x)=>
@@ -258,11 +293,7 @@
 								push();
 								translate(x*5, y*5,world.map.heightmap[x][y]*5);
 								let sfactor = fns.regraDeTres(max,255,fns.ScaleTo(world.map.heightmap[x][y]-min,0,max));
-								fill(
-									sfactor*15,
-									255-sfactor*10,
-									0
-								)
+								fill.apply(this,getColorTheme(kmera.theme,sfactor+extra));
 								box(5, 5, 5);
 								pop();
 							}
