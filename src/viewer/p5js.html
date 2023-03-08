@@ -31,7 +31,7 @@
 <body>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js""></script>
 	<script>
-		var started = false;
+		var stroked = true;
 		var world, fns = [],min,max;
 
 		var kmera =
@@ -203,17 +203,11 @@
 			}
 			else if (keyCode === 35) //END
 			{
-				if(kmera.theme==0)
-					kmera.theme = 5;
-				else
-					kmera.theme--;
+				kmera.theme = (kmera.theme==0)?5:kmera.theme-1;
 			}
 			else if (keyCode === 36) //HOME
 			{
-				if(kmera.theme==5)
-					kmera.theme = 0;
-				else
-					kmera.theme++;
+				kmera.theme = (kmera.theme==5)?0:kmera.theme+1;
 			}
 			else if (keyCode === UP_ARROW) 
 			{
@@ -223,8 +217,12 @@
 			{
 				kmera.target.z -= 50;
 			}
+			else if (keyCode === 45)//insert
+			{
+				stroked = (stroked)?false:true;
+				(stroked)?stroke(0):noStroke();
+			}
 			redraw();
-			//needRedraw = true;
 		}
 
 		async function setup() 
