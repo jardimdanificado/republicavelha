@@ -31,7 +31,7 @@
 <body>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js""></script>
 	<script>
-		var stroked = true;
+		var stroked = true,aliased = false;
 		var world, fns = [],min,max;
 
 		var kmera =
@@ -221,6 +221,11 @@
 			{
 				stroked = (stroked)?false:true;
 				(stroked)?stroke(0):noStroke();
+			}
+			else if (keyCode === 46)//delete
+			{
+				aliased = (aliased)?false:true;
+				(aliased)?setAttributes('antialias', true):setAttributes('antialias', false);;
 			}
 			redraw();
 		}
