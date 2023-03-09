@@ -449,9 +449,9 @@
 						let boxWidth = simplified[k].max.x - simplified[k].min.x + 1;
 						let boxHeight = simplified[k].max.y - simplified[k].min.y + 1;
 						let boxDepth = simplified[k].value * 5;
-						let centerX = simplified[k].min.x * 5 + boxWidth / 2 * 5;
-						let centerY = simplified[k].min.y * 5 + boxHeight / 2 * 5;
-						let centerZ = (boxDepth/2)+5;
+						let centerX = (simplified[k].min.x * 5 + boxWidth / 2 * 5)-2.5;
+						let centerY = (simplified[k].min.y * 5 + boxHeight / 2 * 5)-2.5;
+						let centerZ = (boxDepth/2)+2.5;
 						push();
 						translate(centerX, centerY, centerZ);
 						fill.apply(this, colors.find((elm) => 
