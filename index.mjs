@@ -1,10 +1,7 @@
 import * as Republica from './src/republicavelha.mjs';
-var mundo;//declared outside debug function so we can console.log it globally
+var world;//declared outside debug function so we can console.log it globally
 
-function plantCount(specie = 'caju')
-{
-	return Republica.Util.customFilter(mundo.plant,'specie',specie);
-}
+var plantCount;
 
 export function verifyRamps(blockMap,hmap,position)
 {
@@ -47,16 +44,16 @@ export function verifyRamps(blockMap,hmap,position)
 }
 
 
-function grassify(mundo)
+function grassify(world)
 {
-	for(let x = 0;x<mundo.map.heightmap.length;x++)
-		for(let y = 0;y<mundo.map.heightmap[0].length;y++)
+	for(let x = 0;x<world.map.heightmap.length;x++)
+		for(let y = 0;y<world.map.heightmap[0].length;y++)
 		{
-			mundo.plant.spawn(//this spawns a grass seed at each xy position
+			world.plant.spawn(//this spawns a grass seed at each xy position
 				'seed',
 				'grass',
 				'idle', 
-				{x:x,y:y,z:mundo.map.block[0][0].length-1}, 
+				{x:x,y:y,z:world.map.block[0][0].length-1}, 
 				100, 
 				100
 			);
@@ -75,40 +72,40 @@ function grassify(mundo)
 					)
 				]
 				if(temptype !== 'grass')
-					mundo.plant.spawn(//this spawns a random seed at the xy position
+					world.plant.spawn(//this spawns a random seed at the xy position
 						'seed', 
 						temptype,
 						'idle', 
-						{x:x,y:y,z:mundo.map.block[0][0].length-1}, 
+						{x:x,y:y,z:world.map.block[0][0].length-1}, 
 						100, 
 						100
 					);
 			}
 		}
-	return mundo;
+	return world;
 }
 
-function HTMLRender(mundo)
+function HTMLRender(world)
 {
 	let htmltxt = '';
 	let temp;
-	for(let x = 0;x<mundo.map.block.length;x++)
+	for(let x = 0;x<world.map.block.length;x++)
 	{
-		for(let y = 0;y<mundo.map.block[0].length;y++)
+		for(let y = 0;y<world.map.block[0].length;y++)
 		{
-			for(let z = 0;z<mundo.map.block[0][0].length-1;z++)
+			for(let z = 0;z<world.map.block[0][0].length-1;z++)
 			{
-				if(verifyRamps(mundo.map.block,mundo.map.heightmap,{x:x,y:y})==true)
+				if(verifyRamps(world.map.block,world.map.heightmap,{x:x,y:y})==true)
 				{
-					temp = (mundo.map.block.length + '').length;
+					temp = (world.map.block.length + '').length;
 					for(let p = 0; p < temp; p++)
 						htmltxt += '>';
 					htmltxt += ' ';
 					break;
 				}
-				else if(mundo.map.block[x][y][z].material === "earth"&&mundo.map.block[x][y][z+1].material === "air")
+				else if(world.map.block[x][y][z].material === "earth"&&world.map.block[x][y][z+1].material === "air")
 				{
-					temp = (mundo.map.block.length  + '').length-(z+'').length;
+					temp = (world.map.block.length  + '').length-(z+'').length;
 					for(let p = 0; p < temp; p++)
 						htmltxt += '0';
 					htmltxt += z;
@@ -135,7 +132,11 @@ async function setupNodeJSREPL()
 export async function main(msize,mwidth,mquality,postslices,retry,isCustomCall=false)
 {
 	var world = await Republica.World.New(msize,mwidth,(mwidth**mquality)*(msize.w),postslices,retry);
-
+	plantCount = (specie = 'caju') =>
+	{
+		console.log(world)
+		return Republica.Util.customFilter(world.plant,'specie',specie);
+	}
 	if(typeof window !== 'undefined'&&isCustomCall !== true)
 		HTMLRender(world);
 	else if(typeof process !== 'undefined')

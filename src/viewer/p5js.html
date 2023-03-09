@@ -444,6 +444,7 @@
 				else
 				{
 					let simplified = simplify(world.map.heightmap);
+					console.log(simplified)
 					for (let k = 0; k < simplified.length; k++) 
 					{
 						let boxWidth = simplified[k].max.x - simplified[k].min.x + 1;
