@@ -31,7 +31,7 @@
 	<body>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js""></script>
 		<script>
-			
+
 			function getColorTheme(currentTheme,sfactor)
 			{
 				let letra = (['rgb', 'rbg', 'grb', 'gbr', 'brg', 'bgr'])[currentTheme].split('');
@@ -449,7 +449,6 @@
 					else
 					{
 						let simplified = (simplify(world.map.heightmap));
-						console.log(simplified)
 						for (let k = 0; k < simplified.length; k++) 
 						{
 							let boxWidth = simplified[k].max.x - simplified[k].min.x +1;
