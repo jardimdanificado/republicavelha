@@ -31,17 +31,6 @@
 <body>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js""></script>
 	<script>
-		var stroked = true,aliased = false;
-		var world, fns = [],min,max;
-
-		var kmera =
-		{
-			position:{},
-			target:{},
-			map:{},
-			currentPosition:0,
-			theme:0,
-		}
 
 		function getColorTheme(currentTheme,sfactor)
 		{
@@ -60,7 +49,7 @@
 			return fn.apply(this,args);
 		}
 
-		function cyclePosition(kmera,suboradd=0)
+		function cyclePosition(camera,suboradd=0)
 		{
 			const posit = 
 			[
@@ -72,51 +61,51 @@
 					},
 					target:
 					{
-						x:kmera.map.length*5,
-						y:kmera.map[0].length*5
+						x:camera.map.length*5,
+						y:camera.map[0].length*5
 					}
 				},
 				{
 					position:
 					{
 						x:0,
-						y:kmera.map[0].length*5/2
+						y:camera.map[0].length*5/2
 					},
 					target:
 					{
-						x:kmera.map.length*5,
-						y:kmera.map.length*5/2
+						x:camera.map.length*5,
+						y:camera.map.length*5/2
 					}
 				},
 				{
 					position:
 					{
 						x:0,
-						y:kmera.map[0].length*5
+						y:camera.map[0].length*5
 					},
 					target:
 					{
-						x:kmera.map.length*5,
+						x:camera.map.length*5,
 						y:0
 					}
 				},
 				{
 					position:
 					{
-						x:kmera.map.length*5/2,
-						y:kmera.map[0].length*5
+						x:camera.map.length*5/2,
+						y:camera.map[0].length*5
 					},
 					target:
 					{
-						x:kmera.map.length*5/2,
+						x:camera.map.length*5/2,
 						y:0
 					}
 				},
 				{
 					position:
 					{
-						x:kmera.map.length*5,
-						y:kmera.map[0].length*5
+						x:camera.map.length*5,
+						y:camera.map[0].length*5
 					},
 					target:
 					{
@@ -127,153 +116,304 @@
 				{
 					position:
 					{
-						x:kmera.map.length*5,
-						y:kmera.map[0].length*5/2
+						x:camera.map.length*5,
+						y:camera.map[0].length*5/2
 					},
 					target:
 					{
 						x:0,
-						y:kmera.map[0].length*5/2
+						y:camera.map[0].length*5/2
 					}
 				},
 				{
 					position:
 					{
-						x:kmera.map.length*5,
+						x:camera.map.length*5,
 						y:0
 					},
 					target:
 					{
 						x:0,
-						y:kmera.map[0].length*5
+						y:camera.map[0].length*5
 					}
 				},
 				{
 					position:
 					{
-						x:kmera.map.length*5/2,
+						x:camera.map.length*5/2,
 						y:0
 					},
 					target:
 					{
-						x:kmera.map.length*5/2,
-						y:kmera.map[0].length*5
+						x:camera.map.length*5/2,
+						y:camera.map[0].length*5
 					}
 				},
 			]
 			if(suboradd == 'sub'||suboradd == 0)
 			{
-				if(kmera.currentPosition==0)
-					kmera.currentPosition = 7;
+				if(camera.currentPosition==0)
+					camera.currentPosition = 7;
 				else
-					kmera.currentPosition--;
+					camera.currentPosition--;
 			}
 			else
 			{
-				if(kmera.currentPosition==7)
-					kmera.currentPosition = 0;
+				if(camera.currentPosition==7)
+					camera.currentPosition = 0;
 				else
-					kmera.currentPosition++;
+					camera.currentPosition++;
 			}
-			kmera.position.x = posit[kmera.currentPosition].position.x;
-			kmera.position.y = posit[kmera.currentPosition].position.y;
+			camera.position.x = posit[camera.currentPosition].position.x;
+			camera.position.y = posit[camera.currentPosition].position.y;
 
-			kmera.target.x = posit[kmera.currentPosition].target.x;
-			kmera.target.y = posit[kmera.currentPosition].target.y;
-			return kmera;
+			camera.target.x = posit[camera.currentPosition].target.x;
+			camera.target.y = posit[camera.currentPosition].target.y;
+			return camera;
 		}
 
 		function keyPressed() 
 		{
 			if (keyCode === LEFT_ARROW) 
 			{
-				kmera = cyclePosition(kmera,'sub');
+				options.camera = cyclePosition(options.camera,'sub');
 			}
 			else if (keyCode === RIGHT_ARROW) 
 			{
-				kmera = cyclePosition(kmera,'add');
+				options.camera = cyclePosition(options.camera,'add');
 			}
 			else if (keyCode === 33) //PGUP
 			{
-				kmera.position.z += 50;
+				options.camera.position.z += 50;
 			}
 			else if (keyCode === 34) //PGDOWN
 			{
-				kmera.position.z -= 50;
+				options.camera.position.z -= 50;
 			}
 			else if (keyCode === 35) //END
 			{
-				kmera.theme = (kmera.theme==0)?5:kmera.theme-1;
+				options.theme = (options.theme==0)?5:options.theme-1;
+				
 			}
 			else if (keyCode === 36) //HOME
 			{
-				kmera.theme = (kmera.theme==5)?0:kmera.theme+1;
+				options.theme = (options.theme==5)?0:options.theme+1;
 			}
 			else if (keyCode === UP_ARROW) 
 			{
-				kmera.target.z += 50;
+				options.camera.target.z += 50;
 			}
 			else if (keyCode === DOWN_ARROW) 
 			{
-				kmera.target.z -= 50;
+				options.camera.target.z -= 50;
 			}
 			else if (keyCode === 45)//insert
 			{
-				stroked = (stroked)?false:true;
-				(stroked)?stroke(0):noStroke();
+				options.stroked = (options.stroked)?false:true;
+				(options.stroked)?stroke(0):noStroke();
 			}
 			else if (keyCode === 46)//delete
 			{
-				aliased = (aliased)?false:true;
-				(aliased)?setAttributes('antialias', true):setAttributes('antialias', false);;
+				options.aliased = (options.aliased)?false:true;
+				(options.aliased)?setAttributes('antialias', true):setAttributes('antialias', false);;
 			}
-			redraw();
+			else if (keyCode === 191)//;
+			{
+				options.redraw = (options.redraw)?false:true;
+				(options.redraw)?wrapLoop():noLoop();
+			}
+			else if (keyCode === 77)//m
+			{
+				options.debug = (options.debug)?false:true;
+			}
+			else if (keyCode === 188)//,
+			{
+				let ref = options.framerate;
+				if(ref == 1)
+				{}
+				else if(ref == 0)
+					ref = 1;
+				else
+					ref -= 10
+			}
+			else if (keyCode === 190)//.
+			{
+				let ref = options.framerate;
+				if(ref == 1)
+					ref = 10;
+				else
+					ref += 10;
+			}
+			else if (keyCode === 222)//~
+			{
+				options.detailed = (options.detailed)?false:true;
+			}
+
+			if(!options.redraw)
+				redraw();
 		}
+
+		function wrapLoop()
+		{
+			frameRate(options.framerate);
+			loop();
+		}
+
+		function simplify(arr) 
+		{
+			let blocks = [];
+			let doneY = false;
+			let checkmap = new Array(arr.length);
+			for (let i = 0; i < arr.length; i++) 
+			{
+				checkmap[i] = new Array(arr[0].length).fill(false);
+			}
+			for (let x = 0; x < arr.length; x++) 
+			{
+				for (let y = 0; y < arr[0].length; y++) 
+				{
+					if (checkmap[x][y]) 
+					{
+						continue;
+					} 
+					else 
+					{
+						let currentValue = arr[x][y];
+						let currentBlock = {min: {x: x, y: y}, max: {x: x, y: y}, value: currentValue};
+						let counterX = 0;
+						let exit = false;
+						while (exit == false) 
+						{
+							if (arr[x + counterX] && arr[x + counterX][y] == currentValue) 
+							{
+								checkmap[x + counterX][y] = true;
+								counterX++;
+							} 
+							else 
+							{
+								exit = true;
+							}
+						}
+						exit = false;
+						let counterY = 0;
+						while (exit == false && y + counterY < arr[0].length) 
+							{
+							if (arr[x][y + counterY] == currentValue) 
+							{
+								let checks = [];
+								for (let xx = 0; xx < counterX; xx++) 
+								{
+									for (let yy = 0; yy < counterY; yy++) 
+									{
+										checks.push(arr[currentBlock.max.x + xx][currentBlock.max.y + yy] == currentValue);
+									}
+								}
+								if(checks.reduce((accumulator, currentValue) => {return accumulator + currentValue;}, 0) == checks.length) 
+								{
+									for (let xx = 0; xx < counterX; xx++) 
+									{
+										for (let yy = 0; yy < counterY; yy++) 
+										{
+											checkmap[currentBlock.max.x + xx][currentBlock.max.y + yy] = true;
+										}
+									}
+									counterY++;
+								} 
+								else 
+								{
+									exit = true;
+								}
+							} 
+							else 
+							{
+								exit = true;
+							}
+						}
+						currentBlock.max.y += counterY - 1;
+						currentBlock.max.x += counterX - 1;
+						exit = false;
+						blocks.push(currentBlock);
+					}
+				}
+			}
+			return blocks;
+		}
+
+		var world,session = {};
+		var options = 
+		{
+			redraw: false,
+			detail:1,
+			debug: true,
+			framerate:1,
+			theme:0,
+			stroked: true,
+			aliased: false,
+			camera:
+			{
+				position:{},
+				target:{},
+				map:{},
+				currentPosition:0,
+			},
+		};
 
 		async function setup() 
 		{
+			if(options.debug)
+				console.time('setup');
 			setAttributes('antialias', false);
 			createCanvas(windowWidth, windowHeight, WEBGL);
-			//frameRate(1);
+			frameRate(options.framerate);
 			angleMode(DEGREES);
 			
 			var {main} = await import("../../index.mjs");
 			var {ScaleTo,findMinMax,regraDeTres,getUniqueValues} = await import("../republicavelha/util.mjs");
-			fns.ScaleTo = ScaleTo;
-			fns.findMinMax = findMinMax;
-			fns.regraDeTres = regraDeTres;
-			fns.getUniqueValues = getUniqueValues;
+			session.ScaleTo = ScaleTo;
+			session.findMinMax = findMinMax;
+			session.regraDeTres = regraDeTres;
+			session.getUniqueValues = getUniqueValues;
 			world = await getMap(main,[{w:64,h:64},2,1,1,true,true]);
 			
-			kmera.map = world.map.collision;
-			var {min,max} = fns.findMinMax(kmera.map);
-			kmera.max = max;
-			kmera.min = min;
-			kmera.position = 
+			options.camera.map = world.map.collision;
+			var {min,max} = session.findMinMax(options.camera.map);
+			options.camera.max = max;
+			options.camera.min = min;
+			options.camera.position = 
 			{
-				x:kmera.map.length*5,
-				y:kmera.map[0].length*5,
-				z:kmera.map[0][0].length*5+100
+				x:options.camera.map.length*5,
+				y:options.camera.map[0].length*5,
+				z:options.camera.map[0][0].length*5+100
 			}
-			kmera.target = 
+			options.camera.target = 
 			{
 				x:0,
 				y:0,
-				z:(kmera.map[0][0].length*-5)+100
+				z:(options.camera.map[0][0].length*-5)+100
 			}
-			noLoop();
+			if(options.camera.max<options.camera.map[0][0].length/2)
+				options.extra = options.camera.map[0][0].length/8;
+			else if(options.camera.max>options.camera.map[0][0].length/2)
+				options.extra = -options.camera.map[0][0].length/8;
+			if(!options.redraw)
+				noLoop();
+			if(options.debug)
+				console.timeEnd('setup');
 		}
 
 		function draw() 
 		{
+			if(options.debug)
+				console.time('frame drawn in');
 			if(typeof world !== 'undefined')
-			{	camera(
-					kmera.position.x,//x 2dhorizozntal
-					kmera.position.y,//y 2dvertical
-					kmera.position.z,//z altura
-					kmera.target.x,//taget x
-					kmera.target.y,//target y
-					kmera.target.z,//target z
+			{	
+				camera(
+					options.camera.position.x,//x 2dhorizozntal
+					options.camera.position.y,//y 2dvertical
+					options.camera.position.z,//z altura
+					options.camera.target.x,//taget x
+					options.camera.target.y,//target y
+					options.camera.target.z,//target z
 					0,//direction up on z
 					0,
 					-1
@@ -281,36 +421,50 @@
 				clear();
 				background(0,100,125);
 				
-				
-				let extra = 0;
-				if(kmera.max<kmera.map[0][0].length/2)
-					extra = kmera.map[0][0].length/8;
-				else if(kmera.max>kmera.map[0][0].length/2)
-					extra = -kmera.map[0][0].length/8;
-				
-				let colors = fns.getUniqueValues(world.map.heightmap).map((elm)=>
+				let colors = session.getUniqueValues(world.map.heightmap).map((elm)=>
 				{
-					return ({id:elm,value:fns.regraDeTres(kmera.max,255,fns.ScaleTo(elm-kmera.min,0,kmera.max))});
+					return ({id:elm,value:session.regraDeTres(options.camera.max,255,session.ScaleTo(elm-options.camera.min,0,options.camera.max))});
 				}).map((elm)=>
 				{
-					return({id:elm.id,value:getColorTheme(kmera.theme,elm.value+extra)});
+					return({id:elm.id,value:getColorTheme(options.theme,elm.value+options.extra)});
 				})
-				world.map.heightmap.map(
-					(value,x)=>
+
+				if(options.detailed)
+					for (let x = 0; x < world.map.heightmap.length; x++) 
 					{
-						value.map(
-							(value,y)=>
-							{
-								push();
-								translate(x*5, y*5,world.map.heightmap[x][y]*5);
-								fill.apply(this,colors.find((elm)=> {return elm.id === world.map.heightmap[x][y]}).value);
-								box(5, 5, 5);
-								pop();
-							}
-						)
+						for (let y = 0; y < world.map.heightmap[0].length; y++) 
+						{
+							push();
+							translate(x*5, y*5,world.map.heightmap[x][y]*5);
+							fill.apply(this,colors.find((elm)=> {return elm.id === world.map.heightmap[x][y]}).value);
+							box(5, 5, 5);
+							pop();
+						}
 					}
-				)
+				else
+				{
+					let simplified = simplify(world.map.heightmap);
+					for (let k = 0; k < simplified.length; k++) 
+					{
+						let boxWidth = simplified[k].max.x - simplified[k].min.x + 1;
+						let boxHeight = simplified[k].max.y - simplified[k].min.y + 1;
+						let boxDepth = simplified[k].value * 5;
+						let centerX = simplified[k].min.x * 5 + boxWidth / 2 * 5;
+						let centerY = simplified[k].min.y * 5 + boxHeight / 2 * 5;
+						let centerZ = (boxDepth/2)+5;
+						push();
+						translate(centerX, centerY, centerZ);
+						fill.apply(this, colors.find((elm) => 
+						{
+							return elm.id === simplified[k].value
+						}).value);
+						box(boxWidth * 5, boxHeight * 5, boxDepth);
+						pop();
+					}
+				}
 			}
+			if(options.debug)
+				console.timeEnd('frame drawn in');
 		}
 
 	</script>
