@@ -380,6 +380,8 @@ function keyPressed()
 
 const help = 
 `
+☭REPUBLICA★VELHA☭: 3D VISUALIZER
+
 LEFT/RIGHT -> cycle camera positions.
 UP/DOWN    -> move camera target.
 PGUP/DOWN  -> move camera target.
@@ -396,6 +398,9 @@ s          -> turn render.plants.seed
 t          -> turn render.plants.trunk
 m          -> turn debug logs(expect framelog)
 n          -> turn framelog
+
+☭REPUBLICA★VELHA☭: 3D VISUALIZER
+
 `;
 
 function wrapLoop()
@@ -451,13 +456,14 @@ var options =
 			all:true,
 			herb:false,
 			trunk:true,
-			seed:true
+			seed:false
 		},
 	}
 };
 
 async function setup(msize={w:64,h:64},mwidth=2,mquality=1,postslices=1,retry = true) 
 {
+	console.log(help);
 	if(options.debug)
 		console.time('startup');
 	setAttributes('antialias', options.aliased);
