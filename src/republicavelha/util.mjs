@@ -317,8 +317,8 @@ export function findMinMax(arr)
 	return { min, max };
   }
   
-  export function getUniqueValues(arr) 
-  {
+export function getUniqueValues(arr) 
+{
 	// flatten the input array
 	const flatArr = arr.flat(Infinity);
 	// create a Set to store unique values

@@ -31,58 +31,59 @@ function getSunIntensity(minHour, maxHour, seconds)
     return intensity;
 }
 
-function findTrunkGrowPosition(collisionMap,position)//this try to find a air block in the 9 above blocks
+function findTrunkGrowPosition(collisionMap,x,y,z)//this try to find a air block in the 9 above blocks
 {
-    const {x,y,z} = {...position};
-    if(collisionMap[x][y][z+1]  <= 0)//5
+    if(collisionMap[x][y][z+1]  <75)//5
+    {
         return {
             x:x,
             y:y,
             z:z+1
         };
-    else if(collisionMap[x-1][y][z+1]  <= 0)//4
+    }
+    else if(collisionMap[x-1][y][z+1]  <75)//4
         return {
             x:x-1,
             y:y,
             z:z
         };
-    else if(collisionMap[x+1][y][z+1]  <= 0)//6
+    else if(collisionMap[x+1][y][z+1]  <75)//6
         return {
             x:x+1,
             y:y,
             z:z
         };
-    else if(collisionMap[x+1][y+1][z+1]  <= 0)//3
+    else if(collisionMap[x+1][y+1][z+1]  <75)//3
         return {
             x:x+1,
             y:y+1,
             z:z
         };
-    else if(collisionMap[x-1][y+1][z+1]  <= 0)//1
+    else if(collisionMap[x-1][y+1][z+1]  <75)//1
         return {
             x:x-1,
             y:y+1,
             z:z
         };
-    else if(collisionMap[x][y+1][z+1]  <= 0)//2
+    else if(collisionMap[x][y+1][z+1]  <75)//2
         return {
             x:x,
             y:y+1,
             z:z
         };
-    else if(collisionMap[x][y-1][z+1]  <= 0)//8
+    else if(collisionMap[x][y-1][z+1]  <75)//8
         return {
             x:x,
             y:y-1,
             z:z
         };
-    else if(collisionMap[x+1][y-1][z+1]  <= 0)//9
+    else if(collisionMap[x+1][y-1][z+1]  <75)//9
         return {
             x:x+1,
             y:y-1,
             z:z
         };
-    else if(collisionMap[x-1][y-1][z+1]  <= 0)//7
+    else if(collisionMap[x-1][y-1][z+1]  <75)//7
         return {
             x:x-1,
             y:y-1,
@@ -128,11 +129,11 @@ export const Life =
 {
     Spawn:
     {
-        Seed:(world,specie = 'cannabis', status = 'idle', position = {x:0,y:0,z:0}, quality = 100, condition = 100, decayRate = 2592000/*(30days)*/)=>
+        Seed:(world,specie = 'caju', status = 'idle', position = {x:0,y:0,z:0}, quality = 100, condition = 100, decayRate = 2592000/*(30days)*/)=>
         {
             world.plant.push(new Seed(specie, status, world.time, position, quality, condition, decayRate));
         },
-        Plant:(world,specie = 'cannabis', status = 'idle', position = {x:0,y:0,z:0}, quality = 100, condition = 100)=>
+        Plant:(world,specie = 'caju', status = 'idle', position = {x:0,y:0,z:0}, quality = 100, condition = 100)=>
         {
             let newobject = new Plant(specie, status, world.time, position, quality, condition, decayRate);
             world.plant.push(newobject);
@@ -189,13 +190,21 @@ function growBranch(plant,time)
 
 function growTrunk(plant,collisionMap,time)
 {
-    const position = findTrunkGrowPosition(collisionMap,plant.position)
+   
+    let lastTrunkPosition = plant.position;
+    if(plant.trunk.length > 0)
+        lastTrunkPosition = plant.trunk[plant.trunk.length-1].position;
+
+    var position = findTrunkGrowPosition(collisionMap,lastTrunkPosition.x,lastTrunkPosition.y,lastTrunkPosition.z);
 
     if(typeof position == 'undefined'||position==null)
         return plant;
-    else if(plant.trunk.length < Plants[plant.specie].size.max/10000)
-        if(Util.roleta(47,1) == 1)
+    else if(plant.trunk.length < Plants[plant.specie].size.max/1000)
+        if(Util.roleta(20,1) == 1)
+        {
             plant.trunk.push(new Trunk(plant.specie,'idle',time,position,plant.quality,plant.condition));
+        }  
+    
     return plant;
 }
 
@@ -220,15 +229,15 @@ function plantFrame(world,plant)
     }
     else if(Plants[plant.specie].type == 'tree'||Plants[plant.specie].type == 'fruit tree')
     {
+        let lastTrunkPosition = plant.position;
         if(plant.trunk.length > 0)
+            lastTrunkPosition = plant.trunk[plant.trunk.length-1].position;
+        if(world.time % Util.LimitTo(Plants[plant.specie].time.maturing.min,1,1000)===0 && lastTrunkPosition.x < world.map.block[0][0].length-1)
         {
-            let lastTrunkPosition = plant.trunk[plant.trunk.length-1].position;
-            if(world.time % Util.LimitTo(Plants[plant.specie].time.maturing.min,1,10000)===0 && lastTrunkPosition.x < world.map.block[0][0].length-1)
-            {
-                plant = growBranch(plant,world.time);
-                plant = growTrunk(plant,world.map.collision,world.time);
-            }
+            plant = growBranch(plant,world.time);
+            plant = growTrunk(plant,world.map.collision,world.time);
         }
+        
     }
     
     return(plant);
