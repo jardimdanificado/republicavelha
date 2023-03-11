@@ -1,6 +1,6 @@
 import * as Util from "./util.mjs";
 import { AutoTerrain } from "./terrain.mjs";
-import { Creature, Plant, Seed , Leaf, Trunk, Branch, Fruit, Flower} from "./types.mjs";
+import { Creature, Plant, Seed , Leaf, Trunk, Branch, Fruit, Flower, Vector3} from "./types.mjs";
 import * as Plants from "./plants.mjs";
 
 function getHourOfDay(totalSeconds) 
@@ -36,61 +36,123 @@ function findTrunkGrowPosition(collisionMap,x,y,z)//this try to find a air block
     if(collisionMap[x][y][z+1]  <75)//5
     {
         return {
-            x:x,
-            y:y,
-            z:z+1
+            x:0,
+            y:0,
+            z:0+1
         };
     }
     else if(collisionMap[x-1][y][z+1]  <75)//4
         return {
-            x:x-1,
-            y:y,
-            z:z
+            x:0-1,
+            y:0,
+            z:0
         };
     else if(collisionMap[x+1][y][z+1]  <75)//6
         return {
-            x:x+1,
-            y:y,
-            z:z
+            x:0+1,
+            y:0,
+            z:0
         };
     else if(collisionMap[x+1][y+1][z+1]  <75)//3
         return {
-            x:x+1,
-            y:y+1,
-            z:z
+            x:0+1,
+            y:0+1,
+            z:0
         };
     else if(collisionMap[x-1][y+1][z+1]  <75)//1
         return {
-            x:x-1,
-            y:y+1,
-            z:z
+            x:0-1,
+            y:0+1,
+            z:0
         };
     else if(collisionMap[x][y+1][z+1]  <75)//2
         return {
-            x:x,
-            y:y+1,
-            z:z
+            x:0,
+            y:0+1,
+            z:0
         };
     else if(collisionMap[x][y-1][z+1]  <75)//8
         return {
-            x:x,
-            y:y-1,
-            z:z
+            x:0,
+            y:0-1,
+            z:0
         };
     else if(collisionMap[x+1][y-1][z+1]  <75)//9
         return {
-            x:x+1,
-            y:y-1,
-            z:z
+            x:0+1,
+            y:0-1,
+            z:0
         };
     else if(collisionMap[x-1][y-1][z+1]  <75)//7
         return {
-            x:x-1,
-            y:y-1,
-            z:z
+            x:0-1,
+            y:0-1,
+            z:0
         };
     else 
-        return null;
+        return;
+}
+
+function findBranchGrowPosition(collisionMap,x,y,z)//this try to find a air block in the 8 surrounding blocks, if fail try the 9 above
+{
+    if(collisionMap[x][y][z+1]  <75)//5
+    {
+        return {
+            x:0,
+            y:0,
+            z:0+1
+        };
+    }
+    else if(collisionMap[x-1][y][z]  <75)//4
+        return {
+            x:0-1,
+            y:0,
+            z:0
+        };
+    else if(collisionMap[x+1][y][z]  <75)//6
+        return {
+            x:0+1,
+            y:0,
+            z:0
+        };
+    else if(collisionMap[x+1][y+1][z]  <75)//3
+        return {
+            x:0+1,
+            y:0+1,
+            z:0
+        };
+    else if(collisionMap[x-1][y+1][z]  <75)//1
+        return {
+            x:0-1,
+            y:0+1,
+            z:0
+        };
+    else if(collisionMap[x][y+1][z]  <75)//2
+        return {
+            x:0,
+            y:0+1,
+            z:0
+        };
+    else if(collisionMap[x][y-1][z]  <75)//8
+        return {
+            x:0,
+            y:0-1,
+            z:0
+        };
+    else if(collisionMap[x+1][y-1][z]  <75)//9
+        return {
+            x:0+1,
+            y:0-1,
+            z:0
+        };
+    else if(collisionMap[x-1][y-1][z]  <75)//7
+        return {
+            x:0-1,
+            y:0-1,
+            z:0
+        };
+    else 
+        return findTrunkGrowPosition(collisionMap,x,y,z);
 }
 
 export async function Map(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices ,retry)//create the map
@@ -178,12 +240,16 @@ function growLeaf(plant)
     return plant;
 }
 
-function growBranch(plant,time)
+function growBranch(plant,collisionMap,time)
 {
-    if(plant.branch.length < Plants[plant.specie].leaf/10)
+    if(Plants[plant.specie].type.includes('tree')&&plant.branch.length < Plants[plant.specie].leaf/10&&Util.roleta(13,1,15) == 1)
     {
-        if(Util.roleta(29,1) == 1)
-            plant.branch.push(new Branch(plant.specie,'idle',time,plant.position,plant.quality,plant.condition));
+        //if()
+        let lastTrunkPosition = plant.position;
+        if(plant.trunk.length>0)
+            lastTrunkPosition = Util.Vector3Add(plant.trunk.position,plant.position);
+        var position = findBranchGrowPosition(collisionMap,lastTrunkPosition.x,lastTrunkPosition.y,lastTrunkPosition.z);
+        plant.branch.push(new Branch(plant.specie,'idle',time,position,plant.quality,plant.condition))
     }
     return plant;
 }
@@ -191,16 +257,18 @@ function growBranch(plant,time)
 function growTrunk(plant,collisionMap,time)
 {
    
-    let lastTrunkPosition = plant.position;
+    let lastTrunkPosition = {x:0,y:0,z:0};
     if(plant.trunk.length > 0)
+    {
         lastTrunkPosition = plant.trunk[plant.trunk.length-1].position;
+    }
+    let sendposition = Util.Vector3Add(plant.position,lastTrunkPosition);
+    var position = Util.Vector3Add(findTrunkGrowPosition(collisionMap,sendposition.x,sendposition.y,sendposition.z),lastTrunkPosition);
 
-    var position = findTrunkGrowPosition(collisionMap,lastTrunkPosition.x,lastTrunkPosition.y,lastTrunkPosition.z);
-
-    if(typeof position == 'undefined'||position==null)
+    if(typeof position == 'undefined')
         return plant;
-    else if(plant.trunk.length < Plants[plant.specie].size.max/1000)
-        if(Util.roleta(20,1) == 1)
+    else if(plant.trunk.length < Plants[plant.specie].size.max/100)
+        //if(Util.roleta(20,1) == 1)
         {
             plant.trunk.push(new Trunk(plant.specie,'idle',time,position,plant.quality,plant.condition));
         }  
@@ -234,7 +302,7 @@ function plantFrame(world,plant)
             lastTrunkPosition = plant.trunk[plant.trunk.length-1].position;
         if(world.time % Util.LimitTo(Plants[plant.specie].time.maturing.min,1,1000)===0 && lastTrunkPosition.x < world.map.block[0][0].length-1)
         {
-            plant = growBranch(plant,world.time);
+            plant = growBranch(plant,world.map.collision,world.time);
             plant = growTrunk(plant,world.map.collision,world.time);
         }
         

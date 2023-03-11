@@ -44,11 +44,6 @@ function getColorTheme(currentTheme,sfactor)
 	return[rgb[letra[0]],rgb[letra[1]],rgb[letra[2]]];
 }
 
-var getMap = async (fn,args)=>
-{
-	return fn.apply(this,args);
-}
-
 function simplify(arr) 
 {
 	let blocks = [];
@@ -295,6 +290,17 @@ function keyPressed()
 		options.camera.target.z -= 50;
 		debug.log('target z set to ' + options.camera.target.z);
 	}
+	else if (keyCode === 32)//SPACE
+	{
+		options.play = (options.play)?false:true;
+		(options.play)?world.loop.start(options.looptype):world.loop.stop();
+		debug.log('playing set to ' + options.play);
+	}
+	else if (keyCode === 74)//J
+	{
+		options.looptype = (options.looptype=='raf')?'interval':'raf';
+		debug.log('loop type set to ' + options.looptype);
+	}
 	else if (keyCode === 45)//insert
 	{
 		options.stroked = (options.stroked)?false:true;
@@ -382,6 +388,8 @@ const help =
 `
 ☭REPUBLICA★VELHA☭: 3D VISUALIZER
 
+SPACE      -> play/pause simulation
+j          -> turn loop type (raf/interval)
 LEFT/RIGHT -> cycle camera positions.
 UP/DOWN    -> move camera target.
 PGUP/DOWN  -> move camera target.
@@ -428,6 +436,8 @@ var Plants;
 
 var options = 
 {
+	play:false,
+	looptype:'interval',
 	redraw: false,
 	detailed:false,
 	debug: true,
@@ -473,12 +483,13 @@ async function setup(msize={w:64,h:64},mwidth=2,mquality=1,postslices=1,retry = 
 	
 	var {main} = await import("../../index.mjs");
 	Plants = await import("../republicavelha/plants.mjs");
-	var {ScaleTo,findMinMax,regraDeTres,getUniqueValues} = await import("../republicavelha/util.mjs");
+	var {ScaleTo,findMinMax,regraDeTres,getUniqueValues,Vector3Add} = await import("../republicavelha/util.mjs");
 	session.ScaleTo = ScaleTo;
 	session.findMinMax = findMinMax;
 	session.regraDeTres = regraDeTres;
 	session.getUniqueValues = getUniqueValues;
-	world = await getMap(main,[msize,mwidth,mquality,postslices,retry,true]);
+	session.Vector3Add = Vector3Add;
+	world = await (async(fn,args)=>{return fn.apply(this,args)})(main,[msize,mwidth,mquality,postslices,retry,true,false]);
 	
 	
 	options.camera.map = world.map.collision;
@@ -592,12 +603,13 @@ function draw()
 						pop();
 					}
 					
-					if(options.render.plants.trunk&&Plants[plant.specie].type.includes('tree')&&typeof plant.trunk !== 'undefined')//trunk
+					if(options.render.plants.trunk&&typeof plant.trunk !== 'undefined')//trunk
 					{
 						for (trunk of plant.trunk)
 						{
+							let position = session.Vector3Add(plant.position,trunk.position);
 							push();
-							translate(trunk.position.x*5, trunk.position.y*5,trunk.position.z * 5);
+							translate(position.x*5, position.y*5,position.z * 5);
 							fill(0,0,0);
 							box(5,5,5);
 							pop();

@@ -129,7 +129,7 @@ async function setupNodeJSREPL()
 	return;
 }
 
-export async function main(msize,mwidth,mquality,postslices,retry,isCustomCall=false)
+export async function main(msize,mwidth,mquality,postslices,retry,isCustomCall=false,autostart='interval')
 {
 	var world = await Republica.World.New(msize,mwidth,(mwidth**mquality)*(msize.w),postslices,retry);
 	plantCount = (specie = 'caju') =>
@@ -141,7 +141,8 @@ export async function main(msize,mwidth,mquality,postslices,retry,isCustomCall=f
 		HTMLRender(world);
 	else if(typeof process !== 'undefined')
 		setupNodeJSREPL();
-	world.loop.start('interval');
+	if(autostart !== false)
+		world.loop.start(autostart);
 	world = grassify(world);
 
 	if(typeof process!=='undefined')
