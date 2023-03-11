@@ -1,5 +1,25 @@
 import { Vector3 } from "./types.mjs";
 
+export function Vector3Subtract(vec0,vec1)
+{
+	return {x:vec0.x - vec1.x,y:vec0.y - vec1.y,z:vec0.z - vec1.z};
+}
+
+export function Vector3Add(vec0,vec1)
+{
+	return {x:vec0.x + vec1.x,y:vec0.y + vec1.y,z:vec0.z + vec1.z};
+}
+
+export function Vector2Subtract(vec0,vec1)
+{
+	return {x:vec0.x - vec1.x,y:vec0.y - vec1.y};
+}
+
+export function Vector2Add(vec0,vec1)
+{
+	return {x:vec0.x + vec1.x,y:vec0.y + vec1.y};
+}
+
 export function HSL2RGB(h, s, l) 
 {
 	var r, g, b;
@@ -79,7 +99,7 @@ export function flattenMatrix(matrix)
 	return matrix.reduce((flatArray, currentRow) => flatArray.concat(currentRow), []);
 }
 
-function shuffleArray(arr) 
+export function shuffleArray(arr) 
 {
 	for (let i = arr.length - 1; i > 0; i--) 
 	{
@@ -122,7 +142,7 @@ export function roleta(...odds)
 	var roleta = []; 
 	for(let i = 0; i<odds.length;i++)
 		roleta = roleta.concat(Array(odds[i]).fill(i));
-	return(shuffleArray(roleta)[randomInRange(0, roleta.length - 1)]);
+	return(shuffleArray(shuffleArray(shuffleArray(roleta)))[randomInRange(0, roleta.length - 1)]);
 }
 
 export function repeatWithInterval(func, args, delay) 

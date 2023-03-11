@@ -44,11 +44,6 @@ function getColorTheme(currentTheme,sfactor)
 	return[rgb[letra[0]],rgb[letra[1]],rgb[letra[2]]];
 }
 
-var getMap = async (fn,args)=>
-{
-	return fn.apply(this,args);
-}
-
 function simplify(arr) 
 {
 	let blocks = [];
@@ -295,6 +290,17 @@ function keyPressed()
 		options.camera.target.z -= 50;
 		debug.log('target z set to ' + options.camera.target.z);
 	}
+	else if (keyCode === 32)//SPACE
+	{
+		options.play = (options.play)?false:true;
+		(options.play)?world.loop.start(options.looptype):world.loop.stop();
+		debug.log('playing set to ' + options.play);
+	}
+	else if (keyCode === 74)//J
+	{
+		options.looptype = (options.looptype=='raf')?'interval':'raf';
+		debug.log('loop type set to ' + options.looptype);
+	}
 	else if (keyCode === 45)//insert
 	{
 		options.stroked = (options.stroked)?false:true;
@@ -330,6 +336,23 @@ function keyPressed()
 	}
 	else if (keyCode === 71)//g
 	{
+		options.render.plants.grass = (options.render.plants.grass)?false:true;
+		debug.log('render.plants.grass set to ' + options.render.plants.grass);
+	}
+	else if (keyCode === 89)//y
+	{
+		options.render.plants.prettyGrass = (options.render.plants.prettyGrass)?false:true;
+		options.render.plants.prettyGrass2 = false;
+		debug.log('render.plants.prettyGrass set to ' + options.render.plants.prettyGrass);
+	}
+	else if (keyCode === 85)//u
+	{
+		options.render.plants.prettyGrass2 = (options.render.plants.prettyGrass2)?false:true;
+		options.render.plants.prettyGrass = false;
+		debug.log('render.plants.prettyGrass2 set to ' + options.render.plants.prettyGrass2);
+	}
+	else if (keyCode === 72)//h
+	{
 		options.render.plants.herb = (options.render.plants.herb)?false:true;
 		debug.log('render.plants.herb set to ' + options.render.plants.herb);
 	}
@@ -342,6 +365,11 @@ function keyPressed()
 	{
 		options.render.plants.seed = (options.render.plants.seed)?false:true;
 		debug.log('render.plants.seed set to ' + options.render.plants.seed);
+	}
+	else if (keyCode === 66)//b
+	{
+		options.render.plants.branch = (options.render.plants.branch)?false:true;
+		debug.log('render.plants.branch set to ' + options.render.plants.branch);
 	}
 	else if (keyCode === 188)//,
 	{
@@ -380,8 +408,11 @@ function keyPressed()
 
 const help = 
 `
+
 ☭REPUBLICA★VELHA☭: 3D VISUALIZER
 
+SPACE      -> play/pause simulation
+j          -> turn loop type (raf/interval)
 LEFT/RIGHT -> cycle camera positions.
 UP/DOWN    -> move camera target.
 PGUP/DOWN  -> move camera target.
@@ -393,9 +424,12 @@ HOME/END   -> cycle themes.
 DELETE     -> turn antialiasing
 INSERT     -> turn strokes
 p          -> turn render.plants.all
-g          -> turn render.plants.herb
+g          -> turn render.plants.grass
+h          -> turn render.plants.herb
 s          -> turn render.plants.seed
 t          -> turn render.plants.trunk
+b          -> turn render.plants.branch
+y          -> turn render.plants.prettyGrass
 m          -> turn debug logs(expect framelog)
 n          -> turn framelog
 
@@ -428,6 +462,8 @@ var Plants;
 
 var options = 
 {
+	play:false,
+	looptype:'interval',
 	redraw: false,
 	detailed:false,
 	debug: true,
@@ -455,8 +491,12 @@ var options =
 		{
 			all:true,
 			herb:false,
-			trunk:true,
-			seed:false
+			grass:true,
+			trunk:false,
+			branch:false,
+			seed:false,
+			prettyGrass:false,
+			prettyGrass2:false
 		},
 	}
 };
@@ -470,15 +510,18 @@ async function setup(msize={w:64,h:64},mwidth=2,mquality=1,postslices=1,retry = 
 	createCanvas(windowWidth, windowHeight, WEBGL);
 	frameRate(options.framerate);
 	angleMode(DEGREES);
-	
+	strokeWeight(0.1);
 	var {main} = await import("../../index.mjs");
 	Plants = await import("../republicavelha/plants.mjs");
-	var {ScaleTo,findMinMax,regraDeTres,getUniqueValues} = await import("../republicavelha/util.mjs");
+	var {ScaleTo,findMinMax,regraDeTres,getUniqueValues,Vector3Add,randomInRange,roleta} = await import("../republicavelha/util.mjs");
 	session.ScaleTo = ScaleTo;
+	session.roleta = roleta;
+	session.randomInRange = randomInRange;
 	session.findMinMax = findMinMax;
 	session.regraDeTres = regraDeTres;
 	session.getUniqueValues = getUniqueValues;
-	world = await getMap(main,[msize,mwidth,mquality,postslices,retry,true]);
+	session.Vector3Add = Vector3Add;
+	world = await (async(fn,args)=>{return fn.apply(this,args)})(main,[msize,mwidth,mquality,postslices,retry,true,false]);
 	
 	
 	options.camera.map = world.map.collision;
@@ -541,7 +584,7 @@ function draw()
 				for (let y = 0; y < world.map.heightmap[0].length; y++) 
 				{
 					push();
-					translate(x*5, y*5,world.map.heightmap[x][y]*5);
+					translate(x*5, y*5,(world.map.heightmap[x][y]*5)-5);
 					fill.apply(this,colors.find((elm)=> {return elm.id === world.map.heightmap[x][y]}).value);
 					box(5, 5, 5);
 					pop();
@@ -559,7 +602,7 @@ function draw()
 				let centerY = (simplified[k].min.y * 5 + (boxHeight / 2) * 5)-2.5;
 				let centerZ = (boxDepth/2)+2.5;
 				push();
-				translate(centerX, centerY, simplified[k].value * 5);
+				translate(centerX, centerY, (simplified[k].value * 5)-5);
 				fill.apply(this, colors.find((elm) => 
 				{
 					return elm.id === simplified[k].value
@@ -576,29 +619,78 @@ function draw()
 				{
 					push();
 					translate(plant.position.x*5, plant.position.y*5,plant.position.z * 5);
-					fill(0,200,100);
+					fill(255,0,255);
 					box(5,5,5);
 					pop();
 				}
 				if(plant.type === 'plant')
 				{
 
-					if(options.render.plants.herb)//bush&grass
+					if(options.render.plants.herb&&plant.specie !== 'grass')//bush
 					{
 						push();
-						translate(plant.position.x*5, plant.position.y*5,plant.position.z * 5);
-						fill(0,200,100);
-						box(5,5,5);
+						translate(plant.position.x*5, plant.position.y*5,(plant.position.z * 5));
+						fill(0,100,50);
+						rotateX(session.randomInRange(-5,5));
+						rotateY(session.randomInRange(-5,5));
+						rotateZ(session.randomInRange(-5,5));
+						box(4,4,session.randomInRange(5,15));
 						pop();
 					}
-					
-					if(options.render.plants.trunk&&Plants[plant.specie].type.includes('tree')&&typeof plant.trunk !== 'undefined')//trunk
+
+					if(options.render.plants.prettyGrass)
+					{
+						push();
+						translate(plant.position.x*5, plant.position.y*5,(plant.position.z * 5)-2);
+						fill(15,session.randomInRange(50,75),session.randomInRange(4,10));
+						rotateX(session.randomInRange(-45,45));
+						rotateY(session.randomInRange(-45,45));
+						rotateZ(session.randomInRange(-90,90));
+						box(session.roleta(1,1,30,50,45),session.roleta(1,1,25,25,45),5);
+						pop();
+					}
+					else if(options.render.plants.prettyGrass2)
+					{
+						push();
+						translate(plant.position.x*5, plant.position.y*5,(plant.position.z * 5)-2);
+						fill(15,session.randomInRange(50,75),session.randomInRange(4,10));
+						rotateX(session.randomInRange(-15,15));
+						rotateY(session.randomInRange(-15,15));
+						rotateZ(session.randomInRange(-90,90));
+						box(session.roleta(1,25,30,1),session.roleta(1,25,25,5),5);
+						pop();
+					}
+
+					if(options.render.plants.grass&&plant.specie == 'grass')
+					{
+						push();
+						translate(plant.position.x*5, plant.position.y*5,(plant.position.z * 5)-(session.randomInRange(30,33)/10));
+						fill(session.randomInRange(15,45),session.randomInRange(50,60),session.randomInRange(15,20));
+						box(5,5,session.randomInRange(20,25)/10);
+						pop();
+					}
+
+					if(options.render.plants.trunk&&typeof plant.trunk !== 'undefined')//trunk
 					{
 						for (trunk of plant.trunk)
 						{
+							let position = session.Vector3Add(plant.position,trunk.position);
 							push();
-							translate(trunk.position.x*5, trunk.position.y*5,trunk.position.z * 5);
+							translate(position.x*5, position.y*5,position.z * 5);
 							fill(0,0,0);
+							box(5,5,5);
+							pop();
+						}
+					}
+
+					if(options.render.plants.branch&&typeof plant.branch !== 'undefined')//branch
+					{
+						for (branch of plant.branch)
+						{
+							let position = session.Vector3Add(plant.position,branch.position);
+							push();
+							translate(position.x*5, position.y*5,position.z * 5);
+							fill(255,0,0);
 							box(5,5,5);
 							pop();
 						}

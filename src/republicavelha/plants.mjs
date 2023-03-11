@@ -1,20 +1,57 @@
+export const orange = 
+{
+  type: 'fruit tree',
+  fruit: {
+      name: 'orange',
+      min: 3, // number of fruits per tree
+      max: 200 // number of fruits per tree
+  },
+  size: {
+      min: 200, // centimeters in diameter
+      max: 400 // centimeters in diameter
+  },
+  wood: 'orange wood',
+  leaf: {
+      name: 'orange leaf',
+      min: 100, // number of leaves per tree
+      max: 1000 // number of leaves per tree
+  },
+  flower: {
+      name: 'orange flower',
+      min: 500, // number of flowers per tree
+      max: 5000 // number of flowers per tree
+  },
+  seed: {
+      name: 'orange seed',
+      min: 0, // number of seeds per fruit
+      max: 10 // number of seeds per fruit
+  },
+  place: 'outdoor',
+  time: {
+      maturing: {
+          min: 15552000, // sec from blossom to fruit
+          max: 25920000 // sec from blossom to fruit
+      },
+      lifespan: {
+          min: 315360000, // sec (10 years)
+          max: 630720000 // sec (20 years)
+      }
+  }
+};
 export const grass =
 {
   type: 'herb',
-  fruit: null,
   size:
   {
       min: 5, // centimeters
       max: 50 // centimeters
   },
-  wood: null,
   leaf:
   {
       name: 'grass leaf',
       min: 50, // leaves per plant
       max: 500 // leaves per plant
   },
-  flower: null,
   seed:
   {
       name: 'grass seed',
@@ -36,10 +73,55 @@ export const grass =
       }
   }
 };
+export const caju =
+{
+  type: 'fruit tree',
+  fruit: 
+  {
+    name: 'caju',
+    min: 1, // number of fruits per tree
+    max: 200 // number of fruits per tree
+  },
+  size: 
+  {
+    min: 5, // centimeters in length
+    max: 11 // centimeters in length
+  },
+  wood: 'caju wood',
+  leaf: 
+  {
+    name: 'caju leaf',
+    min: 200, // number of leaves per tree
+    max: 5000 // number of leaves per tree
+  },
+  flower: 
+  {
+    name: 'caju flower',
+    min: 100, // number of flowers per tree
+    max: 1000 // number of flowers per tree
+  },
+  seed: 
+  {
+    name: 'caju seed',
+    min: 1, // number of seeds per fruit
+    max: 3 // number of seeds per fruit
+  },
+  place: 'outdoor',
+  time: 
+  {
+    maturing: {
+      min: 7776000, // seconds from blossom to fruit (90 days)
+      max: 10368000 // seconds from blossom to fruit (120 days)
+    },
+    lifespan: {
+      min: 788940000, // seconds (25 years)
+      max: 1261440000 // seconds (40 years)
+    }
+  }
+};
 export const cannabis =
 {
   type: 'herb',
-  fruit: null,
   size:
   {
       min: 60, // centimeters
@@ -76,46 +158,6 @@ export const cannabis =
       {
           min: 48384000, // 14 months
           max: 72576000 // 24 months
-      }
-  }
-};
-export const orange = 
-{
-  type: 'fruit tree',
-  fruit: {
-      name: 'orange',
-      min: 3, // number of fruits per tree
-      max: 200 // number of fruits per tree
-  },
-  size: {
-      min: 5, // centimeters in diameter
-      max: 10 // centimeters in diameter
-  },
-  wood: 'orange wood',
-  leaf: {
-      name: 'orange leaf',
-      min: 100, // number of leaves per tree
-      max: 1000 // number of leaves per tree
-  },
-  flower: {
-      name: 'orange flower',
-      min: 500, // number of flowers per tree
-      max: 5000 // number of flowers per tree
-  },
-  seed: {
-      name: 'orange seed',
-      min: 0, // number of seeds per fruit
-      max: 10 // number of seeds per fruit
-  },
-  place: 'outdoor',
-  time: {
-      maturing: {
-          min: 15552000, // sec from blossom to fruit
-          max: 25920000 // sec from blossom to fruit
-      },
-      lifespan: {
-          min: 315360000, // sec (10 years)
-          max: 630720000 // sec (20 years)
       }
   }
 };
@@ -156,6 +198,47 @@ export const tamarind =
     lifespan: {
       min: 630720000, // days (20 years)
       max: 946080000 // days (30 years)
+    }
+  }
+};
+export const rice =
+{
+  type: 'grain',
+  size: 
+  {
+    min: 2, // millimeters in length
+    max: 8 // millimeters in length
+  },
+  leaf: 
+  {
+    name: 'rice leaf',
+    min: 4, // number of leaves per plant
+    max: 20 // number of leaves per plant
+  },
+  flower: 
+  {
+    name: 'rice flower',
+    min: 1, // number of flowers per plant
+    max: 10 // number of flowers per plant
+  },
+  seed: 
+  {
+    name: 'rice seed',
+    min: 100, // number of seeds per plant
+    max: 500 // number of seeds per plant
+  },
+  place: 'paddy field',
+  time: 
+  {
+    maturing: 
+    {
+      min: 2592000, // seconds from seed to harvest (30 days)
+      max: 5184000 // seconds from seed to harvest (60 days)
+    },
+    lifespan: 
+    {
+      min: 10368000, // seconds (120 days)
+      max: 15552000 // seconds (180 days)
     }
   }
 };
@@ -207,6 +290,53 @@ export const starfruit =
     }
   }
 };
+export const tomato =
+{
+  type: 'plant',
+  fruit: 
+  {
+    name: 'tomato',
+    min: 1, // number of tomatoes per plant
+    max: 50 // number of tomatoes per plant
+  },
+  size: 
+  {
+    min: 2, // centimeters in diameter
+    max: 10 // centimeters in diameter
+  },
+  leaf: 
+  {
+    name: 'tomato leaf',
+    min: 10, // number of leaves per plant
+    max: 100 // number of leaves per plant
+  },
+  flower: 
+  {
+    name: 'tomato flower',
+    min: 10, // number of flowers per plant
+    max: 100 // number of flowers per plant
+  },
+  seed: 
+  {
+    name: 'tomato seed',
+    min: 10, // number of seeds per fruit
+    max: 500 // number of seeds per fruit
+  },
+  place: 'outdoor',
+  time: 
+  {
+    maturing: 
+    {
+      min: 604800, // seconds from seed to fruit (7 days)
+      max: 2419200 // seconds from seed to fruit (28 days)
+    },
+    lifespan: 
+    {
+      min: 15552000, // seconds (6 months)
+      max: 23328000 // seconds (9 months)
+    }
+  }
+};
 export const jackfruit =
 {
   type: 'fruit tree',
@@ -255,140 +385,3 @@ export const jackfruit =
     }
   }
 };
-export const caju =
-{
-  type: 'fruit tree',
-  fruit: 
-  {
-    name: 'caju',
-    min: 1, // number of fruits per tree
-    max: 200 // number of fruits per tree
-  },
-  size: 
-  {
-    min: 5, // centimeters in length
-    max: 11 // centimeters in length
-  },
-  wood: 'caju wood',
-  leaf: 
-  {
-    name: 'caju leaf',
-    min: 200, // number of leaves per tree
-    max: 5000 // number of leaves per tree
-  },
-  flower: 
-  {
-    name: 'caju flower',
-    min: 100, // number of flowers per tree
-    max: 1000 // number of flowers per tree
-  },
-  seed: 
-  {
-    name: 'caju seed',
-    min: 1, // number of seeds per fruit
-    max: 3 // number of seeds per fruit
-  },
-  place: 'outdoor',
-  time: 
-  {
-    maturing: {
-      min: 7776000, // seconds from blossom to fruit (90 days)
-      max: 10368000 // seconds from blossom to fruit (120 days)
-    },
-    lifespan: {
-      min: 788940000, // seconds (25 years)
-      max: 1261440000 // seconds (40 years)
-    }
-  }
-};
-export const rice =
-{
-  type: 'grain',
-  fruit: null,
-  size: 
-  {
-    min: 2, // millimeters in length
-    max: 8 // millimeters in length
-  },
-  wood: null,
-  leaf: 
-  {
-    name: 'rice leaf',
-    min: 4, // number of leaves per plant
-    max: 20 // number of leaves per plant
-  },
-  flower: 
-  {
-    name: 'rice flower',
-    min: 1, // number of flowers per plant
-    max: 10 // number of flowers per plant
-  },
-  seed: 
-  {
-    name: 'rice seed',
-    min: 100, // number of seeds per plant
-    max: 500 // number of seeds per plant
-  },
-  place: 'paddy field',
-  time: 
-  {
-    maturing: 
-    {
-      min: 2592000, // seconds from seed to harvest (30 days)
-      max: 5184000 // seconds from seed to harvest (60 days)
-    },
-    lifespan: 
-    {
-      min: 10368000, // seconds (120 days)
-      max: 15552000 // seconds (180 days)
-    }
-  }
-};
-export const tomato =
-{
-  type: 'plant',
-  fruit: 
-  {
-    name: 'tomato',
-    min: 1, // number of tomatoes per plant
-    max: 50 // number of tomatoes per plant
-  },
-  size: 
-  {
-    min: 2, // centimeters in diameter
-    max: 10 // centimeters in diameter
-  },
-  wood: null,
-  leaf: 
-  {
-    name: 'tomato leaf',
-    min: 10, // number of leaves per plant
-    max: 100 // number of leaves per plant
-  },
-  flower: 
-  {
-    name: 'tomato flower',
-    min: 10, // number of flowers per plant
-    max: 100 // number of flowers per plant
-  },
-  seed: 
-  {
-    name: 'tomato seed',
-    min: 10, // number of seeds per fruit
-    max: 500 // number of seeds per fruit
-  },
-  place: 'outdoor',
-  time: 
-  {
-    maturing: 
-    {
-      min: 604800, // seconds from seed to fruit (7 days)
-      max: 2419200 // seconds from seed to fruit (28 days)
-    },
-    lifespan: 
-    {
-      min: 15552000, // seconds (6 months)
-      max: 23328000 // seconds (9 months)
-    }
-  }
-}
