@@ -33,126 +33,74 @@ function getSunIntensity(minHour, maxHour, seconds)
 
 function findTrunkGrowPosition(collisionMap,x,y,z)//this try to find a air block in the 9 above blocks
 {
-    if(collisionMap[x][y][z+1]  <75)//5
+    let directions = 
+    [
+        {x: -1, y: 0,z:1}, //4
+        {x: 1, y: 0,z:1},  //6
+        {x: 1, y: 1,z:1},  //3
+        {x: -1, y: 1,z:1}, //1
+        {x: 0, y: 1,z:1},  //2
+        {x: 0, y: -1,z:1}, //8
+        {x: 1, y: -1,z:1}, //9
+        {x: -1, y: -1,z:1} //7
+    ];
+    directions = Util.shuffleArray(Util.shuffleArray(Util.shuffleArray(directions)));
+    for (let opt of directions) 
     {
-        return {
-            x:0,
-            y:0,
-            z:0+1
-        };
+        if((x+opt.x >0&&y+opt.y>0&&x+opt.x <collisionMap.length&&y+opt.y <collisionMap[0].length)!== true)
+            continue;
+        if(collisionMap[x+opt.x][y+opt.y][z+opt.z]  <75)
+            return opt;
     }
-    else if(collisionMap[x-1][y][z+1]  <75)//4
-        return {
-            x:0-1,
-            y:0,
-            z:0
-        };
-    else if(collisionMap[x+1][y][z+1]  <75)//6
-        return {
-            x:0+1,
-            y:0,
-            z:0
-        };
-    else if(collisionMap[x+1][y+1][z+1]  <75)//3
-        return {
-            x:0+1,
-            y:0+1,
-            z:0
-        };
-    else if(collisionMap[x-1][y+1][z+1]  <75)//1
-        return {
-            x:0-1,
-            y:0+1,
-            z:0
-        };
-    else if(collisionMap[x][y+1][z+1]  <75)//2
-        return {
-            x:0,
-            y:0+1,
-            z:0
-        };
-    else if(collisionMap[x][y-1][z+1]  <75)//8
-        return {
-            x:0,
-            y:0-1,
-            z:0
-        };
-    else if(collisionMap[x+1][y-1][z+1]  <75)//9
-        return {
-            x:0+1,
-            y:0-1,
-            z:0
-        };
-    else if(collisionMap[x-1][y-1][z+1]  <75)//7
-        return {
-            x:0-1,
-            y:0-1,
-            z:0
-        };
-    else 
-        return;
+    return;
+}
+
+function findRootGrowPosition(collisionMap,x,y,z)//this try to find a air block in the 9 below blocks
+{
+    let directions = 
+    [
+        {x: -1, y: 0,z:-1}, //4
+        {x: 1, y: 0,z:-1},  //6
+        {x: 1, y: 1,z:-1},  //3
+        {x: -1, y: 1,z:-1}, //1
+        {x: 0, y: 1,z:-1},  //2
+        {x: 0, y: -1,z:-1}, //8
+        {x: 1, y: -1,z:-1}, //9
+        {x: -1, y: -1,z:-1} //7
+    ];
+    directions = Util.shuffleArray(Util.shuffleArray(Util.shuffleArray(directions)));
+    for (let opt of directions) 
+    {
+        if((x+opt.x >=0&&y+opt.y>=0&&z+opt.z >=0&&x+opt.x <collisionMap.length&&y+opt.y <collisionMap[0].length&&z+opt.z <collisionMap[0].length)!== true)
+            continue;
+        if(collisionMap[x+opt.x][y+opt.y][z+opt.z]  <75)
+            return opt;
+    }
+    return;
 }
 
 function findBranchGrowPosition(collisionMap,x,y,z)//this try to find a air block in the 8 surrounding blocks, if fail try the 9 above
 {
-    if(collisionMap[x][y][z+1]  <75)//5
+    let directions = 
+    [
+        {x: -1, y: 0,z:0}, //4
+        {x: 1, y: 0,z:0},  //6
+        {x: 1, y: 1,z:0},  //3
+        {x: -1, y: 1,z:0}, //1
+        {x: 0, y: 1,z:0},  //2
+        {x: 0, y: -1,z:0}, //8
+        {x: 1, y: -1,z:0}, //9
+        {x: -1, y: -1,z:0} //7
+    ];
+    directions = Util.shuffleArray(Util.shuffleArray(Util.shuffleArray(directions)));
+    for (let opt of directions) 
     {
-        return {
-            x:0,
-            y:0,
-            z:0+1
-        };
+        if((x+opt.x >0&&y+opt.y>0&&x+opt.x <collisionMap.length&&y+opt.y <collisionMap[0].length)!== true)
+            continue;
+        if(collisionMap[x+opt.x][y+opt.y][z+opt.z]  <75)
+            return opt;
     }
-    else if(collisionMap[x-1][y][z]  <75)//4
-        return {
-            x:0-1,
-            y:0,
-            z:0
-        };
-    else if(collisionMap[x+1][y][z]  <75)//6
-        return {
-            x:0+1,
-            y:0,
-            z:0
-        };
-    else if(collisionMap[x+1][y+1][z]  <75)//3
-        return {
-            x:0+1,
-            y:0+1,
-            z:0
-        };
-    else if(collisionMap[x-1][y+1][z]  <75)//1
-        return {
-            x:0-1,
-            y:0+1,
-            z:0
-        };
-    else if(collisionMap[x][y+1][z]  <75)//2
-        return {
-            x:0,
-            y:0+1,
-            z:0
-        };
-    else if(collisionMap[x][y-1][z]  <75)//8
-        return {
-            x:0,
-            y:0-1,
-            z:0
-        };
-    else if(collisionMap[x+1][y-1][z]  <75)//9
-        return {
-            x:0+1,
-            y:0-1,
-            z:0
-        };
-    else if(collisionMap[x-1][y-1][z]  <75)//7
-        return {
-            x:0-1,
-            y:0-1,
-            z:0
-        };
-    else 
-        return findTrunkGrowPosition(collisionMap,x,y,z);
+    return findTrunkGrowPosition(collisionMap,x,y,z);
 }
 
 export async function Map(mapsize,multiHorizontal,smooth,randomize,subdivide,postslices ,retry)//create the map
@@ -242,14 +190,14 @@ function growLeaf(plant)
 
 function growBranch(plant,collisionMap,time)
 {
-    if(Plants[plant.specie].type.includes('tree')&&plant.branch.length < Plants[plant.specie].leaf/10&&Util.roleta(13,1,15) == 1)
+    if(plant.branch.length < Plants[plant.specie].leaf.max/10&&Util.roleta(13,1,15) == 1)
     {
-        //if()
-        let lastTrunkPosition = plant.position;
-        if(plant.trunk.length>0)
-            lastTrunkPosition = Util.Vector3Add(plant.trunk.position,plant.position);
-        var position = findBranchGrowPosition(collisionMap,lastTrunkPosition.x,lastTrunkPosition.y,lastTrunkPosition.z);
-        plant.branch.push(new Branch(plant.specie,'idle',time,position,plant.quality,plant.condition))
+        let lastTrunkPosition = {x:0,y:0,z:0};
+        if(plant.trunk.length>0) 
+            lastTrunkPosition = plant.trunk[plant.trunk.length-1].position;
+        let sendposition = Util.Vector3Add(plant.position,lastTrunkPosition);
+        var position = findBranchGrowPosition(collisionMap,sendposition.x,sendposition.y,sendposition.z);
+        plant.branch.push(new Branch(plant.specie,'idle',time,position,plant.quality,plant.condition));
     }
     return plant;
 }
@@ -257,22 +205,23 @@ function growBranch(plant,collisionMap,time)
 function growTrunk(plant,collisionMap,time)
 {
    
-    let lastTrunkPosition = {x:0,y:0,z:0};
+    let lastTrunkPosition = {x:0,y:0,z:-1};
     if(plant.trunk.length > 0)
-    {
         lastTrunkPosition = plant.trunk[plant.trunk.length-1].position;
-    }
     let sendposition = Util.Vector3Add(plant.position,lastTrunkPosition);
     var position = Util.Vector3Add(findTrunkGrowPosition(collisionMap,sendposition.x,sendposition.y,sendposition.z),lastTrunkPosition);
 
     if(typeof position == 'undefined')
         return plant;
     else if(plant.trunk.length < Plants[plant.specie].size.max/100)
-        //if(Util.roleta(20,1) == 1)
+        if(Util.roleta(20,1) == 1)
         {
             plant.trunk.push(new Trunk(plant.specie,'idle',time,position,plant.quality,plant.condition));
-        }  
-    
+            for (let i = 0; i < plant.branch.length; i++) 
+            {
+                plant.branch[i].position.z++;
+            }
+        }
     return plant;
 }
 
@@ -292,17 +241,20 @@ function plantFrame(world,plant)
     {
         if(world.time % (Plants[plant.specie].time.maturing.min/100000)===0)
         {
-            plant = growBranch(plant,world.time);
+            plant = growBranch(plant,world.map.collision,world.time);
         }
     }
     else if(Plants[plant.specie].type == 'tree'||Plants[plant.specie].type == 'fruit tree')
     {
+        if(Util.roleta(2,1))
+        {
+            plant = growBranch(plant,world.map.collision,world.time);
+        }
         let lastTrunkPosition = plant.position;
         if(plant.trunk.length > 0)
             lastTrunkPosition = plant.trunk[plant.trunk.length-1].position;
         if(world.time % Util.LimitTo(Plants[plant.specie].time.maturing.min,1,1000)===0 && lastTrunkPosition.x < world.map.block[0][0].length-1)
         {
-            plant = growBranch(plant,world.map.collision,world.time);
             plant = growTrunk(plant,world.map.collision,world.time);
         }
         

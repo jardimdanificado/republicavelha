@@ -58,29 +58,30 @@ function grassify(world)
 				100
 			);
 
-			if(Republica.Util.roleta(50,Republica.Util.randomInRange(1,50)))//if roleta == 1
-			{	
-				let temptype = Object.keys(Republica.Encyclopedia.Plants)
-				[
-					Republica.Util.roleta.apply(
-						this,
-						Republica.Util.randomIntArray(
-							1,
-							10,
-							Object.keys(Republica.Encyclopedia.Plants).length
+			if(x>0&&y>0&&x<world.map.heightmap.length&&y<world.map.heightmap[0].length)
+				if(Republica.Util.roleta(50,Republica.Util.randomInRange(1,50)))//if roleta == 1
+				{	
+					let temptype = Object.keys(Republica.Encyclopedia.Plants)
+					[
+						Republica.Util.roleta.apply(
+							this,
+							Republica.Util.randomIntArray(
+								1,
+								10,
+								Object.keys(Republica.Encyclopedia.Plants).length
+							)
 						)
-					)
-				]
-				if(temptype !== 'grass')
-					world.plant.spawn(//this spawns a random seed at the xy position
-						'seed', 
-						temptype,
-						'idle', 
-						{x:x,y:y,z:world.map.block[0][0].length-1}, 
-						100, 
-						100
-					);
-			}
+					]
+					if(temptype !== 'grass')
+						world.plant.spawn(//this spawns a random seed at the xy position
+							'seed', 
+							temptype,
+							'idle', 
+							{x:x,y:y,z:world.map.block[0][0].length-1}, 
+							100, 
+							100
+						);
+				}
 		}
 	return world;
 }

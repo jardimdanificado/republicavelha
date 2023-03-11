@@ -99,7 +99,7 @@ export function flattenMatrix(matrix)
 	return matrix.reduce((flatArray, currentRow) => flatArray.concat(currentRow), []);
 }
 
-function shuffleArray(arr) 
+export function shuffleArray(arr) 
 {
 	for (let i = arr.length - 1; i > 0; i--) 
 	{
