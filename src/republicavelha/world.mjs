@@ -190,13 +190,14 @@ function growLeaf(plant)
 
 function growBranch(plant,collisionMap,time)
 {
-    if(plant.branch.length < Plants[plant.specie].leaf.max/100&&Util.roleta(35,1,45) == 1)
+    if(plant.branch.length < Plants[plant.specie].leaf.max/10&&Util.roleta(35,1,45) == 1)
     {
         let lastTrunkPosition = {x:0,y:0,z:0};
         if(plant.trunk.length>0) 
-            lastTrunkPosition = plant.trunk[plant.trunk.length-1].position;
+            lastTrunkPosition = plant.trunk[0].position;
         let sendposition = Util.Vector3Add(plant.position,lastTrunkPosition);
         var position = findBranchGrowPosition(collisionMap,sendposition.x,sendposition.y,sendposition.z);
+
         plant.branch.push(new Branch(plant.specie,'idle',time,position,plant.quality,plant.condition));
     }
     return plant;
@@ -207,7 +208,7 @@ function growTrunk(plant,collisionMap,time)
    
     let lastTrunkPosition = {x:0,y:0,z:-1};
     if(plant.trunk.length > 0)
-        lastTrunkPosition = plant.trunk[plant.trunk.length-1].position;
+        lastTrunkPosition = plant.trunk[0].position;
     let sendposition = Util.Vector3Add(plant.position,lastTrunkPosition);
     var position = Util.Vector3Add(findTrunkGrowPosition(collisionMap,sendposition.x,sendposition.y,sendposition.z),lastTrunkPosition);
 
@@ -216,11 +217,12 @@ function growTrunk(plant,collisionMap,time)
     else if(plant.trunk.length < Plants[plant.specie].size.max/100)
         if(Util.roleta(20,1) == 1)
         {
-            plant.trunk.push(new Trunk(plant.specie,'idle',time,position,plant.quality,plant.condition));
-            for (let i = 0; i < plant.branch.length; i++) 
-            {
-                plant.branch[i].position.z++;
-            }
+            plant.trunk.unshift(new Trunk(plant.specie,'idle',time,position,plant.quality,plant.condition));
+            if(plant.trunk.length>1&&plant.trunk[0].position.z>plant.trunk[1].position.z)
+                for (let i = 0; i < plant.branch.length; i++) 
+                {
+                    plant.branch[i].position.z++;
+                }
         }
     return plant;
 }
