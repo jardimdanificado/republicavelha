@@ -37,14 +37,15 @@ function findTrunkGrowPosition(collisionMap,x,y,z)//this try to find a air block
     [
         {x: -1, y: 0,z:1}, //4
         {x: 1, y: 0,z:1},  //6
-        {x: 1, y: 1,z:1},  //3
-        {x: -1, y: 1,z:1}, //1
+        //{x: 1, y: 1,z:1},  //3
+        //{x: -1, y: 1,z:1}, //1
         {x: 0, y: 1,z:1},  //2
         {x: 0, y: -1,z:1}, //8
-        {x: 1, y: -1,z:1}, //9
-        {x: -1, y: -1,z:1} //7
+        //{x: 1, y: -1,z:1}, //9
+        //{x: -1, y: -1,z:1} //7
     ];
     directions = Util.shuffleArray(Util.shuffleArray(Util.shuffleArray(directions)));
+    
     for (let opt of directions) 
     {
         if((x+opt.x >0&&y+opt.y>0&&x+opt.x <collisionMap.length&&y+opt.y <collisionMap[0].length)!== true)
@@ -182,15 +183,14 @@ function seedFrame(world,plant)
 
 function growLeaf(plant)
 {
-    if(plant.leaf.length < Plants[plant.specie].leaf.max)
-        if(Util.roleta(14,1) == 1)
-            plant.leaf += 1;
+    if(Util.roleta(14,1,16) == 1)
+        plant.leaf += 1;
     return plant;
 }
 
 function growBranch(plant,collisionMap,time)
 {
-    if(plant.branch.length < Plants[plant.specie].leaf.max/10&&Util.roleta(13,1,15) == 1)
+    if(plant.branch.length < Plants[plant.specie].leaf.max/100&&Util.roleta(35,1,45) == 1)
     {
         let lastTrunkPosition = {x:0,y:0,z:0};
         if(plant.trunk.length>0) 
@@ -228,38 +228,28 @@ function growTrunk(plant,collisionMap,time)
 function plantFrame(world,plant)
 {
     
-    if(world.time % (Plants[plant.specie].time.maturing.min/1000000)===0)
+    if(plant.leaf.length < Plants[plant.specie].leaf.max&&world.time % (Plants[plant.specie].time.maturing.min/1000000)===0)
     {
+        if(Plants[plant.specie].size.max > 100)
+        {
+            if(world.time % (Plants[plant.specie].time.maturing.min/100000)===0)
+            {
+                plant = growBranch(plant,world.map.collision,world.time);
+            }
+        }
         plant = growLeaf(plant);
     }
 
-    if(Plants[plant.specie].type == 'herb')
+    if(Plants[plant.specie].type.includes('tree'))
     {
-
-    }
-    else if(Plants[plant.specie].type == 'plant')
-    {
-        if(world.time % (Plants[plant.specie].time.maturing.min/100000)===0)
-        {
-            plant = growBranch(plant,world.map.collision,world.time);
-        }
-    }
-    else if(Plants[plant.specie].type == 'tree'||Plants[plant.specie].type == 'fruit tree')
-    {
-        if(Util.roleta(2,1))
-        {
-            plant = growBranch(plant,world.map.collision,world.time);
-        }
         let lastTrunkPosition = plant.position;
         if(plant.trunk.length > 0)
             lastTrunkPosition = plant.trunk[plant.trunk.length-1].position;
-        if(world.time % Util.LimitTo(Plants[plant.specie].time.maturing.min,1,1000)===0 && lastTrunkPosition.x < world.map.block[0][0].length-1)
+        if(world.time % Util.LimitTo(Plants[plant.specie].time.maturing.min,1,10)===0 && lastTrunkPosition.x < world.map.block[0][0].length-1)
         {
             plant = growTrunk(plant,world.map.collision,world.time);
         }
-        
     }
-    
     return(plant);
 }
 

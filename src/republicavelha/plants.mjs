@@ -206,8 +206,8 @@ export const rice =
   type: 'grain',
   size: 
   {
-    min: 2, // millimeters in length
-    max: 8 // millimeters in length
+    min: 20, 
+    max: 80 
   },
   leaf: 
   {
@@ -301,8 +301,8 @@ export const tomato =
   },
   size: 
   {
-    min: 2, // centimeters in diameter
-    max: 10 // centimeters in diameter
+    min: 20, // centimeters in diameter
+    max: 60 // centimeters in diameter
   },
   leaf: 
   {
