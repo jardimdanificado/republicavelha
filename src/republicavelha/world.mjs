@@ -227,12 +227,11 @@ function growTrunk(plant,collisionMap,time)
 
 function plantFrame(world,plant)
 {
-    
-    if(plant.leaf.length < Plants[plant.specie].leaf.max&&world.time % (Plants[plant.specie].time.maturing.min/1000000)===0)
+    if(plant.leaf < Plants[plant.specie].leaf.max&&world.time % Util.LimitTo(Plants[plant.specie].time.maturing.min,0,10)===0)
     {
         if(Plants[plant.specie].size.max > 100)
         {
-            if(world.time % (Plants[plant.specie].time.maturing.min/100000)===0)
+            if(world.time % Util.LimitTo(Plants[plant.specie].time.maturing.min,0,10)===0)
             {
                 plant = growBranch(plant,world.map.collision,world.time);
             }

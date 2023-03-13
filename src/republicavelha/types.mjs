@@ -117,7 +117,7 @@ export class Plant extends Generic
 	{
 		super('plant', status, birth, position, quality, condition);
 		this.specie = specie;
-		this.leaf = (typeof Plants[this.specie].leaf !== 'undefined') ? []:undefined;
+		this.leaf = 0;
 		this.flower = (typeof Plants[this.specie].flower !== 'undefined') ? []:undefined;
 		this.branch = (Plants[this.specie].type !== 'herb') ? []:undefined;
 		this.trunk = (typeof Plants[this.specie].wood !== 'undefined') ? []:undefined;
