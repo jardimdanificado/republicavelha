@@ -524,7 +524,7 @@ async function setup(msize={w:64,h:64},mwidth=2,mquality=1,postslices=1,retry = 
 	world = await (async(fn,args)=>{return fn.apply(this,args)})(main,[msize,mwidth,mquality,postslices,retry,true,false]);
 	
 	
-	options.camera.map = world.map.collision;
+	options.camera.map = world.map.collision.static;
 	var {min,max} = session.findMinMax(options.camera.map);
 	options.camera.max = max;
 	options.camera.min = min;

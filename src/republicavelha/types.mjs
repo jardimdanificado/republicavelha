@@ -182,3 +182,13 @@ export class Fruit extends Generic
 		this.seed = 1;
 	}
 }
+
+export class Collider
+{
+	constructor(positions = [new Vector3(0,0,0)],value = 0)
+	{
+		this.position = positions;
+		this.value = value;
+		this.active = true;
+	}
+}

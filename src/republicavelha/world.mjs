@@ -1,6 +1,6 @@
 import * as Util from "./util.mjs";
 import { AutoTerrain } from "./terrain.mjs";
-import { Creature, Plant, Seed , Leaf, Trunk, Branch, Fruit, Flower, Vector3} from "./types.mjs";
+import { Creature, Plant, Seed , Leaf, Trunk, Branch, Fruit, Flower, Vector3, Collider} from "./types.mjs";
 import * as Plants from "./plants.mjs";
 
 function getHourOfDay(totalSeconds) 
@@ -111,7 +111,7 @@ export async function Map(mapsize,multiHorizontal,smooth,randomize,subdivide,pos
     delete block.heightmap;
     var temperature = Util.create3DArray(block.length,block[0].length,block[0][0].length,29);
     var plant = Util.create3DArray(block.length,block[0].length,block[0][0].length,[]);
-    var collision = block.map((value)=>
+    var staticCollision = block.map((value)=>
     {
         return (
                 value.map((value)=>
@@ -127,6 +127,47 @@ export async function Map(mapsize,multiHorizontal,smooth,randomize,subdivide,pos
                 })
         )
     })
+    var collision = 
+    {
+        static:staticCollision,
+        dynamic:[],
+        new:(value,...positions)=>
+        {
+            this.push(new Collider(positions,value));
+        },
+        check:(position,value = 75)=>//returns true if no collider in the specified position, of if the colliders in the position are below value;
+        {
+            for(let collider of collision.dynamic)
+            {
+                let tposition = collider.positions.reduce((accumulator, currentValue) => 
+                {
+                    return {
+                      x: accumulator.x + currentValue.x,
+                      y: accumulator.y + currentValue.y,
+                      z: accumulator.z + currentValue.z
+                    };
+                });
+
+                if(
+                    tposition.x == position.x&&
+                    tposition.y == position.y&&
+                    tposition.z == position.z
+                )
+                {
+                    if(collider.value>=value)
+                    {
+                        return false;
+                    }
+                    else
+                        acumulator+=collider.value;
+
+                    if(acumulator >= value)
+                        return false;
+                }
+            }
+            return true;
+        }
+    };
     return {
       block,
       heightmap,
@@ -159,9 +200,16 @@ export const Life =
 
 function gravity(collisionMap,position)
 {
-    return(
-        (position.z > 1 && collisionMap[position.x][position.y][position.z-1]<75) ? {x:position.x,y:position.y,z:position.z-1}:position
-    );
+    let staticmap = collisionMap.static;
+    if(position.z > 1 && staticmap[position.x][position.y][position.z-1]<75)
+    {
+        return{x:position.x,y:position.y,z:position.z-1};
+    }
+    else if(collisionMap.check(new Vector3(position.x,position.y,position.z-1)))
+    {
+        return{x:position.x,y:position.y,z:position.z-1};
+    }
+    return(position);
 }
 
 function seedFrame(world,plant)
@@ -222,6 +270,7 @@ function growTrunk(plant,collisionMap,time)
             branch.position.x += customX;
         }
         plant.trunk.unshift(new Trunk(plant.specie,'idle',time,{x:0,y:0,z:0},plant.quality,plant.condition));
+
     }
     return plant;
 }
@@ -367,6 +416,7 @@ export async function New(mapsize,multiHorizontal,smooth,randomize,subdivide,pos
         creature:[],
         plant:[],
         item:[],
+        collider:[]
     };
     //LOOP FUNCTIONS
     result.loop.start = (type)=>
