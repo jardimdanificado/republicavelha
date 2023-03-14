@@ -170,8 +170,8 @@ export const tamarind =
     max: 500 // number of fruits per tree
   },
   size: {
-    min: 2000, // centimeters in length
-    max: 15000 // centimeters in length
+    min: 200, // centimeters in length
+    max: 1500 // centimeters in length
   },
   wood: 'tamarind wood',
   leaf: {
@@ -253,8 +253,8 @@ export const starfruit =
   },
   size: 
   {
-    min: 7000, // centimeters in length
-    max: 15000 // centimeters in length
+    min: 700, // centimeters in length
+    max: 1500 // centimeters in length
   },
   wood: 'starfruit wood',
   leaf: 
@@ -348,8 +348,8 @@ export const jackfruit =
   },
   size: 
   {
-    min: 10000, // centimeters in diameter
-    max: 25000 // centimeters in diameter
+    min: 1000, // centimeters in diameter
+    max: 2500 // centimeters in diameter
   },
   wood: 'jackfruit wood',
   leaf: 

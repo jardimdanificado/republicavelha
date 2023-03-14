@@ -190,7 +190,7 @@ function growLeaf(plant)
 
 function growBranch(plant,collisionMap,time)
 {
-    if(plant.branch.length < Plants[plant.specie].leaf.max/10&&Util.roleta(35,1,45) == 1)
+    if(plant.branch.length < Plants[plant.specie].leaf.max/10&&Util.roleta(2,1,2) == 1)
     {
         let lastTrunkPosition = {x:0,y:0,z:0};
         if(plant.trunk.length>0) 
@@ -205,25 +205,24 @@ function growBranch(plant,collisionMap,time)
 
 function growTrunk(plant,collisionMap,time)
 {
-   
-    let lastTrunkPosition = {x:0,y:0,z:-1};
-    if(plant.trunk.length > 0)
-        lastTrunkPosition = plant.trunk[0].position;
-    let sendposition = Util.Vector3Add(plant.position,lastTrunkPosition);
-    var position = Util.Vector3Add(findTrunkGrowPosition(collisionMap,sendposition.x,sendposition.y,sendposition.z),lastTrunkPosition);
-
-    if(typeof position == 'undefined')
-        return plant;
-    else if(plant.trunk.length < Plants[plant.specie].size.max/100)
-        if(Util.roleta(20,1) == 1)
+    if(typeof plant.trunk !== "undefined"&&plant.trunk.length < (Plants[plant.specie].size.max/100))
+    {
+        let customX = Util.roleta(1,10,1)-1;
+        let customY = Util.roleta(1,10,1)-1;
+        for (let trunk of plant.trunk) 
         {
-            plant.trunk.unshift(new Trunk(plant.specie,'idle',time,position,plant.quality,plant.condition));
-            if(plant.trunk.length>1&&plant.trunk[0].position.z>plant.trunk[1].position.z)
-                for (let i = 0; i < plant.branch.length; i++) 
-                {
-                    plant.branch[i].position.z++;
-                }
+            trunk.position.z++;
+            trunk.position.y += customY;
+            trunk.position.x += customX;
         }
+        for (let branch of plant.branch) 
+        {
+            branch.position.z++;
+            branch.position.y += customY;
+            branch.position.x += customX;
+        }
+        plant.trunk.unshift(new Trunk(plant.specie,'idle',time,{x:0,y:0,z:0},plant.quality,plant.condition));
+    }
     return plant;
 }
 
@@ -246,7 +245,7 @@ function plantFrame(world,plant)
         let lastTrunkPosition = plant.position;
         if(plant.trunk.length > 0)
             lastTrunkPosition = plant.trunk[plant.trunk.length-1].position;
-        if(world.time % Util.LimitTo(Plants[plant.specie].time.maturing.min,1,10)===0 && lastTrunkPosition.x < world.map.block[0][0].length-1)
+        if(world.time % Util.LimitTo(Plants[plant.specie].time.maturing.min,1,100)===0 && lastTrunkPosition.x < world.map.block[0][0].length-1)
         {
             plant = growTrunk(plant,world.map.collision,world.time);
         }
