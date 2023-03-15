@@ -98,7 +98,7 @@ function findBranchGrowPosition(collisionMap,x,y,z)//this try to find a air bloc
     {
         if((x+opt.x >0&&y+opt.y>0&&x+opt.x <collisionMap.length&&y+opt.y <collisionMap[0].length)!== true)
             continue;
-        if(collisionMap[x+opt.x][y+opt.y][z+opt.z]  <75)
+        if(collisionMap.check(new Vector3(x+opt.x,y+opt.y,z+opt.z)))
             return opt;
     }
     return findTrunkGrowPosition(collisionMap,x,y,z);
@@ -137,6 +137,10 @@ export async function Map(mapsize,multiHorizontal,smooth,randomize,subdivide,pos
         },
         check:(position,value = 75)=>//returns true if no collider in the specified position, of if the colliders in the position are below value;
         {
+            if(collision.static[position.x][position.y][position.z-1] > value)
+            {
+                return false;
+            }
             for(let collider of collision.dynamic)
             {
                 let tposition = collider.positions.reduce((accumulator, currentValue) => 
@@ -270,7 +274,7 @@ function growTrunk(plant,collisionMap,time)
             branch.position.x += customX;
         }
         plant.trunk.unshift(new Trunk(plant.specie,'idle',time,{x:0,y:0,z:0},plant.quality,plant.condition));
-
+        collisionMap.new([plant.position,plant.trunk[0]]);
     }
     return plant;
 }
@@ -305,6 +309,7 @@ function plantFrame(world,plant)
 //INTERPRETATION
 export function frame(world)
 {
+    //console.time('wframe')
 	world.time++;
     if(world.plant.length>0)
     {
@@ -322,6 +327,7 @@ export function frame(world)
             }
         )
     }
+    //console.timeEnd('wframe')
 }
 
 export const Loop = 
