@@ -133,7 +133,7 @@ export async function Map(mapsize,multiHorizontal,smooth,randomize,subdivide,pos
         dynamic:[],
         new:(value,...positions)=>
         {
-            this.push(new Collider(positions,value));
+            collision.dynamic.push(new Collider(positions,value));
         },
         check:(position,value = 75)=>//returns true if no collider in the specified position, of if the colliders in the position are below value;
         {
@@ -242,15 +242,14 @@ function growLeaf(plant)
 
 function growBranch(plant,collisionMap,time)
 {
-    if(plant.branch.length < Plants[plant.specie].leaf.max/10&&Util.roleta(2,1,2) == 1)
+    if(typeof plant.trunk != 'undefined'&& plant.trunk.length>=1&&plant.branch.length < Plants[plant.specie].leaf.max/1000&&Util.roleta(2,1,2) == 1)
     {
-        let lastTrunkPosition = {x:0,y:0,z:0};
-        if(plant.trunk.length>0) 
-            lastTrunkPosition = plant.trunk[0].position;
-        let sendposition = Util.Vector3Add(plant.position,lastTrunkPosition);
-        var position = findBranchGrowPosition(collisionMap,sendposition.x,sendposition.y,sendposition.z);
-
-        plant.branch.push(new Branch(plant.specie,'idle',time,position,plant.quality,plant.condition));
+        let customX = Util.roleta(1,0,1)-1;
+        let customY = Util.roleta(1,0,1)-1;
+        
+        plant.branch.unshift(new Branch(plant.specie,'idle',time,{x:customX,y:customY,z:0},plant.quality,plant.condition));
+        let collisionPositions = (plant.trunk.length>1)?[plant.position,plant.trunk[1].position,plant.branch[0].position]:[plant.position,plant.trunk[0].position,plant.branch[0].position];
+        collisionMap.new(collisionPositions);
     }
     return plant;
 }

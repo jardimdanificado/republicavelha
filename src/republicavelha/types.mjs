@@ -187,7 +187,7 @@ export class Collider
 {
 	constructor(positions = [new Vector3(0,0,0)],value = 0)
 	{
-		this.position = positions;
+		this.positions = positions;
 		this.value = value;
 		this.active = true;
 	}
