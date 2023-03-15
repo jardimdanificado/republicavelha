@@ -117,7 +117,7 @@ export class Plant extends Generic
 	{
 		super('plant', status, birth, position, quality, condition);
 		this.specie = specie;
-		this.leaf = (typeof Plants[this.specie].leaf !== 'undefined') ? []:undefined;
+		this.leaf = 0;
 		this.flower = (typeof Plants[this.specie].flower !== 'undefined') ? []:undefined;
 		this.branch = (Plants[this.specie].type !== 'herb') ? []:undefined;
 		this.trunk = (typeof Plants[this.specie].wood !== 'undefined') ? []:undefined;
@@ -180,5 +180,15 @@ export class Fruit extends Generic
 		this.specie = specie;
 		this.maturation = 0;
 		this.seed = 1;
+	}
+}
+
+export class Collider
+{
+	constructor(positions = [new Vector3(0,0,0)],value = 0)
+	{
+		this.position = positions;
+		this.value = value;
+		this.active = true;
 	}
 }

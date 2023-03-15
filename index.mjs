@@ -135,7 +135,6 @@ export async function main(msize,mwidth,mquality,postslices,retry,isCustomCall=f
 	var world = await Republica.World.New(msize,mwidth,(mwidth**mquality)*(msize.w),postslices,retry);
 	plantCount = (specie = 'caju') =>
 	{
-		console.log(world)
 		return Republica.Util.customFilter(world.plant,'specie',specie);
 	}
 	if(typeof window !== 'undefined'&&isCustomCall !== true)

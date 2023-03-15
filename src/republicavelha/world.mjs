@@ -1,6 +1,6 @@
 import * as Util from "./util.mjs";
 import { AutoTerrain } from "./terrain.mjs";
-import { Creature, Plant, Seed , Leaf, Trunk, Branch, Fruit, Flower, Vector3} from "./types.mjs";
+import { Creature, Plant, Seed , Leaf, Trunk, Branch, Fruit, Flower, Vector3, Collider} from "./types.mjs";
 import * as Plants from "./plants.mjs";
 
 function getHourOfDay(totalSeconds) 
@@ -37,14 +37,15 @@ function findTrunkGrowPosition(collisionMap,x,y,z)//this try to find a air block
     [
         {x: -1, y: 0,z:1}, //4
         {x: 1, y: 0,z:1},  //6
-        {x: 1, y: 1,z:1},  //3
-        {x: -1, y: 1,z:1}, //1
+        //{x: 1, y: 1,z:1},  //3
+        //{x: -1, y: 1,z:1}, //1
         {x: 0, y: 1,z:1},  //2
         {x: 0, y: -1,z:1}, //8
-        {x: 1, y: -1,z:1}, //9
-        {x: -1, y: -1,z:1} //7
+        //{x: 1, y: -1,z:1}, //9
+        //{x: -1, y: -1,z:1} //7
     ];
     directions = Util.shuffleArray(Util.shuffleArray(Util.shuffleArray(directions)));
+    
     for (let opt of directions) 
     {
         if((x+opt.x >0&&y+opt.y>0&&x+opt.x <collisionMap.length&&y+opt.y <collisionMap[0].length)!== true)
@@ -97,7 +98,7 @@ function findBranchGrowPosition(collisionMap,x,y,z)//this try to find a air bloc
     {
         if((x+opt.x >0&&y+opt.y>0&&x+opt.x <collisionMap.length&&y+opt.y <collisionMap[0].length)!== true)
             continue;
-        if(collisionMap[x+opt.x][y+opt.y][z+opt.z]  <75)
+        if(collisionMap.check(new Vector3(x+opt.x,y+opt.y,z+opt.z)))
             return opt;
     }
     return findTrunkGrowPosition(collisionMap,x,y,z);
@@ -110,7 +111,7 @@ export async function Map(mapsize,multiHorizontal,smooth,randomize,subdivide,pos
     delete block.heightmap;
     var temperature = Util.create3DArray(block.length,block[0].length,block[0][0].length,29);
     var plant = Util.create3DArray(block.length,block[0].length,block[0][0].length,[]);
-    var collision = block.map((value)=>
+    var staticCollision = block.map((value)=>
     {
         return (
                 value.map((value)=>
@@ -126,6 +127,51 @@ export async function Map(mapsize,multiHorizontal,smooth,randomize,subdivide,pos
                 })
         )
     })
+    var collision = 
+    {
+        static:staticCollision,
+        dynamic:[],
+        new:(value,...positions)=>
+        {
+            this.push(new Collider(positions,value));
+        },
+        check:(position,value = 75)=>//returns true if no collider in the specified position, of if the colliders in the position are below value;
+        {
+            if(collision.static[position.x][position.y][position.z-1] > value)
+            {
+                return false;
+            }
+            for(let collider of collision.dynamic)
+            {
+                let tposition = collider.positions.reduce((accumulator, currentValue) => 
+                {
+                    return {
+                      x: accumulator.x + currentValue.x,
+                      y: accumulator.y + currentValue.y,
+                      z: accumulator.z + currentValue.z
+                    };
+                });
+
+                if(
+                    tposition.x == position.x&&
+                    tposition.y == position.y&&
+                    tposition.z == position.z
+                )
+                {
+                    if(collider.value>=value)
+                    {
+                        return false;
+                    }
+                    else
+                        acumulator+=collider.value;
+
+                    if(acumulator >= value)
+                        return false;
+                }
+            }
+            return true;
+        }
+    };
     return {
       block,
       heightmap,
@@ -158,9 +204,16 @@ export const Life =
 
 function gravity(collisionMap,position)
 {
-    return(
-        (position.z > 1 && collisionMap[position.x][position.y][position.z-1]<75) ? {x:position.x,y:position.y,z:position.z-1}:position
-    );
+    let staticmap = collisionMap.static;
+    if(position.z > 1 && staticmap[position.x][position.y][position.z-1]<75)
+    {
+        return{x:position.x,y:position.y,z:position.z-1};
+    }
+    else if(collisionMap.check(new Vector3(position.x,position.y,position.z-1)))
+    {
+        return{x:position.x,y:position.y,z:position.z-1};
+    }
+    return(position);
 }
 
 function seedFrame(world,plant)
@@ -182,21 +235,21 @@ function seedFrame(world,plant)
 
 function growLeaf(plant)
 {
-    if(plant.leaf.length < Plants[plant.specie].leaf.max)
-        if(Util.roleta(14,1) == 1)
-            plant.leaf += 1;
+    if(Util.roleta(14,1,16) == 1)
+        plant.leaf += 1;
     return plant;
 }
 
 function growBranch(plant,collisionMap,time)
 {
-    if(plant.branch.length < Plants[plant.specie].leaf.max/10&&Util.roleta(13,1,15) == 1)
+    if(plant.branch.length < Plants[plant.specie].leaf.max/10&&Util.roleta(2,1,2) == 1)
     {
         let lastTrunkPosition = {x:0,y:0,z:0};
         if(plant.trunk.length>0) 
-            lastTrunkPosition = plant.trunk[plant.trunk.length-1].position;
+            lastTrunkPosition = plant.trunk[0].position;
         let sendposition = Util.Vector3Add(plant.position,lastTrunkPosition);
         var position = findBranchGrowPosition(collisionMap,sendposition.x,sendposition.y,sendposition.z);
+
         plant.branch.push(new Branch(plant.specie,'idle',time,position,plant.quality,plant.condition));
     }
     return plant;
@@ -204,68 +257,59 @@ function growBranch(plant,collisionMap,time)
 
 function growTrunk(plant,collisionMap,time)
 {
-   
-    let lastTrunkPosition = {x:0,y:0,z:-1};
-    if(plant.trunk.length > 0)
-        lastTrunkPosition = plant.trunk[plant.trunk.length-1].position;
-    let sendposition = Util.Vector3Add(plant.position,lastTrunkPosition);
-    var position = Util.Vector3Add(findTrunkGrowPosition(collisionMap,sendposition.x,sendposition.y,sendposition.z),lastTrunkPosition);
-
-    if(typeof position == 'undefined')
-        return plant;
-    else if(plant.trunk.length < Plants[plant.specie].size.max/100)
-        if(Util.roleta(20,1) == 1)
+    if(typeof plant.trunk !== "undefined"&&plant.trunk.length < (Plants[plant.specie].size.max/100))
+    {
+        let customX = Util.roleta(1,10,1)-1;
+        let customY = Util.roleta(1,10,1)-1;
+        for (let trunk of plant.trunk) 
         {
-            plant.trunk.push(new Trunk(plant.specie,'idle',time,position,plant.quality,plant.condition));
-            for (let i = 0; i < plant.branch.length; i++) 
-            {
-                plant.branch[i].position.z++;
-            }
+            trunk.position.z++;
+            trunk.position.y += customY;
+            trunk.position.x += customX;
         }
+        for (let branch of plant.branch) 
+        {
+            branch.position.z++;
+            branch.position.y += customY;
+            branch.position.x += customX;
+        }
+        plant.trunk.unshift(new Trunk(plant.specie,'idle',time,{x:0,y:0,z:0},plant.quality,plant.condition));
+        collisionMap.new([plant.position,plant.trunk[0]]);
+    }
     return plant;
 }
 
 function plantFrame(world,plant)
 {
-    
-    if(world.time % (Plants[plant.specie].time.maturing.min/1000000)===0)
+    if(plant.leaf < Plants[plant.specie].leaf.max&&world.time % Util.LimitTo(Plants[plant.specie].time.maturing.min,0,10)===0)
     {
+        if(Plants[plant.specie].size.max > 100)
+        {
+            if(world.time % Util.LimitTo(Plants[plant.specie].time.maturing.min,0,10)===0)
+            {
+                plant = growBranch(plant,world.map.collision,world.time);
+            }
+        }
         plant = growLeaf(plant);
     }
 
-    if(Plants[plant.specie].type == 'herb')
+    if(Plants[plant.specie].type.includes('tree'))
     {
-
-    }
-    else if(Plants[plant.specie].type == 'plant')
-    {
-        if(world.time % (Plants[plant.specie].time.maturing.min/100000)===0)
-        {
-            plant = growBranch(plant,world.map.collision,world.time);
-        }
-    }
-    else if(Plants[plant.specie].type == 'tree'||Plants[plant.specie].type == 'fruit tree')
-    {
-        if(Util.roleta(2,1))
-        {
-            plant = growBranch(plant,world.map.collision,world.time);
-        }
         let lastTrunkPosition = plant.position;
         if(plant.trunk.length > 0)
             lastTrunkPosition = plant.trunk[plant.trunk.length-1].position;
-        if(world.time % Util.LimitTo(Plants[plant.specie].time.maturing.min,1,1000)===0 && lastTrunkPosition.x < world.map.block[0][0].length-1)
+        if(world.time % Util.LimitTo(Plants[plant.specie].time.maturing.min,1,100)===0 && lastTrunkPosition.x < world.map.block[0][0].length-1)
         {
             plant = growTrunk(plant,world.map.collision,world.time);
         }
-        
     }
-    
     return(plant);
 }
 
 //INTERPRETATION
 export function frame(world)
 {
+    //console.time('wframe')
 	world.time++;
     if(world.plant.length>0)
     {
@@ -283,6 +327,7 @@ export function frame(world)
             }
         )
     }
+    //console.timeEnd('wframe')
 }
 
 export const Loop = 
@@ -377,6 +422,7 @@ export async function New(mapsize,multiHorizontal,smooth,randomize,subdivide,pos
         creature:[],
         plant:[],
         item:[],
+        collider:[]
     };
     //LOOP FUNCTIONS
     result.loop.start = (type)=>
