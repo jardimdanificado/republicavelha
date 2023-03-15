@@ -133,7 +133,7 @@ export async function Map(mapsize,multiHorizontal,smooth,randomize,subdivide,pos
         dynamic:[],
         new:(value,...positions)=>
         {
-            this.push(new Collider(positions,value));
+            collision.dynamic.push(new Collider(positions,value));
         },
         check:(position,value = 75)=>//returns true if no collider in the specified position, of if the colliders in the position are below value;
         {
