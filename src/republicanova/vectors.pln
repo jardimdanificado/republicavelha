@@ -1,0 +1,7 @@
+local vectors:module = {}
+
+function vectors.vec3(x: integer, y: integer, z: integer): {x:integer,y:integer,z:integer}
+    return {x=x, y=y, z=z}
+end
+
+return vectors
