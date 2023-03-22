@@ -1,2 +1,6 @@
 *.so
 .vscode
+build/lua
+build/luarocks
+build/pallene
+build/bin
