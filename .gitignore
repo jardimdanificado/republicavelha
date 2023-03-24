@@ -1,7 +1,7 @@
 *.so
+*.o
 .vscode
 build/lua
-build/luarocks
-build/pallene
-build/bin
 src/old
+.replit
+replit.nix
