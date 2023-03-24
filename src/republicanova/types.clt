@@ -1,3 +1,0 @@
-typealias int = integer
-typealias vector3 = { x:float,y:float,z:float}
-typealias vector2 = { x:float,y:float,z:float}

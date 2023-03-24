@@ -2,6 +2,7 @@
 #this is adapted from default pallene install instructions https://github.com/pallene-lang/pallene
 #pallene docs at https://github.com/pallene-lang/pallene/blob/master/doc/manual.md
 #pallene can use lua functions as well
+#be sure to have wget build-essential and unzip
 
 rm -r lua lua-internals luarocks* pallene bin -f
 
@@ -22,8 +23,7 @@ mv *.a ./lib/
 mv *.awk ./lib/
 mv lua ./bin/
 mv luac ./bin/
-cd bin
-cd ../..
+cd ..
 
 mkdir luarocks
 wget https://luarocks.org/releases/luarocks-3.9.1.tar.gz
@@ -46,3 +46,4 @@ rm -r luarocks-3.9.1 lua-internals *.tar.gz -f
 mkdir bin
 ln -rs luarocks/bin/* ./bin/
 ln -rs lua/bin/* ./bin/
+ls -rs pallene/bin/* ./bin/
