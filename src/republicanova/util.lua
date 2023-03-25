@@ -1,11 +1,118 @@
 
 local util = {}
-util.math = require("_util")
+util.math = {}
 util.string = {}
 util.array = {}
 util.file = {}
 util.file.save = {}
 util.file.load = {}
+
+util.math.vec2 = function(x, y)
+    return {x=x, y=y}
+end
+
+util.math.vec2add = function(vec0, vec1)
+    return 
+    {
+        x = vec0.x + vec1.x,
+        y = vec0.y + vec1.y
+    }
+end
+
+util.math.vec2sub = function(vec0, vec1)
+    return 
+    {
+        x = vec0.x - vec1.x,
+        y = vec0.y - vec1.y
+    }
+end
+
+util.math.vec2div = function(vec0, vec1)
+    return 
+    {
+        x = vec0.x / vec1.x,
+        y = vec0.y / vec1.y
+    }
+end
+
+util.math.vec2mod = function(vec0, vec1)
+    return 
+    {
+        x = vec0.x % vec1.x,
+        y = vec0.y % vec1.y
+    }
+end
+
+util.math.vec2mul = function(vec0, vec1)
+    return 
+    {
+        x = vec0.x * vec1.x,
+        y = vec0.y * vec1.y
+    }
+end
+
+util.math.vec3 = function(x, y, z)
+    return {x=x, y=y, z=z}
+end
+
+util.math.vec3add = function(vec0, vec1)
+    return 
+    {
+        x = vec0.x + vec1.x,
+        y = vec0.y + vec1.y,
+        z = vec0.z + vec1.z
+    }
+end
+
+util.math.vec3sub = function(vec0, vec1)
+    return 
+    {
+        x = vec0.x - vec1.x,
+        y = vec0.y - vec1.y,
+        z = vec0.z - vec1.z
+    }
+end
+
+util.math.vec3mul = function(vec0, vec1)
+    return 
+    {
+        x = vec0.x * vec1.x,
+        y = vec0.y * vec1.y,
+        z = vec0.z * vec1.z
+    }
+end
+
+util.math.vec3div = function(vec0, vec1)
+    return 
+    {
+        x = vec0.x / vec1.x,
+        y = vec0.y / vec1.y,
+        z = vec0.z / vec1.z
+    }
+end
+
+util.math.vec3mod = function(vec0, vec1)
+    return 
+    {
+        x = vec0.x % vec1.x,
+        y = vec0.y % vec1.y,
+        z = vec0.z % vec1.z
+    }
+end
+
+util.math.limitTo = function(value, min, max)
+    if value > max then
+		while (value > max) do
+			value = value - (max - min)
+        end
+	end
+	if (value < min) then
+		while (value < min) do
+            value = value + (max - min)
+        end
+    end
+	return value
+end
 
 util.string.split = function(str, separator)
     local parts = {}
