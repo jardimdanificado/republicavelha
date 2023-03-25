@@ -111,3 +111,82 @@ function Heightmap(size)
 
     return (normalizeMatrix(diamondSquare(generateMatrix())))
 end
+
+function smoothBlock(hm,position)
+    local x = position.x
+    local y = position.y
+    local sum = 0
+    local count = 0
+    if(x>1 and y>1) then
+        sum = sum + hm[x-1][y-1]
+        count = count + 1
+    end
+    if(y>1) then
+        sum = sum + hm[x][y-1]
+        count = count + 1
+    end
+    if(x<#hm and y>1) then	
+        sum = sum + hm[x+1][y-1]
+        count = count + 1
+    end
+    if(x>0) then
+        sum = sum + hm[x-1][y]
+        count = count + 1
+    end
+    --sum += hm[x][y]
+    --count++
+    if(x<hm.length-1) then
+        sum = sum + hm[x+1][y]
+        count = count+1
+    end
+    if(x>0 and y<hm.length-1) then
+        sum = sum + hm[x-1][y+1]
+        count = count+1
+    end
+    if(y<hm.length-1) then
+        sum = sum + hm[x][y+1]
+        count = count+1
+    end
+    if(x<hm.length-1 and y<hm.length-1) then
+        sum = sum + hm[x+1][y+1]
+        count = count+1
+    end
+    return(sum/count)
+end
+
+function smoothHeightmap(hm,corner) 
+    local corner = randomInRange(0,3)
+    switch(corner)--lua does not have switch blocks, redo so with if-else
+    {
+        case 0:
+        {
+            for x = 1, #hm do
+                for y = 0,#hm)
+                    hm[x][y] = smoothBlock(hm,new Vector2(x,y));--get this from util later
+        }
+        break
+        case 1:
+        {
+            for(let x = hm.length-1;x >=0;x-=1)
+                for(let y = 0;y < (hm.length);y+=1)
+                    hm[x][y] = smoothBlock(hm,new Vector2(x,y));
+        }
+        break
+        case 2:
+        {
+            for(let x = hm.length-1;x >=0;x-=1)
+                for(let y = hm.length-1;y >=0;y-=1)
+                    hm[x][y] = smoothBlock(hm,new Vector2(x,y));
+        }
+        break
+        case 3:
+        {
+            for(let x = 0;x < (hm.length);x+=1)
+                for(let y = hm.length-1;y >=0;y-=1)
+                    hm[x][y] = smoothBlock(hm,new Vector2(x,y));
+        }
+        break
+    }
+    return hm
+end
+    
