@@ -13,11 +13,4 @@ function modulo.generic(type, status, birth, position, quality, condition, decay
     }
 end
 
-function modulo.block(material, status, birth, position , quality, condition)
-    local obj = {}
-    obj = modulo.generic('block', status, birth, position, quality, condition);
-    obj.material = material
-    return obj
-end
-
 return modulo

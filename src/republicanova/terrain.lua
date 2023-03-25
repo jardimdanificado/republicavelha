@@ -260,10 +260,6 @@ function Terrain(map,fixedHeight)
     if type(fixedHeight) == nil then
         fixedHeight = 128
     end
-    local blockLookup = {
-        earth = types.block('earth'),
-        air = types.block('air'),
-    }
     
     local result = {}
     for x = 1, #map do
@@ -271,7 +267,7 @@ function Terrain(map,fixedHeight)
         for y = 1, #map do
             result[x][y] = {}
             for z = 1, fixedHeight do
-                result[x][y][z] = (z < map[x][y]) and types.block('earth') or types.block('air')
+                result[x][y][z] = (z < map[x][y]) and 'earth' or 'air'
             end
         end
     end
