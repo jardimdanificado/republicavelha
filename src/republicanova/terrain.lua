@@ -155,8 +155,8 @@ function smoothBlock(hm,position)
     return(sum/count)
 end
 
-function smoothHeightmap(hm,corner) 
-    local corner = randomInRange(0,3)
+function smoothHeightmap(hm) 
+    local corner = math.random(0,3)
     if corner == 0 then
             for x = 1, #hm do
                 for y = 1,#hm do
@@ -166,7 +166,7 @@ function smoothHeightmap(hm,corner)
     end
     if corner == 1 then
             for x = #hm,1,-1 do
-                for y = 1,y < (hm.length),1 do
+                for y = 1,#hm,1 do
                     hm[x][y] = smoothBlock(hm,{x=x, y=y})
                 end
             end
@@ -250,7 +250,7 @@ end
 
 function autoSmoothHeightmap(hm,smooth)
     while(smooth>0) do
-        hm = smoothHeightmap(hm,randomInRange(0,3))
+        hm = smoothHeightmap(hm)
         smooth = smooth-1
     end
     return hm
@@ -319,7 +319,7 @@ function checkDifference(heightmap)
 end
 
 function AutoTerrain(mapsize, multiHorizontal, smooth, retry)
-        mapsize = mapsize or {w=64,h=32}
+        mapsize = mapsize or {w=128,h=64}
         multiHorizontal = multiHorizontal or 2
         smooth = smooth or 0
         retry = retry or 0
@@ -340,7 +340,9 @@ function AutoTerrain(mapsize, multiHorizontal, smooth, retry)
             print('heightmap generated in ' .. retry .. ' retries.')
         end
         local terrain = {}
+        print(os.clock())
         terrain = Terrain(hmap,mapsize.h)
+        print(os.clock())
         return(terrain)
 end
 
