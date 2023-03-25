@@ -271,7 +271,7 @@ function Terrain(map,fixedHeight)
         for y = 1, #map do
             result[x][y] = {}
             for z = 1, fixedHeight do
-                result[x][y][z] = (z < map[x][y]) and blockLookup.earth or blockLookup.air
+                result[x][y][z] = (z < map[x][y]) and types.block('earth') or types.block('air')
             end
         end
     end
