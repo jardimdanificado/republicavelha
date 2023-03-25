@@ -5,3 +5,6 @@ build/lua
 src/old
 .replit
 replit.nix
+util.lua
+types.lua
+_util.lua

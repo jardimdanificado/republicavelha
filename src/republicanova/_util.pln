@@ -100,4 +100,18 @@ function util.vec3mod(vec0:vector3, vec1:vector3):vector3
     }
 end
 
+function util.limitTo(value:integer, min:integer, max:integer):integer
+    if value > max then
+		while (value > max) do
+			value = value - (max - min)
+        end
+	end
+	if (value < min) then
+		while (value < min) do
+            value = value + (max - min)
+        end
+    end
+	return value
+end
+
 return util

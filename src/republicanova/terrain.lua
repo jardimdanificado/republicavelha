@@ -1,3 +1,6 @@
+local util = require "util"
+local types = require "types"
+
 function Heightmap(size) 
     local N = (8+math.random(0,5))
     local RANDOM_INITIAL_RANGE = (10+math.random(0,3))
@@ -42,8 +45,6 @@ function Heightmap(size)
                         count = count + 1
                     end
                 end
---                print(math.floor(j + chunkSize / 2))
---                print(math.floor(i + chunkSize / 2))
                 matrix[j + math.floor(chunkSize / 2)][i + math.floor(chunkSize / 2)] = sum / count + math.random(-randomFactor, randomFactor)
             end
         end
@@ -129,25 +130,25 @@ function smoothBlock(hm,position)
         sum = sum + hm[x+1][y-1]
         count = count + 1
     end
-    if(x>0) then
+    if(x>1) then
         sum = sum + hm[x-1][y]
         count = count + 1
     end
-    --sum += hm[x][y]
-    --count++
-    if(x<hm.length-1) then
+    sum = sum + hm[x][y]
+    count = count + 1
+    if(x<#hm) then
         sum = sum + hm[x+1][y]
         count = count+1
     end
-    if(x>0 and y<hm.length-1) then
+    if(x>1 and y<#hm) then
         sum = sum + hm[x-1][y+1]
         count = count+1
     end
-    if(y<hm.length-1) then
+    if(y<#hm) then
         sum = sum + hm[x][y+1]
         count = count+1
     end
-    if(x<hm.length-1 and y<hm.length-1) then
+    if(x<#hm and y<#hm) then
         sum = sum + hm[x+1][y+1]
         count = count+1
     end
@@ -156,37 +157,191 @@ end
 
 function smoothHeightmap(hm,corner) 
     local corner = randomInRange(0,3)
-    switch(corner)--lua does not have switch blocks, redo so with if-else
-    {
-        case 0:
-        {
+    if corner == 0 then
             for x = 1, #hm do
-                for y = 0,#hm)
-                    hm[x][y] = smoothBlock(hm,new Vector2(x,y));--get this from util later
-        }
-        break
-        case 1:
-        {
-            for(let x = hm.length-1;x >=0;x-=1)
-                for(let y = 0;y < (hm.length);y+=1)
-                    hm[x][y] = smoothBlock(hm,new Vector2(x,y));
-        }
-        break
-        case 2:
-        {
-            for(let x = hm.length-1;x >=0;x-=1)
-                for(let y = hm.length-1;y >=0;y-=1)
-                    hm[x][y] = smoothBlock(hm,new Vector2(x,y));
-        }
-        break
-        case 3:
-        {
-            for(let x = 0;x < (hm.length);x+=1)
-                for(let y = hm.length-1;y >=0;y-=1)
-                    hm[x][y] = smoothBlock(hm,new Vector2(x,y));
-        }
-        break
-    }
+                for y = 1,#hm do
+                    hm[x][y] = smoothBlock(hm,{x=x, y=y})
+                end
+            end
+    end
+    if corner == 1 then
+            for x = #hm,1,-1 do
+                for y = 1,y < (hm.length),1 do
+                    hm[x][y] = smoothBlock(hm,{x=x, y=y})
+                end
+            end
+    end
+    if corner == 2 then
+            for x = #hm, 1, -1 do
+                for y = #hm, 1, -1 do
+                    hm[x][y] = smoothBlock(hm,{x=x, y=y})
+                end
+            end
+    end
+    if corner == 3 then
+            for x = 1,#hm,1 do
+                for y = #hm, 1, -1 do
+                    hm[x][y] = smoothBlock(hm,{x=x, y=y})
+                end
+            end
+    end
     return hm
 end
     
+function roundHeightmap(hm)
+    local min = -math.huge;
+    for x = 1, #hm do
+        for y = 1, #hm do
+            if(min > -math.huge and min > hm[x][y]) then
+                min = hm[x][y]
+            end
+        end
+    end
+    for x = 1, #hm do
+        for y = 1, #hm do
+            if min > -math.huge then
+                hm[x][y] = hm[x][y] + min
+            end
+        end
+    end
+    for x = 1,#hm,1 do
+        for y = 1, #hm,1 do
+            if min > -math.huge then
+                hm[x][y] = math.floor(((hm[x][y] +min)*(math.pow(10,(string.len(math.floor(min)))))+0.5));
+            end
+        end
+    end
+    return hm;
+end
+
+function polishHeightmap(heightmap,fixedHeight)
+    for x = 1,#heightmap do
+        for y = 1, #heightmap[x] do
+            local ints = {}
+            ints[1] = math.floor(heightmap[x][y])
+            ints[2] = math.floor(fixedHeight-((fixedHeight/4)*3))
+            ints[3] = math.floor(fixedHeight-2)
+            heightmap[x][y] = math.floor(util.math.limitTo(ints[1],ints[2],ints[3]))
+        end
+    end
+    return(heightmap)
+end
+
+function autoHeightmap(mapsize, multi) 
+    local results = {}
+    for x = 1, multi do
+        for y = 1, multi do 
+            local map = Heightmap(mapsize)
+            for xx = 1, mapsize do
+                -- Add a new row to the results table for each xx value
+                if not results[((x-1)*mapsize)+xx] then
+                    results[((x-1)*mapsize)+xx] = {}
+                end
+                for yy = 1, mapsize do 
+                    -- Add the value from the sub-heightmap to the corresponding
+                    -- position in the results table
+                    results[((x-1)*mapsize)+xx][((y-1)*mapsize)+yy] = map[xx][yy]
+                end
+            end
+        end
+    end
+    return results
+end
+
+function autoSmoothHeightmap(hm,smooth)
+    while(smooth>0) do
+        hm = smoothHeightmap(hm,randomInRange(0,3))
+        smooth = smooth-1
+    end
+    return hm
+end
+
+function Terrain(map,fixedHeight)
+    if type(fixedHeight) == nil then
+        fixedHeight = 128
+    end
+    local blockLookup = {
+        earth = types.block('earth'),
+        air = types.block('air'),
+    }
+    
+    local result = {}
+    for x = 1, #map do
+        result[x] = {}
+        for y = 1, #map do
+            result[x][y] = {}
+            for z = 1, fixedHeight do
+                result[x][y][z] = (z < map[x][y]) and blockLookup.earth or blockLookup.air
+            end
+        end
+    end
+    return(result)
+end
+
+function checkDifference(heightmap) 
+    local counter = 0;
+    
+    for i = 1, #heightmap do 
+        for j = 1, j < #heightmap[i] do 
+            local currentValue = heightmap[i][j]
+            local hasNeighbor = false
+        
+            for x = -1, x <= 1, 1 do 
+                for y = -1, 1 do
+                    if (x ~= 0 and y ~= 0) then
+                        local neighborI = i + x;
+                        local neighborJ = j + y;
+                        if (
+                            neighborI >= 1 and
+                            neighborI < #heightmap and
+                            neighborJ >= 1 and
+                            neighborJ < #heightmap[i]
+                        ) then
+                            local neighborValue = heightmap[neighborI][neighborJ];
+                            if (math.abs(currentValue - neighborValue) == 1) then
+                                hasNeighbor = true;
+                                break
+                            end
+                        end
+                    end
+                end
+                if (hasNeighbor) then
+                    break
+                end
+            end
+        end
+    
+        if (hasNeighbor) then
+            counter = counter + 1
+        end
+    end
+    return counter
+end
+
+function AutoTerrain(mapsize, multiHorizontal, smooth, retry)
+        mapsize = mapsize or {w=64,h=32}
+        multiHorizontal = multiHorizontal or 2
+        smooth = smooth or 0
+        retry = retry or 0
+        local hmap
+        hmap = autoHeightmap(mapsize.w,multiHorizontal)
+        hmap = roundHeightmap(hmap)
+        hmap = autoSmoothHeightmap(hmap,smooth)
+        hmap = polishHeightmap(hmap,mapsize.h)
+        
+        if(retry>=1 and checkDifference(hmap)>((mapsize.w*multiHorizontal)^2)/2) then
+            if(retry > 1) then
+                print("retry number " .. retry)
+            end
+            retry = retry +1
+            return(AutoTerrain(mapsize,multiHorizontal,smooth,postslices,retry))
+        end
+        if(retry >= 2) then
+            print('heightmap generated in ' .. retry .. ' retries.')
+        end
+        local terrain = {}
+        terrain = Terrain(hmap,mapsize.h)
+        return(terrain)
+end
+
+AutoTerrain()
