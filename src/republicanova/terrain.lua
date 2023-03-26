@@ -1,10 +1,10 @@
-local util = require "util"
-local types = require "types"
+local util = require("src.republicanova.util")
+local types = require ("src.republicanova.types")
 
 function Heightmap(size) 
     local N = (8+math.random(0,5))
     local RANDOM_INITIAL_RANGE = (10+math.random(0,3))
-    local MATRIX_LENGTH = math.pow(2, N)+1
+    local MATRIX_LENGTH = (2 ^ N)+1
 
     function generateMatrix() 
         local matrix = {}
@@ -207,7 +207,7 @@ function roundHeightmap(hm)
     for x = 1,#hm,1 do
         for y = 1, #hm,1 do
             if min > -math.huge then
-                hm[x][y] = math.floor(((hm[x][y] +min)*(math.pow(10,(string.len(math.floor(min)))))+0.5));
+                hm[x][y] = math.floor(((hm[x][y] +min)*((10^(string.len(math.floor(min)))))+0.5));
             end
         end
     end
@@ -342,4 +342,5 @@ function AutoTerrain(mapsize, multiHorizontal, smooth, retry)
         return(terrain)
 end
 
-AutoTerrain()
+local terrain = AutoTerrain
+return terrain
