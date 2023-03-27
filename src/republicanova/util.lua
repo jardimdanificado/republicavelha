@@ -1,6 +1,4 @@
-
 local util = {}
-
 
 util.math = {}
 util.string = {}
@@ -188,6 +186,23 @@ util.array.expand = function(matrix)
     return result
 end
 
+util.array.new = function(size,value)
+    local result = {}
+    value = value or 0
+    for i = 1, size do
+        result[i] = value
+    end
+    return result
+end
+
+util.array.shuffle = function(arr)
+	for i = #arr, 1, -1 do
+	  local j = math.floor(math.random(1,#arr))
+	  arr[i], arr[j] = arr[j], arr[i]
+	end
+	return arr
+end
+
 util.func.time = function(func,...)
     local name = 'noname'
     if type(func) == 'table' then
@@ -198,6 +213,44 @@ util.func.time = function(func,...)
     tclock = os.clock()-tclock
     print(name .. ": " .. tclock .. " seconds")
     return result,tclock
+end
+
+util.roleta = function(...) 
+  local odds = {...}
+	local roleta = {} 
+	for i = 1,#odds do
+    table.concat(roleta,util.array.new(odds[i],i))
+		--roleta = roleta.concat(Array(odds[i]).fill(i));
+	  return(util.array.shuffle(util.array.shuffle(util.array.shuffle(roleta)))[math.random(1,#roleta)])
+  end
+end
+
+util.file.save.heightmap = function(matrix, filename)
+    local file = io.open(filename, "w")
+    local max = 0
+    for i=1,#matrix do
+        for j=1,#matrix[i] do
+            if matrix[i][j] > max then
+                max = matrix[i][j]
+            end
+        end
+    end
+    local digits = #tostring(max)
+    for i=1,#matrix do
+        for j=1,#matrix[i] do
+            local value = matrix[i][j]
+            if (i > 1 and matrix[i-1][j] == value - 1) or (i < #matrix and matrix[i+1][j] == value - 1) or (j > 1 and matrix[i][j-1] == value - 1) or (j < #matrix[i] and matrix[i][j+1] == value - 1) then
+                file:write(string.rep(">", digits))
+            else
+                file:write(string.format("%0"..digits.."d", value))
+            end
+            if j < #matrix[i] then
+                file:write(" ")
+            end
+        end
+        file:write("\n")
+    end
+    file:close()
 end
 
 return util

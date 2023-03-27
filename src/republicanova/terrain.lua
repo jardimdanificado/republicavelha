@@ -118,75 +118,55 @@ function smoothBlock(hm,position)
     local y = position.y
     local sum = 0
     local count = 0
-    if(x>1 and y>1) then
+    if x > 1 and y > 1 then
         sum = sum + hm[x-1][y-1]
         count = count + 1
     end
-    if(y>1) then
+    if y > 1 then
         sum = sum + hm[x][y-1]
         count = count + 1
     end
-    if(x<#hm and y>1) then	
+    if x < #hm and y > 1 then
         sum = sum + hm[x+1][y-1]
         count = count + 1
     end
-    if(x>1) then
+    if x > 1 then
         sum = sum + hm[x-1][y]
         count = count + 1
     end
     sum = sum + hm[x][y]
     count = count + 1
-    if(x<#hm) then
+    if x < #hm then
         sum = sum + hm[x+1][y]
         count = count+1
     end
-    if(x>1 and y<#hm) then
+    if x > 1 and y < #hm then
         sum = sum + hm[x-1][y+1]
         count = count+1
     end
-    if(y<#hm) then
+    if y < #hm then
         sum = sum + hm[x][y+1]
         count = count+1
     end
-    if(x<#hm and y<#hm) then
+    if x < #hm and y < #hm then
         sum = sum + hm[x+1][y+1]
         count = count+1
     end
-    return(sum/count)
+    return sum / count
 end
 
 function smoothHeightmap(hm) 
-    local corner = math.random(0,3)
-    if corner == 0 then
-            for x = 1, #hm do
-                for y = 1,#hm do
-                    hm[x][y] = smoothBlock(hm,{x=x, y=y})
-                end
-            end
-    end
-    if corner == 1 then
-            for x = #hm,1,-1 do
-                for y = 1,#hm,1 do
-                    hm[x][y] = smoothBlock(hm,{x=x, y=y})
-                end
-            end
-    end
-    if corner == 2 then
-            for x = #hm, 1, -1 do
-                for y = #hm, 1, -1 do
-                    hm[x][y] = smoothBlock(hm,{x=x, y=y})
-                end
-            end
-    end
-    if corner == 3 then
-            for x = 1,#hm,1 do
-                for y = #hm, 1, -1 do
-                    hm[x][y] = smoothBlock(hm,{x=x, y=y})
-                end
-            end
+    local xx = util.array.shuffle({{min=1,max=#hm},{min=#hm,max=1}})[math.random(1,2)]
+    local yy = util.array.shuffle({{min=1,max=#hm},{min=#hm,max=1}})[math.random(1,2)]
+    
+    for x = xx.min, xx.max do
+        for y = yy.min,yy.max do
+            hm[x][y] = smoothBlock(hm,{x=x, y=y})
+        end
     end
     return hm
 end
+
     
 function roundHeightmap(hm)
     local min = -math.huge;
@@ -215,8 +195,9 @@ function roundHeightmap(hm)
 end
 
 function polishHeightmap(heightmap,fixedHeight)
-    for x = 1,#heightmap do
-        for y = 1, #heightmap[x] do
+    local hmcache = #heightmap
+    for x = 1,hmcache do
+        for y = 1, hmcache do
             local ints = {}
             ints[1] = math.floor(heightmap[x][y])
             ints[2] = math.floor(fixedHeight-((fixedHeight/4)*3))
@@ -249,8 +230,9 @@ function autoHeightmap(mapsize, multi)
 end
 
 function autoSmoothHeightmap(hm,smooth)
+    local tempfunc = smoothHeightmap
     while(smooth>0) do
-        hm = smoothHeightmap(hm)
+        hm = tempfunc(hm)
         smooth = smooth-1
     end
     return hm
@@ -314,10 +296,11 @@ function checkDifference(heightmap)
     return counter
 end
 
-function AutoTerrain(mapsize, multiHorizontal, smooth, retry)
+function AutoTerrain(mapsize, multiHorizontal, smooth, quality, retry)
         mapsize = mapsize or {w=128,h=64}
+        quality = quality or 0
         multiHorizontal = multiHorizontal or 2
-        smooth = smooth or 0
+        smooth = smooth or mapsize.w*quality
         retry = retry or 0
         local hmap
         hmap = util.func.time({autoHeightmap,"autoHeightmap"},mapsize.w,multiHorizontal)
@@ -340,7 +323,7 @@ function AutoTerrain(mapsize, multiHorizontal, smooth, retry)
             print('heightmap generated in ' .. retry .. ' retries.')
         end
         local terrain = {}
-        terrain = util.func.time({Terrain,"Terrain"},hmap,mapsize.h)
+        terrain = {util.func.time({Terrain,"Terrain"},hmap,mapsize.h),hmap}
         --terrain = Terrain(hmap,mapsize.h)
         return(terrain)
 end
