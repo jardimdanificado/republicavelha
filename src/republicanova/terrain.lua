@@ -267,7 +267,7 @@ function Terrain(map,fixedHeight)
         for y = 1, #map do
             result[x][y] = {}
             for z = 1, fixedHeight do
-                result[x][y][z] = (z < map[x][y]) and 'earth' or 'air'
+                result[x][y][z] = (z < map[x][y]) and 2 or 1 --check materials.lua for material types
             end
         end
     end
@@ -320,10 +320,14 @@ function AutoTerrain(mapsize, multiHorizontal, smooth, retry)
         smooth = smooth or 0
         retry = retry or 0
         local hmap
-        hmap = autoHeightmap(mapsize.w,multiHorizontal)
-        hmap = roundHeightmap(hmap)
-        hmap = autoSmoothHeightmap(hmap,smooth)
-        hmap = polishHeightmap(hmap,mapsize.h)
+        hmap = util.func.time({autoHeightmap,"autoHeightmap"},mapsize.w,multiHorizontal)
+        --hmap = autoHeightmap(mapsize.w,multiHorizontal)
+        hmap = util.func.time({roundHeightmap,"roundHeightmap"},hmap,smooth)
+        --hmap = roundHeightmap(hmap)
+        hmap = util.func.time({autoSmoothHeightmap,"autoSmoothHeightmap"},hmap,smooth)
+        --hmap = autoSmoothHeightmap(hmap,smooth)
+        hmap = util.func.time({polishHeightmap,"polishHeightmap"},hmap,mapsize.h)
+        --hmap = polishHeightmap(hmap,mapsize.h)
         
         if(retry>=1 and checkDifference(hmap)>((mapsize.w*multiHorizontal)^2)/2) then
             if(retry > 1) then
@@ -336,11 +340,9 @@ function AutoTerrain(mapsize, multiHorizontal, smooth, retry)
             print('heightmap generated in ' .. retry .. ' retries.')
         end
         local terrain = {}
-        print(os.clock())
-        terrain = Terrain(hmap,mapsize.h)
-        print(os.clock())
+        terrain = util.func.time({Terrain,"Terrain"},hmap,mapsize.h)
+        --terrain = Terrain(hmap,mapsize.h)
         return(terrain)
 end
 
-local terrain = AutoTerrain
-return terrain
+return AutoTerrain

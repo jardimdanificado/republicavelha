@@ -1,11 +1,16 @@
 
 local util = {}
+
+
 util.math = {}
 util.string = {}
 util.array = {}
 util.file = {}
 util.file.save = {}
 util.file.load = {}
+util.func = {}
+
+util.array.unpack = unpack or table.unpack
 
 util.math.vec2 = function(x, y)
     return {x=x, y=y}
@@ -182,6 +187,17 @@ util.array.expand = function(matrix)
 
     return result
 end
-    
+
+util.func.time = function(func,...)
+    local name = 'noname'
+    if type(func) == 'table' then
+        func,name = func[1],func[2]
+    end
+    local tclock = os.clock()
+    local result = func(util.array.unpack({...}))
+    tclock = os.clock()-tclock
+    print(name .. ": " .. tclock .. " seconds")
+    return result,tclock
+end
 
 return util
