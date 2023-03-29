@@ -3,6 +3,7 @@ local util = {}
 util.math = {}
 util.string = {}
 util.array = {}
+util.matrix = {}
 util.file = {}
 util.file.save = {}
 util.file.load = {}
@@ -103,18 +104,13 @@ util.math.vec3mod = function(vec0, vec1)
     }
 end
 
-util.math.limitTo = function(value, min, max)
-    if value > max then
-		while (value > max) do
-			value = value - (max - min)
-        end
-	end
-	if (value < min) then
-		while (value < min) do
-            value = value + (max - min)
-        end
+util.math.limit = function(value, min, max)
+    local range = max - min
+    if range <= 0 then
+        return min
     end
-	return value
+    local offset = (value - min) % range
+    return offset + min + (offset < 0 and range or 0)
 end
 
 util.string.split = function(str, separator)
@@ -203,6 +199,59 @@ util.array.shuffle = function(arr)
 	return arr
 end
 
+util.array.minmax = function(arr)
+    local min = math.huge
+    local max = -math.huge
+    for y = 1, #arr do
+        if(arr[x][y] > max) then
+            max = arr[x][y]
+        elseif(arr[x][y] < min) then
+            min = arr[x][y]
+        end
+    end
+    return {min=min,max=max}
+end
+
+util.matrix.minmax = function(matrix)
+    local min_val = matrix[1][1]
+    local max_val = matrix[1][1]
+    for i = 1, #matrix do
+        for j = 1, #matrix[i] do
+            if matrix[i][j] < min_val then
+                min_val = matrix[i][j]
+            end
+            if matrix[i][j] > max_val then
+                max_val = matrix[i][j]
+            end
+        end
+    end
+    return {min = min_val, max = max_val}
+end
+
+util.matrix.unique = function(matrix)
+    function contains(table, val)
+        for i = 1, #table do
+            if table[i] == val then
+                return true
+            end
+        end
+        return false
+    end
+    local unique_vals = {}
+    for i = 1, #matrix do
+        for j = 1, #matrix[i] do
+            if not contains(unique_vals, math.floor(matrix[i][j])) then
+                table.insert(unique_vals, math.floor(matrix[i][j]))
+            end
+        end
+    end
+    print(unique_vals[4],unique_vals[8])
+    return unique_vals
+end
+
+
+  
+
 util.func.time = function(func,...)
     local name = 'noname'
     if type(func) == 'table' then
@@ -251,6 +300,26 @@ util.file.save.heightmap = function(matrix, filename)
         file:write("\n")
     end
     file:close()
+end
+
+util.math.regrad3 = function(a, b, d) 
+    local c = (a * d) / b
+    return c
+end
+
+util.math.scale = function(value, min, max) 
+    if (value > max) then
+        while (value > max) do
+            value = value - max - min
+        end
+    end
+    if (value < min) then
+        while (value < min) do
+            value = value + (max - min)
+        end
+    end
+    value = util.math.regrad3(max-min,100,value-min)
+    return value;
 end
 
 return util
