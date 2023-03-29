@@ -2,7 +2,7 @@ local util = require("src.republicanova.util")
 local types = require ("src.republicanova.types")
 
 function Heightmap(size) 
-    math.randomseed(os.time()+size)
+    math.randomseed(math.floor((os.time()+size)*(os.clock()*10000)))
     local N = (8+math.random(0,5))
     local RANDOM_INITIAL_RANGE = (10+math.random(0,3))
     local MATRIX_LENGTH = (2 ^ N)+1
@@ -246,8 +246,8 @@ function polishHeightmap(heightmap,fixedHeight)
         threshold = threshold + min
     end
 
-    print(threshold)
-    print(min.. ' ' .. max)
+    --print(threshold)
+    --print(min.. ' ' .. max)
 
     for x = 1,hmcache do
         for y = 1, hmcache do
@@ -423,7 +423,7 @@ end
 
 function checkDifference(heightmap) 
     local counter = 0;
-    
+    local abs = math.abs
     for i = 1, #heightmap do 
         for j = 1, #heightmap[i] do 
             local currentValue = heightmap[i][j]
@@ -441,7 +441,7 @@ function checkDifference(heightmap)
                             neighborJ <= #heightmap[i] -- changed '<' to '<='
                         ) then
                             local neighborValue = heightmap[neighborI][neighborJ];
-                            if (math.abs(currentValue - neighborValue) == 1) then
+                            if (abs(currentValue - neighborValue) == 1) then
                                 hasNeighbor = true;
                                 break
                             end
@@ -464,47 +464,36 @@ function checkDifference(heightmap)
     return counter
 end
 
-function AutoTerrain(mapsize, multiHorizontal, layers, retry)
-        mapsize = mapsize or {w=64,h=64}
+function AutoTerrain(multiHorizontal, layers,retry)
+        local floor = math.floor
+        local mapsize = {w=64,h=64}
         multiHorizontal = multiHorizontal or 2
-        smooth = mapsize.w * multiHorizontal
+        layers = layers or 8
+        local smooth = mapsize.w * (multiHorizontal^2)/2
         retry = retry or 1
-        --local hmap = randommap(multiHorizontal*mapsize)
         local hmap = util.func.time({autoHeightmap,"autoHeightmap"},mapsize.w,multiHorizontal)
-        --hmap = autoHeightmap(mapsize,multiHorizontal)
         hmap = util.func.time({autoExpandHeightmap,"autoExpandHeightmap"},hmap,mapsize.h/2)
-        --hmap = util.func.time({roundHeightmap,"roundHeightmap"},hmap)
-        --hmap = roundHeightmap(hmap)
-        --hmap = autoSmoothHeightmap(hmap,smooth)
-        --hmap = polishHeightmap(hmap,mapsize)
-        --for _ = 1, mapsize/4 do
-        --    hmap = fixHeightmap(hmap,mapsize)
-        --end
-        hmap = util.func.time({autoSmoothHeightmap,"autoSmoothHeightmap"},hmap,smooth)
-        
-        --for _ = 1, mapsize do
-        --    hmap = fixHeightmap(hmap)
-        --    hmap = adjustHeightmap(hmap)
-        --end
+        hmap = util.func.time({autoSmoothHeightmap,"autoSmoothHeightmap"},hmap,(smooth))
+        hmap = util.func.time({polishHeightmap,"polishHeightmap"},hmap,mapsize.h)
+
         local mmm = util.matrix.minmax(hmap)
-        local munique = util.matrix.unique(hmap)
+        local munique = #util.matrix.unique(hmap)
         if(retry>=1) then
-            if (#munique < layers or mmm.min<1 or mmm.max > mapsize.w ) then
+            if (mmm.min<1 or mmm.max > mapsize.w or munique < layers) then
                 if(retry > 1) then
                     print("retry number " .. retry)
                 end
-                math.randomseed(math.floor(os.time()*(retry)))
-                return(AutoTerrain(mapsize,multiHorizontal, layers,retry+1))
+                math.randomseed(floor(os.time()*(retry)))
+                return(AutoTerrain(multiHorizontal, layers, retry+1))
             end
         end
-        if(retry >= 2) then
+        if(retry > 0) then
             print('heightmap generated in ' .. retry .. ' retries.')
         end
-        hmap = util.func.time({polishHeightmap,"polishHeightmap"},hmap,mapsize.h)
+        --hmap = util.func.time({polishHeightmap,"polishHeightmap"},hmap,mapsize.h)
         
         local terrain = {}
         terrain = {util.func.time({Terrain,"Terrain"},hmap,mapsize.h),hmap}
-        --terrain = Terrain(hmap,mapsize)
         return(terrain)
 end
 

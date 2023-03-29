@@ -245,7 +245,7 @@ util.matrix.unique = function(matrix)
             end
         end
     end
-    print(unique_vals[4],unique_vals[8])
+    --print(unique_vals[4],unique_vals[8])
     return unique_vals
 end
 
