@@ -134,7 +134,7 @@ end
 
 function main()
 
-    if(republica.util.string.includes(arg[1],'.zip')) then
+    if(arg[1] ~= nil and republica.util.string.includes(arg[1],'.zip')) then
         os.execute( "./raylib-lua/raylua_e " .. arg[1])
             return
     elseif(arg[1] == 'setup') then
