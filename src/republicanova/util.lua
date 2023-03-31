@@ -126,6 +126,10 @@ util.string.split = function(str, separator)
     return parts
 end
 
+util.string.includes = function(str,substring)
+    return string.find(str, substring, 1, true) ~= nil
+end
+
 util.file.load.text = function(path)
     local file = io.open(path, "r")
     local contents = file("*all")
@@ -325,6 +329,37 @@ util.file.save.heightmap = function(matrix, filename)
         file:write("\n")
     end
     file:close()
+end
+
+util.file.exist = function(path)
+    local file = io.open(path, "r")
+    if file then
+        file:close()
+        return true
+    else
+        return false
+    end
+end
+
+util.file.isFile = function(path)
+    local mode = lfs.attributes(path, "mode")
+    return mode == "file"
+end
+
+util.file.check = function(path)
+    local file = io.open(path, "r")
+    if file then
+    local info = file:read("*a")
+    if info:sub(1,4) == "RIFF" then
+        return true,'wav'
+    else
+        return true,'folder'
+    end
+    file:close()
+    else
+        return false,'none'
+    end
+
 end
 
 util.math.regrad3 = function(a, b, d) 

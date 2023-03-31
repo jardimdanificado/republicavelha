@@ -67,7 +67,7 @@ function simplify(arr)
 end 
 
 
-function main()
+function start()
     local screenWidth = 800
     local screenHeight = 450
     --size up to 6 is safe, above 6 you can get buggy maps, default is 2
@@ -121,13 +121,55 @@ function main()
     rl.CloseWindow()
 end
 
-if(arg[1] == 'setup') then
-    os.execute("rm -rf raylib-lua")
-    os.execute("git clone https://github.com/TSnake41/raylib-lua --depth 1")
-    os.execute("cd raylib-lua")
-    os.execute("git submodule init")
-    os.execute("git submodule update")
-    os.execute("make && cd ..")
-else
-    main()
+function setup()
+    os.execute(
+        "rm -rf raylib-lua \n" ..
+        "git clone https://github.com/TSnake41/raylib-lua --depth 1 \n" ..
+        "cd raylib-lua \n" ..
+        "git submodule init \n" ..
+        "git submodule update \n" ..
+        "make && cd .. "
+    )
 end
+
+function main()
+
+    if(republica.util.string.includes(arg[1],'.zip')) then
+        os.execute( "./raylib-lua/raylua_e " .. arg[1])
+            return
+    elseif(arg[1] == 'setup') then
+        setup()
+    elseif arg[1] == 'compile' then
+
+        local path = ''
+
+        if(republica.util.file.exist("./raylib-lua")==false or (republica.util.file.exist("./raylib-lua/raylua_e")==false and republica.util.file.exist("./raylib-lua/raylua_e.exe") == false)) then
+            setup()
+        end
+
+        if(arg[2] ~= nil) then
+            if(republica.util.string.includes(arg[2],'.zip'))then
+                os.execute( "./raylib-lua/raylua_e " .. arg[2])
+                return
+            end
+            for i = 2, #arg, 1 do
+                path = path .. arg[i]
+            end
+        else
+            path = "src main.lua"
+        end
+
+        if(republica.util.file.exist("./compile.zip")==true) then
+            os.execute("rm compile.zip")
+        end
+
+        os.execute("zip -r compile.zip ".. path .." \n"..
+            "./raylib-lua/raylua_e compile.zip \n"..
+            "rm compile.zip"
+        )
+        return
+    else
+        start()
+    end
+end
+main()
