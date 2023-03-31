@@ -8,3 +8,4 @@ replit.nix
 heightmap.txt
 src/raylib-lua
 compile_out
+rest.lua

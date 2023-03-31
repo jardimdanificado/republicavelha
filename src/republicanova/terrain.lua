@@ -500,12 +500,10 @@ function AutoTerrain(multiHorizontal, layers,retry)
     if(retry > 0) then
         print('heightmap generated in ' .. retry .. ' retries.')
     end
-    hmap = util.func.time({polishHeightmap,"polishHeightmap"},hmap,mapsize.h)
-    --hmap = fixHeightmap(hmap)
-    --hmap = adjustHeightmap(hmap)
+    hmap = polishHeightmap(hmap,mapsize.h)
     local terrain = {}
-    terrain = {util.func.time({Terrain,"Terrain"},hmap,mapsize.h),hmap}
-    return {terrain,hmap}
+    terrain = Terrain(hmap,mapsize.h)
+    return {terrain, hmap}
 end
 
 return AutoTerrain

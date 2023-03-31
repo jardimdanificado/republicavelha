@@ -113,6 +113,29 @@ util.math.limit = function(value, min, max)
     return offset + min + (offset < 0 and range or 0)
 end
 
+util.math.rotate = function(position, pivot, angle)
+    -- convert angle to radians
+    angle = math.rad(angle)
+    
+    -- calculate sine and cosine of angle
+    local s = math.sin(angle)
+    local c = math.cos(angle)
+    
+    -- translate position so that pivot is at the origin
+    local translated = util.math.vec3sub(position,{x=pivot.x,y=pivot.y,z=pivot.z})
+    
+    -- apply rotation
+    local rotated =
+    {
+        x=translated.x * c - translated.z * s,
+        y=position.y,
+        z=translated.x * s + translated.z * c
+    }
+    
+    -- translate back to original position
+    return util.math.vec3add(rotated,{x=pivot.x,y=0,z=pivot.z})
+end  
+
 util.string.split = function(str, separator)
     local parts = {}
     local start = 1
@@ -224,6 +247,51 @@ util.array.sum = function(arr)
     return sum
 end
 
+util.array.map = function(arr, callback)
+    local result = {}
+    for i = 1, #arr do
+        result[i] = callback(arr[i])
+    end
+    return result
+    end
+    
+util.array.filter = function(arr, callback)
+    local result = {}
+    for i = 1, #arr do
+        if callback(arr[i]) then
+            table.insert(result, arr[i])
+        end
+    end
+    return result
+end
+    
+util.array.reduce = function(arr, callback, initial)
+    local accumulator = initial
+    for i = 1, #arr do
+        accumulator = callback(accumulator, arr[i])
+    end
+    return accumulator
+end
+
+util.matrix.new = function(sizex,sizey,sizez,value)
+    local result = {}
+    value = value or 0
+    for x = 1, sizex do
+        result[x] = {}
+        for y = 1, sizey do
+            if(value ~= nil) then
+                result[x][y] = {}
+                for z = 1, sizez, 1 do
+                    result[x][y][z] = value
+                end
+            else
+                result[x][y] = sizez
+            end
+        end
+    end
+    return result
+end
+
 util.matrix.minmax = function(matrix)
     local min_val = matrix[1][1]
     local max_val = matrix[1][1]
@@ -279,6 +347,29 @@ util.matrix.map = function(matrix, callback)
         end
     end
     return matrix
+end
+
+util.matrix.reduce = function(matrix, callback, initialValue)
+    local accumulator = initialValue
+    for x = 1, #matrix do
+        for y = 1, #matrix[x] do
+            accumulator = callback(accumulator, matrix[x][y])
+        end
+    end
+    return accumulator
+end
+
+util.matrix.filter = function(matrix, callback)
+    local filtered = {}
+    for x = 1, #matrix do
+        filtered[x] = {}
+        for y = 1, #matrix[x] do
+            if callback(matrix[x][y]) then
+                filtered[x][y] = matrix[x][y]
+            end
+        end
+    end
+    return filtered
 end
 
 util.func.time = function(func,...)

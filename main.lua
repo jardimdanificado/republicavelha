@@ -1,4 +1,36 @@
 local republica = require("src.republicanova")
+local exit = false
+
+local options
+
+function teclado()
+    if(rl.IsKeyPressed(rl.KEY_INSERT)) then
+        simple = simple == false and true or false
+    elseif(rl.IsKeyDown(rl.KEY_PAGE_UP)) then
+        options.camera.position.y = options.camera.position.y + 2
+        rl.UpdateCamera(options.camera,0)
+    elseif(rl.IsKeyDown(rl.KEY_PAGE_DOWN)) then
+        options.camera.position.y = options.camera.position.y - 2
+        rl.UpdateCamera(options.camera,0)
+    elseif(rl.IsKeyDown(rl.KEY_UP)) then
+        options.camera.target.y = options.camera.target.y + 2
+        rl.UpdateCamera(options.camera,0)
+    elseif(rl.IsKeyDown(rl.KEY_DOWN)) then
+        options.camera.target.y = options.camera.target.y - 2
+        rl.UpdateCamera(options.camera,0)
+    elseif(rl.IsKeyDown(rl.KEY_RIGHT)) then
+        options.camera.position = republica.util.math.rotate(options.camera.position,{x=#options.world.map.height/2,y=#options.world.map.block[1][1],z=#options.world.map.height/2},-3)
+        options.camera.target = {x=#options.world.map.height/2,y=#options.world.map.block[1][1],z=#options.world.map.height/2}
+        rl.UpdateCamera(options.camera,0)
+    elseif(rl.IsKeyDown(rl.KEY_LEFT)) then
+        options.camera.position = republica.util.math.rotate(options.camera.position,{x=#options.world.map.height/2,y=#options.world.map.block[1][1],z=#options.world.map.height/2},3)
+        options.camera.target = {x=#options.world.map.height/2,y=#options.world.map.block[1][1],z=#options.world.map.height/2}
+        rl.UpdateCamera(options.camera,0)
+    elseif(rl.IsKeyPressed(rl.KEY_SPACE)) then
+        options.paused = (not paused) and true or false
+        rl.UpdateCamera(options.camera,0)
+    end
+end
 
 function y_rgba(index, min_val, max_val, invert)
     local range = max_val - min_val
@@ -66,58 +98,59 @@ function simplify(arr)
     return blocks;
 end 
 
-
 function start()
-    local screenWidth = 800
-    local screenHeight = 450
+    local world = republica.world(2,16)
+    local simplerender = true
+    options = 
+    {
+        world = world,
+        camera = rl.new("Camera", {
+            position = rl.new("Vector3", 0, #world.map.height, 0),
+            target = rl.new("Vector3", #world.map.height/2, republica.util.matrix.average(world.map.height), #world.map.height/2),
+            up = rl.new("Vector3", 0, 1, 0),
+            fovy = 45,
+            type = rl.CAMERA_PERSPECTIVE
+        }),
+        screen = {x=800,y=450},
+        title = 'republica nova',
+        paused = true
+    }
     --size up to 6 is safe, above 6 you can get buggy maps, default is 2
     --layers up to 16 are safe, default is 8
-    local terrain = republica.terrain(2,16)
-    local heightmap
-    local simplerender = true
-    terrain,heightmap = terrain[1],terrain[2]
     rl.SetConfigFlags(rl.FLAG_VSYNC_HINT)
-    rl.InitWindow(screenWidth, screenHeight, "republica nova")
-    
-    local camera = rl.new("Camera", {
-        position = rl.new("Vector3", 0, #heightmap, 0),
-        target = rl.new("Vector3", #heightmap/2, republica.util.matrix.average(heightmap), #heightmap/2),
-        up = rl.new("Vector3", 0, 1, 0),
-        fovy = 45,
-        type = rl.CAMERA_PERSPECTIVE
-    })
-
-    local mm = republica.util.matrix.minmax(heightmap)
-    local simpler = simplify(heightmap)
-    print("\nmerged " .. #heightmap*#heightmap[1] .. ' blocks into ' .. #simpler .. ' blocks\n')
+    rl.InitWindow(options.screen.x, options.screen.y, options.title)
+    --print (world.map.height[1][1])
+    local mm = republica.util.matrix.minmax(world.map.height)
+    local simpler = simplify(world.map.height)
+    print("\nmerged " .. #world.map.height*#world.map.height[1] .. ' blocks into ' .. #simpler .. ' blocks\n')
 
     while not rl.WindowShouldClose() do
         rl.BeginDrawing()
         rl.ClearBackground(rl.RAYWHITE)
-        if(rl.IsKeyPressed(rl.KEY_INSERT)) then
-            simple = simple == false and true or false
-        end
-        rl.BeginMode3D(camera)
+        rl.BeginMode3D(options.camera)
+        teclado(options.camera)
         if(simple == true) then
             for x = 1, #simpler do
                 rl.DrawCube(simpler[x].position,simpler[x].size.x,1,simpler[x].size.z,simpler[x].color)
                 rl.DrawCubeWires(simpler[x].position,simpler[x].size.x,1,simpler[x].size.z,simpler[x].gridcolor)
             end
         else
-            for x = 1, #heightmap do
-                for z = 1, #heightmap do
-                    rl.DrawCube({x=x,y=heightmap[x][z],z=z},1,1,1,y_rgba(heightmap[x][z],mm.min,mm.max))
-                    rl.DrawCubeWires({x=x,y=heightmap[x][z],z=z},1,1,1,y_rgba(heightmap[x][z],mm.min,mm.max,true))
+            for x = 1, #world.map.height do
+                for z = 1, #world.map.height do
+                    rl.DrawCube({x=x,y=world.map.height[x][z],z=z},1,1,1,y_rgba(world.map.height[x][z],mm.min,mm.max))
+                    rl.DrawCubeWires({x=x,y=world.map.height[x][z],z=z},1,1,1,y_rgba(world.map.height[x][z],mm.min,mm.max,true))
                 end
             end
         end
-
+        if(not options.paused) then
+            
+        end
         rl.EndMode3D()
 
         rl.DrawFPS(10, 10)
         rl.EndDrawing()
     end
-    
+    exit = true
     rl.CloseWindow()
 end
 
@@ -133,21 +166,21 @@ function setup()
 end
 
 function main()
-
     if(arg[1] ~= nil and republica.util.string.includes(arg[1],'.zip')) then
         os.execute( "./raylib-lua/raylua_e " .. arg[1])
-            return
+        return
     elseif(arg[1] == 'setup') then
-        setup()
+        return setup()
+    elseif(arg[1] == 'exit') then
+        exit = true
     elseif arg[1] == 'compile' then
 
         local path = ''
 
         if(republica.util.file.exist("./raylib-lua")==false or (republica.util.file.exist("./raylib-lua/raylua_e")==false and republica.util.file.exist("./raylib-lua/raylua_e.exe") == false)) then
             setup()
-        end
-
-        if(arg[2] ~= nil) then
+            return
+        elseif(arg[2] ~= nil) then
             if(republica.util.string.includes(arg[2],'.zip'))then
                 os.execute( "./raylib-lua/raylua_e " .. arg[2])
                 return
@@ -161,6 +194,7 @@ function main()
 
         if(republica.util.file.exist("./compile.zip")==true) then
             os.execute("rm compile.zip")
+            return
         end
 
         os.execute("zip -r compile.zip ".. path .." \n"..
@@ -168,8 +202,11 @@ function main()
             "rm compile.zip"
         )
         return
-    else
+    elseif(arg[1] == run or rl == nil) then
+        os.execute("./raylib-lua/raylua_s main.lua")
+    elseif(exit == false) then
         start()
     end
 end
-main()
+
+main()--
