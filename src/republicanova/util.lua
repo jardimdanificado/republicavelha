@@ -200,16 +200,24 @@ util.array.shuffle = function(arr)
 end
 
 util.array.minmax = function(arr)
-    local min = math.huge
-    local max = -math.huge
+    local min = arr[1]
+    local max = arr[1]
     for y = 1, #arr do
-        if(arr[x][y] > max) then
-            max = arr[x][y]
-        elseif(arr[x][y] < min) then
-            min = arr[x][y]
+        if(arr[y] > max) then
+            max = arr[y]
+        elseif(arr[y] < min) then
+            min = arr[y]
         end
     end
     return {min=min,max=max}
+end
+
+util.array.sum = function(arr)
+    local sum = 0
+    for i = 1, #arr, 1 do
+        sum = sum + arr[i] 
+    end
+    return sum
 end
 
 util.matrix.minmax = function(matrix)
@@ -249,8 +257,25 @@ util.matrix.unique = function(matrix)
     return unique_vals
 end
 
+util.matrix.average = function(matrix)
+    local sum,count = 0,0
+    for x = 1, #matrix do
+        for y = 1, #matrix[x] do
+            sum = sum + matrix[x][y]
+            count = count + 1
+        end
+    end
+    return(sum/count)
+end
 
-  
+util.matrix.map = function(matrix, callback)
+    for x = 1, #matrix do
+        for y = 1, #matrix[x] do
+            matrix[x][y] = callback(matrix[x][y])
+        end
+    end
+    return matrix
+end
 
 util.func.time = function(func,...)
     local name = 'noname'

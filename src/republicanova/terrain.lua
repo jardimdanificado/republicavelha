@@ -220,43 +220,47 @@ function roundHeightmap(hm)
     return hm;
 end
 
-function polishHeightmap(heightmap,fixedHeight)
+function polishHeightmap(heightmap, fixedHeight)
     local floor = math.floor
     local limit = util.math.limit
     local hmcache = #heightmap
     local threshold = 0
     local max = -math.huge
     local min = math.huge
-    for x = 1,hmcache do
+    for x = 1, hmcache do
         for y = 1, hmcache do
-            if(heightmap[x][y] > max) then
+            if heightmap[x][y] > max then
                 max = heightmap[x][y]
-            elseif(heightmap[x][y] < min) then
+            end
+            if heightmap[x][y] < min then
                 min = heightmap[x][y]
             end
         end
     end
-    
-    if(max > fixedHeight) then
+
+    if max > fixedHeight then
         threshold = math.ceil(max - fixedHeight)
     end
 
-    
-    if(min<1) then
-        threshold = threshold + min
+    if min < 1 - threshold then
+        threshold = 1 - min
     end
 
-    --print(threshold)
-    --print(min.. ' ' .. max)
-
-    for x = 1,hmcache do
+    for x = 1, hmcache do
         for y = 1, hmcache do
-            heightmap[x][y] = (floor(util.math.limit(heightmap[x][y],1,fixedHeight)-(threshold)))
-            --heightmap[x][y] = (floor(util.math.limit(heightmap[x][y],1,fixedHeight)))
+            if heightmap[x][y] >= fixedHeight then
+                heightmap[x][y] = fixedHeight
+            elseif heightmap[x][y] < fixedHeight - threshold then
+                heightmap[x][y] = floor(limit(heightmap[x][y] + threshold, 1, fixedHeight))
+            else
+                heightmap[x][y] = fixedHeight - 1
+            end
         end
     end
-    return(heightmap)
+
+    return heightmap
 end
+
 
 function autoHeightmap(mapsize, multi) 
     local results = {}
@@ -465,36 +469,43 @@ function checkDifference(heightmap)
 end
 
 function AutoTerrain(multiHorizontal, layers,retry)
-        local floor = math.floor
-        local mapsize = {w=64,h=64}
-        multiHorizontal = multiHorizontal or 2
-        layers = layers or 8
-        local smooth = mapsize.w * (multiHorizontal^2)/2
-        retry = retry or 1
-        local hmap = util.func.time({autoHeightmap,"autoHeightmap"},mapsize.w,multiHorizontal)
-        hmap = util.func.time({autoExpandHeightmap,"autoExpandHeightmap"},hmap,mapsize.h/2)
-        hmap = util.func.time({autoSmoothHeightmap,"autoSmoothHeightmap"},hmap,(smooth))
-        hmap = util.func.time({polishHeightmap,"polishHeightmap"},hmap,mapsize.h)
+    local floor = math.floor
+    local mapsize = {w=64,h=64}
+    multiHorizontal = multiHorizontal or 2
+    layers = layers or 8
+    local smooth = mapsize.w * (multiHorizontal^2)/2
+    retry = retry or 1
+    local hmap = util.func.time({autoHeightmap,"autoHeightmap"},mapsize.w,multiHorizontal)
+    hmap = util.func.time({autoExpandHeightmap,"autoExpandHeightmap"},hmap,mapsize.h/2)
+    hmap = util.func.time({autoSmoothHeightmap,"autoSmoothHeightmap"},hmap,(smooth))
+    hmap = util.func.time({polishHeightmap,"polishHeightmap"},hmap,mapsize.h+mapsize.h/32)
 
-        local mmm = util.matrix.minmax(hmap)
-        local munique = #util.matrix.unique(hmap)
-        if(retry>=1) then
-            if (mmm.min<1 or mmm.max > mapsize.w or munique < layers) then
-                if(retry > 1) then
-                    print("retry number " .. retry)
-                end
-                math.randomseed(floor(os.time()*(retry)))
-                return(AutoTerrain(multiHorizontal, layers, retry+1))
+    local mmm = util.matrix.minmax(hmap)
+    local munique = util.matrix.unique(hmap)
+    local taverage = util.matrix.average(hmap)
+
+    if(mmm.min>=16) then
+        util.matrix.map(hmap,function(value) return value-(mmm.min/2) end)
+    end
+
+    if(retry>=1) then
+        if (mmm.min<1 or mmm.max > mapsize.w or #munique <= 4 and #munique < layers) then
+            if(retry > 1) then
+                print("retry number " .. retry)
             end
+            math.randomseed(floor(os.time()*(retry)))
+            return(AutoTerrain(multiHorizontal, layers, retry+1))
         end
-        if(retry > 0) then
-            print('heightmap generated in ' .. retry .. ' retries.')
-        end
-        --hmap = util.func.time({polishHeightmap,"polishHeightmap"},hmap,mapsize.h)
-        
-        local terrain = {}
-        terrain = {util.func.time({Terrain,"Terrain"},hmap,mapsize.h),hmap}
-        return(terrain)
+    end
+    if(retry > 0) then
+        print('heightmap generated in ' .. retry .. ' retries.')
+    end
+    hmap = util.func.time({polishHeightmap,"polishHeightmap"},hmap,mapsize.h)
+    --hmap = fixHeightmap(hmap)
+    --hmap = adjustHeightmap(hmap)
+    local terrain = {}
+    terrain = {util.func.time({Terrain,"Terrain"},hmap,mapsize.h),hmap}
+    return {terrain,hmap}
 end
 
 return AutoTerrain

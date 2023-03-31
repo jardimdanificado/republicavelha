@@ -6,3 +6,4 @@ src/old
 .replit
 replit.nix
 heightmap.txt
+src/raylib-lua
