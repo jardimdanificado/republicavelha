@@ -3,33 +3,43 @@ local exit = false
 
 local options
 
-function teclado()
-    if(rl.IsKeyPressed(rl.KEY_INSERT)) then
-        simple = (simple == false) and true or false
-    elseif(rl.IsKeyDown(rl.KEY_PAGE_UP)) then
-        options.camera.position.y = options.camera.position.y + 2
-        rl.UpdateCamera(options.camera,0)
-    elseif(rl.IsKeyDown(rl.KEY_PAGE_DOWN)) then
-        options.camera.position.y = options.camera.position.y - 2
-        rl.UpdateCamera(options.camera,0)
-    elseif(rl.IsKeyDown(rl.KEY_UP)) then
-        options.camera.target.y = options.camera.target.y + 2
-        rl.UpdateCamera(options.camera,0)
-    elseif(rl.IsKeyDown(rl.KEY_DOWN)) then
-        options.camera.target.y = options.camera.target.y - 2
-        rl.UpdateCamera(options.camera,0)
-    elseif(rl.IsKeyDown(rl.KEY_RIGHT)) then
-        options.camera.position = republica.util.math.rotate(options.camera.position,{x=#options.world.map.height/2,y=#options.world.map.block[1][1],z=#options.world.map.height/2},-3)
-        options.camera.target = {x=#options.world.map.height/2,y=#options.world.map.block[1][1],z=#options.world.map.height/2}
-        rl.UpdateCamera(options.camera,0)
-    elseif(rl.IsKeyDown(rl.KEY_LEFT)) then
-        options.camera.position = republica.util.math.rotate(options.camera.position,{x=#options.world.map.height/2,y=#options.world.map.block[1][1],z=#options.world.map.height/2},3)
-        options.camera.target = {x=#options.world.map.height/2,y=#options.world.map.block[1][1],z=#options.world.map.height/2}
-        rl.UpdateCamera(options.camera,0)
-    elseif(rl.IsKeyPressed(rl.KEY_SPACE)) then
-        options.paused = (not paused) and true or false
-        rl.UpdateCamera(options.camera,0)
+function grassify(world)
+    for  x = 1, #world.map.height do
+        for y = 1, #world.map.height[1] do
+            world.plant.spawn(--//this spawns a grass seed at each xy position
+                world,
+                'grass',
+                {x=x,y=y,z=#world.map.block[1][1]}
+            )
+
+            if(x>1 and y>1 and x<=#world.map.height and y<=#world.map.height[1]) then
+                if(republica.util.roleta(50,math.random(1,50)) == 2) then --if roleta == 1
+                    local temptype = Object.keys(republica.plants)
+                    [
+                        republica.util.roleta(
+                            this,
+                            republica.util.array.random(
+                                1,
+                                10,
+                                util.array.keys(republica.plants)
+                            )
+                        )
+                    ]
+                    if(temptype ~= 'grass') then
+                        world.plant.spawn(--this spawns a random seed at the xy position
+                            'seed', 
+                            temptype,
+                            'idle', 
+                            {x=x,y=y,z=#world.map.block[1][1]}, 
+                            100, 
+                            100
+                        )
+                    end
+                end
+            end
+        end
     end
+    return world;
 end
 
 function y_rgba(index, min_val, max_val, invert)
@@ -98,9 +108,42 @@ function simplify(arr)
     return blocks;
 end 
 
+function teclado()
+    if(rl.IsKeyPressed(rl.KEY_INSERT)) then
+        options.simple = (options.simple == false) and true or false
+    elseif(rl.IsKeyPressed(rl.KEY_F)) then
+        print(options.world.time)
+    elseif(rl.IsKeyPressed(rl.KEY_G)) then
+        print(options.world.plant[5].germination)
+    elseif(rl.IsKeyDown(rl.KEY_PAGE_UP)) then
+        options.camera.position.y = options.camera.position.y + 2
+        rl.UpdateCamera(options.camera,0)
+    elseif(rl.IsKeyDown(rl.KEY_PAGE_DOWN)) then
+        options.camera.position.y = options.camera.position.y - 2
+        rl.UpdateCamera(options.camera,0)
+    elseif(rl.IsKeyDown(rl.KEY_UP)) then
+        options.camera.target.y = options.camera.target.y + 2
+        rl.UpdateCamera(options.camera,0)
+    elseif(rl.IsKeyDown(rl.KEY_DOWN)) then
+        options.camera.target.y = options.camera.target.y - 2
+        rl.UpdateCamera(options.camera,0)
+    elseif(rl.IsKeyDown(rl.KEY_RIGHT)) then
+        options.camera.position = republica.util.math.rotate(options.camera.position,options.camera.target,-3)
+        rl.UpdateCamera(options.camera,0)
+        options.camera.target = {x=#options.world.map.height/2,y=options.camera.target.y,z=#options.world.map.height/2}
+    elseif(rl.IsKeyDown(rl.KEY_LEFT)) then
+        options.camera.position = republica.util.math.rotate(options.camera.position,options.camera.target,3)
+        rl.UpdateCamera(options.camera,0)
+        options.camera.target = {x=#options.world.map.height/2,y=options.camera.target.y,z=#options.world.map.height/2}
+    elseif(rl.IsKeyPressed(rl.KEY_SPACE)) then
+        options.paused = (options.paused == false) and true or false
+        print("paused = " .. (options.paused and 'true' or 'false'))
+    end
+end
+
 function start()
     local world = republica.world(2,16)
-    local simplerender = true
+    world = grassify(world)
     options = 
     {
         world = world,
@@ -113,6 +156,7 @@ function start()
         }),
         screen = {x=800,y=450},
         title = 'republica nova',
+        simple = true,
         paused = true
     }
     --size up to 6 is safe, above 6 you can get buggy maps, default is 2
@@ -129,7 +173,7 @@ function start()
         rl.ClearBackground(rl.RAYWHITE)
         rl.BeginMode3D(options.camera)
         teclado(options.camera)
-        if(simple == true) then
+        if(options.simple == true) then
             for x = 1, #simpler do
                 rl.DrawCube(simpler[x].position,simpler[x].size.x,1,simpler[x].size.z,simpler[x].color)
                 rl.DrawCubeWires(simpler[x].position,simpler[x].size.x,1,simpler[x].size.z,simpler[x].gridcolor)
@@ -142,8 +186,8 @@ function start()
                 end
             end
         end
-        if(not options.paused) then
-            
+        if(options.paused == false) then
+            world.frame(world)
         end
         rl.EndMode3D()
 
@@ -165,7 +209,7 @@ function setup(sys)
             "cd raylib-lua \n" ..
             "git submodule init \n" ..
             "git submodule update \n" ..
-            "make && cd .. \n" .. 
+            "make  and  cd .. \n" .. 
             "mv ./raylib-lua/raylua_* . \n" ..
             "rm -rf raylib-lua \n")
     end
@@ -192,7 +236,7 @@ function main()
             end
             os.execute(
                     "zip -r compile.zip main.lua src \n" ..
-                    execpath .. " compile.zip && rm -f compile.zip && mv compile_out republicanova" .. extension)
+                    execpath .. " compile.zip  and  rm -f compile.zip  and  mv compile_out republicanova" .. extension)
             os.exit()
         elseif(arg[1] == 'setup') then
             setup(sys)

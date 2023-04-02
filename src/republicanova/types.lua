@@ -8,14 +8,14 @@ function types.generic(type, status, birth, position, quality, condition, decayR
         mods = mods or {},
         quality = quality or 100,
         condition = condition or 100,
-        position = position or {x=0,y=0,z=0},
+        position = position or {x=1,y=1,z=1},
         birth = birth or 0,
         decayRate = decayRate or 0
     }
 end
 
 function types.creature(specie, status, birth, position, quality, condition) 
-    local seed = types.generic('creature', status or 'idle', birth or 0, position or {x=0,y=0,z=0}, quality or 100, condition or 100)
+    local seed = types.generic('creature', status or 'idle', birth or 0, position or {x=1,y=1,z=1}, quality or 100, condition or 100)
     seed.specie = specie or 'human'
     seed.gender = gender or 'female'
 
@@ -23,7 +23,7 @@ function types.creature(specie, status, birth, position, quality, condition)
 end
 
 function types.plant(specie, status, birth, position, quality, condition) 
-    local plant = types.generic('plant', status or 'idle', birth or 0, position or {x=0,y=0,z=0}, quality or 100, condition or 100)
+    local plant = types.generic('plant', status or 'idle', birth or 0, position or {x=1,y=1,z=1}, quality or 100, condition or 100)
     plant.specie = specie or 'tomato'
     plant.leaf = 0
     plant.flower = (type(Plants[plant.specie].flower) ~= nil) and {} or 0
@@ -34,38 +34,39 @@ function types.plant(specie, status, birth, position, quality, condition)
 end
 
 function types.seed(specie, status, birth, position, quality, condition) 
-    local seed = types.generic('seed', status or 'idle', birth or 0, position or {x=0,y=0,z=0}, quality or 100, condition or 100,2592000)
+    local seed = types.generic('seed', status or 'idle', birth or 0, position or {x=1,y=1,z=1}, quality or 100, condition or 100,2592000)
     seed.specie = specie or 'tomato'
+    seed.germination = 0
     return seed
 end
 
 function types.leaf(specie, status, birth, position, quality, condition) 
-    local leaf = types.generic('leaf', status or 'idle', birth or 0, position or {x=0,y=0,z=0}, quality or 100, condition or 100)
+    local leaf = types.generic('leaf', status or 'idle', birth or 0, position or {x=1,y=1,z=1}, quality or 100, condition or 100)
     leaf.specie = specie or 'grass'
     return leaf
 end
 
 function types.trunk(specie, status, birth, position, quality, condition) 
-    local trunk = types.generic('trunk', status or 'idle', birth or 0, position or {x=0,y=0,z=0}, quality or 100, condition or 100)
+    local trunk = types.generic('trunk', status or 'idle', birth or 0, position or {x=1,y=1,z=1}, quality or 100, condition or 100)
     trunk.specie = specie or 'tamarind'
     return trunk
 end
 
 function types.branch(specie, status, birth, position, quality, condition) 
-    local branch = types.generic('branch', status or 'idle', birth or 0, position or {x=0,y=0,z=0}, quality or 100, condition or 100)
+    local branch = types.generic('branch', status or 'idle', birth or 0, position or {x=1,y=1,z=1}, quality or 100, condition or 100)
     branch.specie = specie or 'jackfruit'
     return branch
 end
 
 function types.flower(specie, status, birth, position, quality, condition) 
-    local flower = types.generic('flower', status or 'idle', birth or 0, position or {x=0,y=0,z=0}, quality or 100, condition or 100)
+    local flower = types.generic('flower', status or 'idle', birth or 0, position or {x=1,y=1,z=1}, quality or 100, condition or 100)
     flower.specie = specie or 'cannabis'
     flower.flowering = 0
     return flower
 end
 
 function types.fruit(specie, status, birth, position, quality, condition) 
-    local fruit = types.generic('fruit', status or 'idle', birth or 0, position or {x=0,y=0,z=0}, quality or 100, condition or 100)
+    local fruit = types.generic('fruit', status or 'idle', birth or 0, position or {x=1,y=1,z=1}, quality or 100, condition or 100)
     fruit.specie = specie or 'tomato'
     fruit.maturation = maturation or 0
     fruit.seed = seed or 1
@@ -74,7 +75,7 @@ end
 
 function types.collider(positions,value, active)
     return{
-		positions = positions or {x=0,y=0,z=0},
+		positions = positions or {x=1,y=1,z=1},
 		value = value or 0,
 		active = active or true
     }

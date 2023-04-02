@@ -8,7 +8,5 @@ replit.nix
 heightmap.txt
 raylua_*
 compile_out
-rest.lua
-republicanova
 *.exe
 *.appimage

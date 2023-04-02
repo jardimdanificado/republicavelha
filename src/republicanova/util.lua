@@ -122,7 +122,7 @@ util.math.rotate = function(position, pivot, angle)
     local c = math.cos(angle)
     
     -- translate position so that pivot is at the origin
-    local translated = util.math.vec3sub(position,{x=pivot.x,y=pivot.y,z=pivot.z})
+    local translated = util.math.vec3sub(position,pivot)
     
     -- apply rotation
     local rotated =
@@ -218,6 +218,24 @@ util.array.new = function(size,value)
     return result
 end
 
+util.array.keys = function(arr)
+    local result = {insert=table.insert}
+    for key, value in pairs(arr) do
+        result:insert(key)
+    end
+    return result
+end
+
+util.array.random = function(start, fim, size) 
+	local result = {}
+	local range = fim - start + 1
+	for i = 0, i < size do
+	  local randomInt = math.floor(math.random() * range) + start
+	  result.push(randomInt)
+    end
+	return result
+end
+
 util.array.shuffle = function(arr)
 	for i = #arr, 1, -1 do
 	  local j = math.floor(math.random(1,#arr))
@@ -253,8 +271,8 @@ util.array.map = function(arr, callback)
         result[i] = callback(arr[i])
     end
     return result
-    end
-    
+end
+
 util.array.filter = function(arr, callback)
     local result = {}
     for i = 1, #arr do
@@ -388,10 +406,10 @@ util.roleta = function(...)
   local odds = {...}
 	local roleta = {} 
 	for i = 1,#odds do
-    table.concat(roleta,util.array.new(odds[i],i))
+        table.insert(roleta,util.array.new(odds[i],i))
 		--roleta = roleta.concat(Array(odds[i]).fill(i));
-	  return(util.array.shuffle(util.array.shuffle(util.array.shuffle(roleta)))[math.random(1,#roleta)])
-  end
+	    return(util.array.shuffle(util.array.shuffle(util.array.shuffle(roleta)))[math.random(1,#roleta)])
+    end
 end
 
 util.file.save.heightmap = function(matrix, filename)
