@@ -183,9 +183,7 @@ end
 function main()
     local ffi = require "ffi"
     local sys = ffi.os
-    if(rl == nil and arg[1] == 'main.lua') then
-        setAndGo(sys)
-    elseif(arg[1] ~= nil ) then
+    if(arg[1] ~= nil and arg[1] ~= 'main.lua') then
         if(arg[1] == 'compile') then
             local extension = (sys == "Windows") and '.exe' or '.appimage'
             local execpath =  (sys == "Windows") and "./raylua_r.exe" or "./raylua_r"
@@ -195,6 +193,7 @@ function main()
             os.execute(
                     "zip -r compile.zip main.lua src \n" ..
                     execpath .. " compile.zip && rm -f compile.zip && mv compile_out republicanova" .. extension)
+            os.exit()
         elseif(arg[1] == 'setup') then
             setup(sys)
             return
@@ -204,7 +203,11 @@ function main()
             start()
         end
     else
-        start()
+        if(rl == nil) then
+            setAndGo(sys)
+        else
+            start()
+        end
     end
 end
 
