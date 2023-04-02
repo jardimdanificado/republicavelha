@@ -236,14 +236,6 @@ util.array.random = function(start, fim, size)
 	return result
 end
 
-util.array.shuffle = function(arr)
-	for i = #arr, 1, -1 do
-	  local j = math.floor(util.random(1,#arr))
-	  arr[i], arr[j] = arr[j], arr[i]
-	end
-	return arr
-end
-
 util.array.minmax = function(arr)
     local min = arr[1]
     local max = arr[1]
@@ -408,12 +400,15 @@ util.roleta = function(...)
 	for i = 1,#odds do
         table.insert(roleta,util.array.new(odds[i],i))
 		--roleta = roleta.concat(Array(odds[i]).fill(i));
-	    return(util.array.shuffle(util.array.shuffle(util.array.shuffle(roleta)))[util.random(1,#roleta)][util.random(1,#roleta[1])])
+	    return(util.random(1,#roleta))
     end
 end
 
 util.random = function(min, max)
     local clock = tostring(os.clock())
+    if(clock:find("%.") == nil) then
+        return min
+    end
     local last_digits = tonumber(clock:sub(clock:find("%.") + 1))
     return (last_digits % (max - min + 1)) + min
 end

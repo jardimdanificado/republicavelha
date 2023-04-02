@@ -115,7 +115,6 @@ function findTrunkGrowPosition(collisionMap,x,y,z)--this try to find a air block
         --{x= 1, y= -1,z=1}, --9
         --{x= -1, y= -1,z=1} --7
     }
-    directions = util.array.shuffle(util.array.shuffle(util.array.shuffle(directions)))
     
     for i = 1, #directions do
         opt = directions[i]
@@ -139,7 +138,6 @@ function findRootGrowPosition(collisionMap,x,y,z)--this try to find a air block 
         {x= 1, y= -1,z=-1}, --9
         {x= -1, y= -1,z=-1} --7
     }
-    directions = util.array.shuffle(util.array.shuffle(util.array.shuffle(directions)))
     for i = 1, #directions do
         opt = directions[i]
         if((x+opt.x >=1 and y+opt.y>=1 and z+opt.z >=1 and x+opt.x < #collisionMap and y+opt.y < #collisionMap[1] and z+opt.z < #collisionMap[1]) ~= true)then
@@ -162,7 +160,6 @@ function findBranchGrowPosition(collisionMap,x,y,z)--this try to find a air bloc
         {x= 1, y= -1,z=0}, --9
         {x= -1, y= -1,z=0} --7
     }
-    directions = util.array.shuffle(util.array.shuffle(util.array.shuffle(directions)))
     for i = 1, #directions do
         opt = directions[i]
         if((x+opt.x >1 and y+opt.y>1 and x+opt.x < #collisionMap and y+opt.y < #collisionMap[1])~= true) then
@@ -238,14 +235,14 @@ end
 
 function growLeaf(plant)
     --print(time)
-    if(util.roleta(14,1,16) == 1) then
+    if(util.roleta(14,1,16) == 2) then
         plant.leaf = plant.leaf + 1
     end
     return plant
 end
 
 function growBranch(plant,collisionMap,time)
-    print(time)
+    --print(time)
     if(type(plant.trunk) ~= nil and #plant.trunk>=2 and #plant.branch < Plants[plant.specie].leaf.max/1000 and util.roleta(2,1,2) == 1) then
         local customX = util.roleta(1,0,1)-2
         local customY = util.roleta(1,0,1)-2
@@ -257,23 +254,26 @@ function growBranch(plant,collisionMap,time)
     return plant
 end
 
-function growTrunk(plant,collisionMap,time)
-    
+function growTrunk(world,plant,time)
+    local collisionMap = world.map.collision
     if(type(plant.trunk) ~= nil and #plant.trunk < (Plants[plant.specie].size.max/100)) then
         local customX = util.roleta(1,10,1)-2
         local customY = util.roleta(1,10,1)-2
-        --print"aoba"
         for i = 1, #plant.trunk do
             local trunk = plant.trunk[i]
-            trunk.position.z = trunk.position.z + 1
-            trunk.position.y = trunk.position.y + customY
-            trunk.position.x = trunk.position.x + customX
+            if(trunk.position.z < #world.map.block[1][1]) then
+                trunk.position.z = trunk.position.z + 1
+                trunk.position.y = trunk.position.y + customY
+                trunk.position.x = trunk.position.x + customX
+            end
         end
-        for i = 0, #plant.branch do
+        for i = 1, #plant.branch do
             local branch = plant.branch[i]
-            branch.position.z = branch.position.z + 1
-            branch.position.y = branch.position.y + customY
-            branch.position.x = branch.position.x + customX
+            if(branch.position.z < #world.map.block[1][1]) then
+                branch.position.z = branch.position.z + 1
+                branch.position.y = branch.position.y + customY
+                branch.position.x = branch.position.x + customX
+            end
         end
         table.insert(plant.trunk,1,types.trunk(plant.specie,'idle',time,{x=1,y=1,z=1},plant.quality,plant.condition))
         collisionMap.new({plant.position,plant.trunk[1]})
@@ -284,8 +284,10 @@ end
 function plantFrame(world,plant)
     if(plant.leaf < Plants[plant.specie].leaf.max and world.time % 5 ==0) then
         if(Plants[plant.specie].size.max > 100) then
+            --print 'b'
             plant = growBranch(plant,world.map.collision,world.time)
         end
+        --print 'c'
         plant = growLeaf(plant)
     end
     
@@ -295,7 +297,8 @@ function plantFrame(world,plant)
             lastTrunkPosition = plant.trunk[#plant.trunk].position
         end
         if(world.time % util.math.limit(Plants[plant.specie].time.maturing.min,1,100)==0 and lastTrunkPosition.x < #world.map.block[1][1]) then
-            plant = growTrunk(plant,world.map.collision,world.time)
+            --print 'a'
+            plant = growTrunk(world,plant,world.time)
         end
     end
     return(plant)

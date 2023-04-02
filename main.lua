@@ -13,28 +13,18 @@ function grassify(world)
             )
             
             if(x>1 and y>1 and x<=#world.map.height and y<=#world.map.height[1]) then
-                print(republica.util.random(1,50))
-                if(republica.util.roleta(50,republica.util.random(1,50)) == 2) then --if roleta == 1
+                --print(republica.util.random(1,3))
+                if(republica.util.random(1,3)) then --if roleta == 1
                     --print(republica.util.array.keys(republica.plants))
-                    local temptype = util.array.keys(republica.plants)
+                    local temptype = republica.util.array.keys(republica.plants)
                     [
-                        republica.util.roleta(
-                            this,
-                            republica.util.array.random(
-                                1,
-                                10,
-                                republica.util.array.keys(republica.plants)
-                            )
-                        )
+                        republica.util.random(1,3)
                     ]
                     if(temptype ~= 'grass') then
                         world.plant.spawn(--this spawns a random seed at the xy position
-                            'seed', 
+                            world, 
                             temptype,
-                            'idle', 
-                            {x=x,y=y,z=#world.map.block[1][1]}, 
-                            100, 
-                            100
+                            {x=x,y=y,z=#world.map.block[1][1]}
                         )
                     end
                 end
