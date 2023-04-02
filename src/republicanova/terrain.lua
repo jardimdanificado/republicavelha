@@ -2,11 +2,9 @@ local util = require("src.republicanova.util")
 local types = require ("src.republicanova.types")
 
 function Heightmap(size) 
-    math.randomseed(math.floor((os.time()+size)*(os.clock()*10000)))
-    local N = (8+math.random(0,5))
-    local RANDOM_INITIAL_RANGE = (10+math.random(0,3))
+    local N = (8+util.random(0,5))
+    local RANDOM_INITIAL_RANGE = (10+util.random(0,3))
     local MATRIX_LENGTH = (2 ^ N)+1
-    math.randomseed(os.time()*N*RANDOM_INITIAL_RANGE)
     function generateMatrix() 
         local matrix = {}
         for i=1,MATRIX_LENGTH do
@@ -17,10 +15,10 @@ function Heightmap(size)
             table.insert(matrix,arr)
         end
 
-        matrix[1][MATRIX_LENGTH] = math.random(0, RANDOM_INITIAL_RANGE)
-        matrix[MATRIX_LENGTH][1] = math.random(0, RANDOM_INITIAL_RANGE)
-        matrix[1][1] = math.random(0, RANDOM_INITIAL_RANGE)
-        matrix[MATRIX_LENGTH][MATRIX_LENGTH] = math.random(
+        matrix[1][MATRIX_LENGTH] = util.random(0, RANDOM_INITIAL_RANGE)
+        matrix[MATRIX_LENGTH][1] = util.random(0, RANDOM_INITIAL_RANGE)
+        matrix[1][1] = util.random(0, RANDOM_INITIAL_RANGE)
+        matrix[MATRIX_LENGTH][MATRIX_LENGTH] = util.random(
             0,
             RANDOM_INITIAL_RANGE
         )
@@ -46,7 +44,7 @@ function Heightmap(size)
                         count = count + 1
                     end
                 end
-                matrix[j + math.floor(chunkSize / 2)][i + math.floor(chunkSize / 2)] = sum / count + math.random(-randomFactor, randomFactor)
+                matrix[j + math.floor(chunkSize / 2)][i + math.floor(chunkSize / 2)] = sum / count + util.random(-randomFactor, randomFactor)
             end
         end
     end
@@ -69,7 +67,7 @@ function Heightmap(size)
                         count = count + 1
                     end
                 end
-                matrix[y][x] = sum / count + math.random(-randomFactor, randomFactor)
+                matrix[y][x] = sum / count + util.random(-randomFactor, randomFactor)
             end
         end
         return matrix
@@ -157,7 +155,7 @@ function smoothBlock(hm,position)
 end
 
 function smoothHeightmap(hm,corner)
-    corner = corner or math.random(1,4)
+    corner = corner or util.random(1,4)
     local corners = 
     {
         {x = {min=1,max=#hm}, y = {min=1,max=#hm}},
@@ -175,7 +173,7 @@ function smoothHeightmap(hm,corner)
 end
 
 function increaseDistance(hm,corner)
-    corner = corner or math.random(1,4)
+    corner = corner or util.random(1,4)
     local corners = 
     {
         {x = {min=1,max=#hm}, y = {min=1,max=#hm}},
@@ -287,8 +285,7 @@ function autoSmoothHeightmap(hm,smooth)
     local tempfunc = smoothHeightmap
     rand = 1
     while(smooth>0) do
-        math.randomseed(os.time()+smooth)
-        rand = math.random(1,4)
+        rand = util.random(1,4)
         hm = tempfunc(hm,rand)
         smooth = smooth-1
     end
@@ -298,9 +295,8 @@ end
 function autoExpandHeightmap(hm,smooth)
     local tempfunc = increaseDistance
     local rand = 1
-    math.randomseed(math.floor(os.time()*hm[4][8]))
     while(smooth>0) do
-        rand = math.random(1,4)
+        rand = util.random(1,4)
         hm = tempfunc(hm,rand)
         smooth = smooth-1
     end
@@ -403,7 +399,7 @@ function adjustHeightmap(heightmap)
                         heightmap[i+1][j-1], heightmap[i+1][j], heightmap[i+1][j+1],
                     }
                     table.sort(nearby)
-                    local targetValue = nearby[math.random(2,7)]
+                    local targetValue = nearby[util.random(2,7)]
                     if targetValue < currentValue - 1 then
                         heightmap[i][j] = currentValue - 1
                     elseif targetValue > currentValue + 1 then
@@ -493,7 +489,6 @@ function AutoTerrain(multiHorizontal, layers,retry)
             if(retry > 1) then
                 print("retry number " .. retry)
             end
-            math.randomseed(floor(os.time()*(retry)))
             return(AutoTerrain(multiHorizontal, layers, retry+1))
         end
     end

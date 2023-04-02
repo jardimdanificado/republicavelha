@@ -11,17 +11,19 @@ function grassify(world)
                 'grass',
                 {x=x,y=y,z=#world.map.block[1][1]}
             )
-
+            
             if(x>1 and y>1 and x<=#world.map.height and y<=#world.map.height[1]) then
-                if(republica.util.roleta(50,math.random(1,50)) == 2) then --if roleta == 1
-                    local temptype = Object.keys(republica.plants)
+                print(republica.util.random(1,50))
+                if(republica.util.roleta(50,republica.util.random(1,50)) == 2) then --if roleta == 1
+                    --print(republica.util.array.keys(republica.plants))
+                    local temptype = util.array.keys(republica.plants)
                     [
                         republica.util.roleta(
                             this,
                             republica.util.array.random(
                                 1,
                                 10,
-                                util.array.keys(republica.plants)
+                                republica.util.array.keys(republica.plants)
                             )
                         )
                     ]
@@ -114,7 +116,7 @@ function teclado()
     elseif(rl.IsKeyPressed(rl.KEY_F)) then
         print(options.world.time)
     elseif(rl.IsKeyPressed(rl.KEY_G)) then
-        print(options.world.plant[5].germination)
+        print(options.world.map.block[1][1][64])
     elseif(rl.IsKeyDown(rl.KEY_PAGE_UP)) then
         options.camera.position.y = options.camera.position.y + 2
         rl.UpdateCamera(options.camera,0)
@@ -236,7 +238,7 @@ function main()
             end
             os.execute(
                     "zip -r compile.zip main.lua src \n" ..
-                    execpath .. " compile.zip  and  rm -f compile.zip  and  mv compile_out republicanova" .. extension)
+                    execpath .. " compile.zip  and  rm -f compile.zip && rm compile.zip &&  mv compile_out republicanova" .. extension)
             os.exit()
         elseif(arg[1] == 'setup') then
             setup(sys)

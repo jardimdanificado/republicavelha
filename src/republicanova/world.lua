@@ -2,6 +2,7 @@ local util = require("src.republicanova.util")
 local terrain = require("src.republicanova.terrain")
 local types = require("src.republicanova.types")
 local Materials = require("src.republicanova.materials")
+local Plants = require("src.republicanova.plants")
 
 function getHourOfDay(totalSeconds) 
     return math.floor(totalSeconds / 3600) % 24
@@ -39,9 +40,12 @@ function Map(multiHorizontal,quality)--create the map
                 util.array.map(value,function(value)
                     return (
                             util.array.map(value,function(value)
-                                return (
-                                    (Materials[value].solid == true) and 100 or 0
-                                )
+                                local result = 0
+                                --print(Materials[value].solid)
+                                if(Materials[value].solid == true) then
+                                    result = 100
+                                end
+                                return (result)
                             end)
                     )
                 end)
@@ -57,8 +61,9 @@ function Map(multiHorizontal,quality)--create the map
         table.insert(collision.dynamic,{positions = positions,value = value,active = true})
     end
     collision.check=function(position,value)--returns true if no collider in the specified position, of if the colliders in the position are below value
+        --print(position.x, position.y, position.z)
         value = value or 75
-        if(collision.static[position.x][position.y][position.z-1] > value) then
+        if(position.z > 2 and collision.static[position.x][position.y][position.z-1] > value) then
             return false
         end
         for i = 1, #collision.dynamic do
@@ -216,12 +221,13 @@ end
 function seedFrame(world,plant)
     if(world.map.block[plant.position.x][plant.position.y][plant.position.z-1] ~= nil) then
         plant.position = gravity(world.map.collision,plant.position)
-        print(plant.position.z)
-        if(world.time%60==0 and plant.position.z> 2 and Materials[world.map.block[plant.position.x][plant.position.y][plant.position.z-1]].name == 'earth') then
+        --print(plant.position.z)
+        if(world.time%6==0 and plant.position.z> 2 and Materials[world.map.block[plant.position.x][plant.position.y][plant.position.z-1]].name == 'earth') then
             plant.germination = plant.germination + 1
             plant.status = (plant.status ~= 'germinating') and 'germinating' or plant.status
             if(plant.status == 'germinating') then
-                if(plant.germination >= Plants[plant.specie].time.maturing.max/100000 or (util.roleta(19,1) == 2 and plant.germination>=(Plants[plant.specie].time.maturing.min/100000))) then
+                if(plant.germination >= Plants[plant.specie].time.maturing.max/1000000 or (util.roleta(19,1) == 2 and plant.germination>=(Plants[plant.specie].time.maturing.min/1000000))) then
+                    --print("specie = " .. plant.specie)
                     return(types.plant(plant.specie,plant.status,world.time,plant.position,plant.quality,100))
                 end
             end
@@ -231,6 +237,7 @@ function seedFrame(world,plant)
 end
 
 function growLeaf(plant)
+    --print(time)
     if(util.roleta(14,1,16) == 1) then
         plant.leaf = plant.leaf + 1
     end
@@ -238,21 +245,24 @@ function growLeaf(plant)
 end
 
 function growBranch(plant,collisionMap,time)
+    print(time)
     if(type(plant.trunk) ~= nil and #plant.trunk>=2 and #plant.branch < Plants[plant.specie].leaf.max/1000 and util.roleta(2,1,2) == 1) then
         local customX = util.roleta(1,0,1)-2
         local customY = util.roleta(1,0,1)-2
         
         table.insert(plant.branch,1,types.branch(plant.specie,'idle',time,{x=customX,y=customY,z=0},plant.quality,plant.condition))
-        local collisionPositions = (#plant.trunk>1) and {plant.position,plant.trunk[1].position,plant.branch[1].position} or {plant.position,plant.trunk[1].position,plant.branch[1].position}
+        local collisionPositions = (#plant.trunk>1) and {plant.position,plant.trunk[2].position,plant.branch[1].position} or {plant.position,plant.trunk[1].position,plant.branch[1].position}
         collisionMap.new(collisionPositions)
     end
     return plant
 end
 
 function growTrunk(plant,collisionMap,time)
+    
     if(type(plant.trunk) ~= nil and #plant.trunk < (Plants[plant.specie].size.max/100)) then
         local customX = util.roleta(1,10,1)-2
         local customY = util.roleta(1,10,1)-2
+        --print"aoba"
         for i = 1, #plant.trunk do
             local trunk = plant.trunk[i]
             trunk.position.z = trunk.position.z + 1
@@ -272,16 +282,14 @@ function growTrunk(plant,collisionMap,time)
 end
 
 function plantFrame(world,plant)
-    if(plant.leaf < Plants[plant.specie].leaf.max and world.time % util.math.limit(Plants[plant.specie].time.maturing.min,0,10)==0) then
+    if(plant.leaf < Plants[plant.specie].leaf.max and world.time % 5 ==0) then
         if(Plants[plant.specie].size.max > 100) then
-            if(world.time % util.math.limit(Plants[plant.specie].time.maturing.min,0,10)==0) then
-                plant = growBranch(plant,world.map.collision,world.time)
-            end
+            plant = growBranch(plant,world.map.collision,world.time)
         end
         plant = growLeaf(plant)
     end
-
-    if(Plants[plant.specie].type.includes('tree')) then
+    
+    if util.string.includes(Plants[plant.specie].type,'tree') then
         local lastTrunkPosition = plant.position
         if(#plant.trunk > 0) then
             lastTrunkPosition = plant.trunk[#plant.trunk].position
@@ -300,7 +308,6 @@ function frame(world)
             if(plant.type == 'seed') then
                 return(seedFrame(world,plant))
             elseif(plant.type == 'plant') then
-                print 'plant'
                 return(plantFrame(world,plant))
             end
             return(plant)
@@ -317,7 +324,7 @@ function world(size,quality)
         plant = 
         {
             spawn = function(world,specie,position) 
-                table.insert(world.plant,types.seed('specie',nil,world.time,position)) 
+                table.insert(world.plant,types.seed(specie,nil,world.time,position)) 
             end
         }
     }

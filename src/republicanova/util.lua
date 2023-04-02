@@ -230,7 +230,7 @@ util.array.random = function(start, fim, size)
 	local result = {}
 	local range = fim - start + 1
 	for i = 0, i < size do
-	  local randomInt = math.floor(math.random() * range) + start
+	  local randomInt = math.floor(util.random() * range) + start
 	  result.push(randomInt)
     end
 	return result
@@ -238,7 +238,7 @@ end
 
 util.array.shuffle = function(arr)
 	for i = #arr, 1, -1 do
-	  local j = math.floor(math.random(1,#arr))
+	  local j = math.floor(util.random(1,#arr))
 	  arr[i], arr[j] = arr[j], arr[i]
 	end
 	return arr
@@ -408,8 +408,14 @@ util.roleta = function(...)
 	for i = 1,#odds do
         table.insert(roleta,util.array.new(odds[i],i))
 		--roleta = roleta.concat(Array(odds[i]).fill(i));
-	    return(util.array.shuffle(util.array.shuffle(util.array.shuffle(roleta)))[math.random(1,#roleta)])
+	    return(util.array.shuffle(util.array.shuffle(util.array.shuffle(roleta)))[util.random(1,#roleta)][util.random(1,#roleta[1])])
     end
+end
+
+util.random = function(min, max)
+    local clock = tostring(os.clock())
+    local last_digits = tonumber(clock:sub(clock:find("%.") + 1))
+    return (last_digits % (max - min + 1)) + min
 end
 
 util.file.save.heightmap = function(matrix, filename)
