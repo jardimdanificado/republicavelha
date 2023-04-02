@@ -5,7 +5,7 @@ local options
 
 function teclado()
     if(rl.IsKeyPressed(rl.KEY_INSERT)) then
-        simple = simple == false and true or false
+        simple = (simple == false) and true or false
     elseif(rl.IsKeyDown(rl.KEY_PAGE_UP)) then
         options.camera.position.y = options.camera.position.y + 2
         rl.UpdateCamera(options.camera,0)
@@ -154,57 +154,56 @@ function start()
     rl.CloseWindow()
 end
 
-function setup()
-    os.execute(
-        "rm -rf raylib-lua \n" ..
-        "git clone https://github.com/TSnake41/raylib-lua --depth 1 \n" ..
-        "cd raylib-lua \n" ..
-        "git submodule init \n" ..
-        "git submodule update \n" ..
-        "make && cd .. "
-    )
+function setup(sys)
+    if sys == "Windows" then    
+        os.execute("curl -s https://api.github.com/repos/TSnake41/raylib-lua/releases/latest | grep \"browser_download_url.*zip\" | cut -d : -f 2,3 | tr -d \\\" | wget -qi - \n" ..
+        "unzip -q raylua-*.zip")
+    else
+        os.execute(
+            "rm raylua_* raylib-lua -rf \n" ..
+            "git clone https://github.com/TSnake41/raylib-lua --depth 1 \n" ..
+            "cd raylib-lua \n" ..
+            "git submodule init \n" ..
+            "git submodule update \n" ..
+            "make && cd .. \n" .. 
+            "mv ./raylib-lua/raylua_* . \n" ..
+            "rm -rf raylib-lua \n")
+    end
+
+end
+
+function setAndGo(sys)
+    local execpath =  (sys == "Windows") and "./raylua_s.exe" or "./raylua_s"
+    if(republica.util.file.exist(execpath) == false) then 
+        setup(sys)
+    end
+    os.execute(execpath .. ' main.lua')
 end
 
 function main()
-    if(arg[1] ~= nil and republica.util.string.includes(arg[1],'.zip')) then
-        os.execute( "./raylib-lua/raylua_e " .. arg[1])
-        return
-    elseif(arg[1] == 'setup') then
-        return setup()
-    elseif(arg[1] == 'exit') then
-        exit = true
-    elseif arg[1] == 'compile' then
-
-        local path = ''
-
-        if(republica.util.file.exist("./raylib-lua")==false or (republica.util.file.exist("./raylib-lua/raylua_e")==false and republica.util.file.exist("./raylib-lua/raylua_e.exe") == false)) then
-            setup()
+    local ffi = require "ffi"
+    local sys = ffi.os
+    if(rl == nil and arg[1] == 'main.lua') then
+        setAndGo(sys)
+    elseif(arg[1] ~= nil ) then
+        if(arg[1] == 'compile') then
+            local extension = (sys == "Windows") and '.exe' or '.appimage'
+            local execpath =  (sys == "Windows") and "./raylua_r.exe" or "./raylua_r"
+            if(republica.util.file.exist(execpath) == false) then 
+                setup(sys)
+            end
+            os.execute(
+                    "zip -r compile.zip main.lua src \n" ..
+                    execpath .. " compile.zip && rm -f compile.zip && mv compile_out republicanova" .. extension)
+        elseif(arg[1] == 'setup') then
+            setup(sys)
             return
-        elseif(arg[2] ~= nil) then
-            if(republica.util.string.includes(arg[2],'.zip'))then
-                os.execute( "./raylib-lua/raylua_e " .. arg[2])
-                return
-            end
-            for i = 2, #arg, 1 do
-                path = path .. arg[i]
-            end
+        elseif(rl == nil) then
+            setAndGo(sys)
         else
-            path = "src main.lua"
+            start()
         end
-
-        if(republica.util.file.exist("./compile.zip")==true) then
-            os.execute("rm compile.zip")
-            return
-        end
-
-        os.execute("zip -r compile.zip ".. path .." \n"..
-            "./raylib-lua/raylua_e compile.zip \n"..
-            "rm compile.zip"
-        )
-        return
-    elseif(arg[1] == run or rl == nil) then
-        os.execute("./raylib-lua/raylua_s main.lua")
-    elseif(exit == false) then
+    else
         start()
     end
 end

@@ -6,6 +6,9 @@ src/old
 .replit
 replit.nix
 heightmap.txt
-src/raylib-lua
+raylua_*
 compile_out
 rest.lua
+republicanova
+*.exe
+*.appimage
