@@ -201,7 +201,7 @@ function setup(sys)
             "cd raylib-lua \n" ..
             "git submodule init \n" ..
             "git submodule update \n" ..
-            "make  and  cd .. \n" .. 
+            "make  &&  cd .. \n" .. 
             "mv ./raylib-lua/raylua_* . \n" ..
             "rm -rf raylib-lua \n")
     end
@@ -228,7 +228,7 @@ function main()
             end
             os.execute(
                     "zip -r compile.zip main.lua src \n" ..
-                    execpath .. " compile.zip  and  rm -f compile.zip && rm compile.zip &&  mv compile_out republicanova" .. extension)
+                    execpath .. " compile.zip &&  rm -f compile.zip && rm compile.zip &&  mv compile_out republicanova" .. extension)
             os.exit()
         elseif(arg[1] == 'setup') then
             setup(sys)
