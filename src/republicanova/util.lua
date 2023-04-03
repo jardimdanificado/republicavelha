@@ -404,13 +404,12 @@ util.roleta = function(...)
     end
 end
 
+randi = 1
+
 util.random = function(min, max)
-    local clock = tostring(os.clock())
-    if(clock:find("%.") == nil) then
-        return min
-    end
-    local last_digits = tonumber(clock:sub(clock:find("%.") + 1))
-    return (last_digits % (max - min + 1)) + min
+    math.randomseed(os.time() + os.clock() + randi)
+    randi = randi + 1  
+    return math.random(min,max)
 end
 
 util.file.save.heightmap = function(matrix, filename)
