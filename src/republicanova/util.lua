@@ -404,12 +404,13 @@ util.roleta = function(...)
     end
 end
 
+randi = 1
+
 util.random = function(min, max)
     local clock = tostring(os.clock())
-    if(clock:find("%.") == nil) then
-        return min
-    end
-    local last_digits = tonumber(clock:sub(clock:find("%.") + 1))
+    clock = string.gsub(clock, "%.", "")
+    local last_digits = tonumber(clock:sub(1)) + randi
+    randi = randi + 1
     return (last_digits % (max - min + 1)) + min
 end
 
