@@ -412,9 +412,10 @@ util.random = function(min, max)
     return math.random(min,max)
 end
 
-util.file.save.heightmap = function(matrix, filename)
+util.file.save.heightmap = function(matrix, filename, drawRamps)
     local file = io.open(filename, "w")
     local max = 0
+    drawRamps = drawRamps or false
     for i=1,#matrix do
         for j=1,#matrix[i] do
             if matrix[i][j] > max then
@@ -426,11 +427,11 @@ util.file.save.heightmap = function(matrix, filename)
     for i=1,#matrix do
         for j=1,#matrix[i] do
             local value = matrix[i][j]
-            if (i > 1 and matrix[i-1][j] == value - 1) or (i < #matrix and matrix[i+1][j] == value - 1) or (j > 1 and matrix[i][j-1] == value - 1) or (j < #matrix[i] and matrix[i][j+1] == value - 1) then
-                file:write(string.rep(">", digits))
-            else
-                file:write(string.format("%0"..digits.."d", value))
-            end
+            --if (i > 1 and matrix[i-1][j] == value - 1) or (i < #matrix and matrix[i+1][j] == value - 1) or (j > 1 and matrix[i][j-1] == value - 1) or (j < #matrix[i] and matrix[i][j+1] == value - 1) then
+            --file:write(string.rep(">", digits))
+            --else
+            file:write(string.format("%0"..digits.."d", value))
+            --end
             if j < #matrix[i] then
                 file:write(" ")
             end
