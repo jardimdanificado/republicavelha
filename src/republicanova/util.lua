@@ -407,8 +407,8 @@ end
 randi = 1
 
 util.random = function(min, max)
-    math.randomseed(os.time() + os.clock() + randi)
-    randi = randi + 1  
+    math.randomseed(os.time() + (os.clock()*20) + randi)
+    randi = randi + math.random(1,40)  
     return math.random(min,max)
 end
 

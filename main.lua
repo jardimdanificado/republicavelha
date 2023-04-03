@@ -13,7 +13,7 @@ function grassify(world)
             )
             
             if(x>1 and y>1 and x<=#world.map.height and y<=#world.map.height[1]) then
-                --print(republica.util.random(1,3))
+                --print(republica.util.random(1,100))
                 if(republica.util.random(1,3)) then --if roleta == 1
                     --print(republica.util.array.keys(republica.plants))
                     local temptype = republica.util.array.keys(republica.plants)
@@ -154,6 +154,7 @@ function start()
     --size up to 6 is safe, above 6 you can get buggy maps, default is 2
     --layers up to 16 are safe, default is 8
     rl.SetConfigFlags(rl.FLAG_VSYNC_HINT)
+    rl.SetConfigFlags(rl.FLAG_WINDOW_RESIZABLE)
     rl.InitWindow(options.screen.x, options.screen.y, options.title)
     --print (world.map.height[1][1])
     local mm = republica.util.matrix.minmax(world.map.height)
