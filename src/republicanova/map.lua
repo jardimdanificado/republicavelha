@@ -1,6 +1,10 @@
 local util = require("src.republicanova.util")
 local types = require ("src.republicanova.types")
 
+-------------------------------------------------
+--TERRAIN
+-------------------------------------------------
+
 function Heightmap(size) 
     local N = (8+util.random(0,5))
     local RANDOM_INITIAL_RANGE = (10+util.random(0,3))
@@ -303,7 +307,7 @@ function autoExpandHeightmap(hm,smooth)
     return hm
 end
 
-function Terrain(map,fixedHeight)
+function terrify(map,fixedHeight)
     if type(fixedHeight) == nil then
         fixedHeight = 128
     end
@@ -464,7 +468,7 @@ function checkDifference(heightmap)
     return counter
 end
 
-function AutoTerrain(multiHorizontal, layers,retry)
+function Terrain(multiHorizontal, layers,retry)
     local floor = math.floor
     local mapsize = {w=64,h=64}
     multiHorizontal = multiHorizontal or 2
@@ -497,8 +501,90 @@ function AutoTerrain(multiHorizontal, layers,retry)
     end
     hmap = polishHeightmap(hmap,mapsize.h)
     local terrain = {}
-    terrain = Terrain(hmap,mapsize.h)
+    terrain = terrify(hmap,mapsize.h)
     return {terrain, hmap}
 end
 
-return AutoTerrain
+-------------------------------------------------
+--COLLISION
+-------------------------------------------------
+
+function Collision(blockmap)
+    local collision = {}
+    collision.list = {}
+    collision.new={}
+    collision.new.default = function(value,position)
+        local positions = {...}
+        local uid = util.uniqueid()
+        collision.list[uid] = types.collider(position,value)
+        return uid
+    end
+    collision.new.relative = function(parent,value,position)
+        local uid = util.uniqueid()
+        collision.list[uid] = types.collider(position,value)
+        collision.list[uid].parent = parent
+        table.insert(parent.relatives,collision.list[uid])
+        return uid
+    end
+    collision.map = util.array.map(blockmap,function(value,x)
+        return (
+                util.array.map(value,function(value,y)
+                    return (
+                            util.array.map(value,function(value,z)
+                                local result = 0
+                                if(Materials[value].solid == true) then
+                                    result = 100
+                                end
+                                return (result)
+                            end)
+                    )
+                end)
+        )
+    end)
+    
+    collision.move = function(id,newPosition)
+        local position = collision.list[id].position
+        local value = collision.list[id].value
+        local old = collision.map[position.x][position.y][position.z]
+        local new = collision.map[newPosition.x][newPosition.y][newPosition.z]
+        old = old - value
+        new = new + new
+        collision.list[id].position = newPosition
+    end
+    collision.check=function(position,value)--returns true if no collider in the specified position, of if the colliders in the position are below value
+        value = value or 75
+        if(
+            position.x <1 or 
+            position.y <1 or 
+            position.z <1 or 
+            position.x >#collision.map or 
+            position.y >#collision.map[1] or 
+            position.z >#collision.map[1][1]
+        ) then
+            return true
+        elseif(collision.map[position.x][position.y][position.z] > value) then
+            return false
+        else
+            return true
+        end
+    end
+    return collision
+end
+
+-------------------------------------------------
+--MAP
+-------------------------------------------------
+
+function Map(multiHorizontal,quality)--create the map
+    local block,heightmap = util.array.unpack(Terrain(multiHorizontal,quality))
+    local temperature = util.matrix.new(#block,#block[1],#block[1][1],29)
+    
+    return {
+        block = block,
+        height = heightmap,
+        temperature = temperature,
+        collision = Collision(block)
+    }
+end
+
+return Map

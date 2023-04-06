@@ -31,78 +31,6 @@ function getSunIntensity(minHour, maxHour, seconds)
     return intensity
 end
 
-function Map(multiHorizontal,quality)--create the map
-    local block,heightmap = util.array.unpack(terrain(multiHorizontal,quality))
-    local temperature = util.matrix.new(#block,#block[1],#block[1][1],29)
-    local plant = util.matrix.new(#block,#block[1],#block[1][1],{})
-    local staticCollision = util.array.map(block,function(value)
-        return (
-                util.array.map(value,function(value)
-                    return (
-                            util.array.map(value,function(value)
-                                local result = 0
-                                --print(Materials[value].solid)
-                                if(Materials[value].solid == true) then
-                                    result = 100
-                                end
-                                return (result)
-                            end)
-                    )
-                end)
-        )
-    end)
-    local collision = 
-    {
-        static=staticCollision,
-        dynamic={}
-    }
-    collision.new=function(value,...)
-        local positions = {...}
-        table.insert(collision.dynamic,{positions = positions,value = value,active = true})
-    end
-    collision.check=function(position,value)--returns true if no collider in the specified position, of if the colliders in the position are below value
-        --print(position.x, position.y, position.z)
-        value = value or 75
-        if(position.z > 2 and collision.static[position.x][position.y][position.z-1] > value) then
-            return false
-        end
-        for i = 1, #collision.dynamic do
-            local collider = collision.dynamic[i]
-            local tposition = util.matrix.reduce(collider.positions,function(accumulator, currentValue)
-                return {
-                    x= accumulator.x + currentValue.x,
-                    y= accumulator.y + currentValue.y,
-                    z= accumulator.z + currentValue.z
-                }
-            end)
-
-            if(
-                tposition.x == position.x and
-                tposition.y == position.y and
-                tposition.z == position.z
-            ) then
-                if(collider.value>=value)
-                then
-                    return false
-                else
-                    acumulator = acumulator + collider.value
-                end
-                if(acumulator >= value) then
-                    return false
-                end
-            end
-        end
-        return true
-    end
-    return {
-        block = block,
-        height = heightmap,
-        temperature = temperature,
-        plant = plant,
-        collision = collision
-    }
-end
-
 function findTrunkGrowPosition(collisionMap,x,y,z)--this try to find a air block in the 9 above blocks
     local directions = 
     {
@@ -206,10 +134,7 @@ local Life =
 }
 
 function gravity(collisionMap,position)
-    local staticmap = collisionMap.static
-    if(position.z > 1  and  staticmap[position.x][position.y][position.z-1]<75) then
-        return{x=position.x,y=position.y,z=position.z-1}
-    elseif(position.z > 1 and collisionMap.check({x=position.x,y=position.y,z=position.z-1})) then
+    if(position.z > 1 and collisionMap.check({x=position.x,y=position.y,z=position.z-1})) then
         return{x=position.x,y=position.y,z=position.z-1}
     end
     return(position)
@@ -246,7 +171,7 @@ function growBranch(plant,collisionMap,time)
     if(type(plant.trunk) ~= nil and #plant.trunk>=2 and #plant.branch < Plants[plant.specie].leaf.max/1000 and util.roleta(2,1,2) == 1) then
         local customX = util.roleta(1,0,1)-2
         local customY = util.roleta(1,0,1)-2
-        
+        --print(customX, customY)
         table.insert(plant.branch,1,types.branch(plant.specie,'idle',time,{x=customX,y=customY,z=0},plant.quality,plant.condition))
         local collisionPositions = (#plant.trunk>1) and {plant.position,plant.trunk[2].position,plant.branch[1].position} or {plant.position,plant.trunk[1].position,plant.branch[1].position}
         collisionMap.new(collisionPositions)
@@ -276,7 +201,7 @@ function growTrunk(world,plant,time)
             end
         end
         table.insert(plant.trunk,1,types.trunk(plant.specie,'idle',time,{x=1,y=1,z=1},plant.quality,plant.condition))
-        collisionMap.new({plant.position,plant.trunk[1]})
+        collisionMap.new.relative(plant.position,plant.trunk[1].position)
     end
     return plant
 end
@@ -327,10 +252,14 @@ function world(size,quality)
         plant = 
         {
             spawn = function(world,specie,position) 
-                table.insert(world.plant,types.seed(specie,nil,world.time,position)) 
+                table.insert(world.plant,types.seed(specie,'idle',world.time,position)) 
             end
-        }
+        },
+        data = {}
     }
+    for k, v in pairs(types) do
+        wd.data[k] = {}
+    end
     return wd
 end
 

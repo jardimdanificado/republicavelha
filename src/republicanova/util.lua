@@ -149,6 +149,12 @@ util.string.split = function(str, separator)
     return parts
 end
 
+util.string.replace = function(inputString, oldSubstring, newSubstring)
+    newSubstring = newSubstring or ''
+    local resultString = inputString:gsub(oldSubstring, newSubstring)
+    return resultString
+end
+
 util.string.includes = function(str,substring)
     return string.find(str, substring, 1, true) ~= nil
 end
@@ -260,7 +266,7 @@ end
 util.array.map = function(arr, callback)
     local result = {}
     for i = 1, #arr do
-        result[i] = callback(arr[i])
+        result[i] = callback(arr[i],i)
     end
     return result
 end
@@ -394,22 +400,34 @@ util.func.time = function(func,...)
     return result,tclock
 end
 
-util.roleta = function(...) 
-  local odds = {...}
-	local roleta = {} 
-	for i = 1,#odds do
-        table.insert(roleta,util.array.new(odds[i],i))
-		--roleta = roleta.concat(Array(odds[i]).fill(i));
-	    return(util.random(1,#roleta))
-    end
-end
-
 randi = 1
 
 util.random = function(min, max)
     math.randomseed(os.time() + (os.clock()*20) + randi)
     randi = randi + math.random(1,40)  
     return math.random(min,max)
+end
+
+util.roleta = function(...)
+    local odds = {...}
+    local total = 0
+    for i = 1, #odds do
+        total = total + odds[i]
+    end
+    
+    local random_num = util.random(1, total)
+    local sum = 0
+    for i = 1, #odds do
+        sum = sum + odds[i]
+        if random_num <= sum then
+            return i
+        end
+    end
+end
+
+util.uniqueid = function(custom)
+    custom = custom or 'noname'
+    return(util.string.replace(os.clock() .. os.time() .. custom .. util.random(0,420),'.',''))
 end
 
 util.file.save.heightmap = function(matrix, filename, drawRamps)
