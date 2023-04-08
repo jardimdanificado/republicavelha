@@ -515,12 +515,12 @@ function Collision(blockmap)
     collision.new={}
     collision.new.default = function(value,position)
         local positions = {...}
-        local uid = util.uniqueid()
+        local uid = util.id()
         collision.list[uid] = types.collider(position,value)
         return uid
     end
     collision.new.relative = function(parent,value,position)
-        local uid = util.uniqueid()
+        local uid = util.id()
         collision.list[uid] = types.collider(position,value)
         collision.list[uid].parent = parent
         table.insert(parent.relatives,collision.list[uid])
@@ -578,7 +578,6 @@ end
 function Map(multiHorizontal,quality)--create the map
     local block,heightmap = util.array.unpack(Terrain(multiHorizontal,quality))
     local temperature = util.matrix.new(#block,#block[1],#block[1][1],29)
-    
     return {
         block = block,
         height = heightmap,

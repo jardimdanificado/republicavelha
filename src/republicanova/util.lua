@@ -1,5 +1,12 @@
 local util = {}
 
+util.char = --36
+{
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
+    'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+    'u', 'v', 'w', 'x', 'y', 'z'
+}
 util.math = {}
 util.string = {}
 util.array = {}
@@ -8,6 +15,7 @@ util.file = {}
 util.file.save = {}
 util.file.load = {}
 util.func = {}
+util.bank = {}
 
 util.array.unpack = unpack or table.unpack
 
@@ -139,6 +147,13 @@ end
 util.string.split = function(str, separator)
     local parts = {}
     local start = 1
+    separator = separator or ''
+    if separator == '' then
+        for i = 1, #str do
+            parts[i] = string.sub(str, i, i)
+        end
+        return parts
+    end
     local splitStart, splitEnd = string.find(str, separator, start)
     while splitStart do
         table.insert(parts, string.sub(str, start, splitStart - 1))
@@ -148,6 +163,7 @@ util.string.split = function(str, separator)
     table.insert(parts, string.sub(str, start))
     return parts
 end
+
 
 util.string.replace = function(inputString, oldSubstring, newSubstring)
     newSubstring = newSubstring or ''
@@ -273,12 +289,14 @@ end
 
 util.array.filter = function(arr, callback)
     local result = {}
-    for i = 1, #arr do
-        if callback(arr[i]) then
-            table.insert(result, arr[i])
+    local names = {}
+    for k, v in pairs(arr) do
+        if callback(v,k) then
+            table.insert(result, v)
+            table.insert(names, k)
         end
     end
-    return result
+    return result,names
 end
     
 util.array.reduce = function(arr, callback, initial)
@@ -287,6 +305,26 @@ util.array.reduce = function(arr, callback, initial)
         accumulator = callback(accumulator, arr[i])
     end
     return accumulator
+end
+
+util.array.includes = function(arr,value)
+    for k, v in pairs(arr) do
+        if(value == v) then
+            return true
+        end
+    end
+    return false
+end
+
+util.matrix.includes = function(matrix,value)
+    for k, v in pairs(matrix) do
+        for k, v in pairs(v) do
+            if(value == v) then
+                return true
+            end
+        end
+    end
+    return false
 end
 
 util.matrix.new = function(sizex,sizey,sizez,value)
@@ -400,10 +438,10 @@ util.func.time = function(func,...)
     return result,tclock
 end
 
-randi = 1
+randi = randi or 1
 
 util.random = function(min, max)
-    math.randomseed(os.time() + (os.clock()*20) + randi)
+    math.randomseed(os.time() + randi)
     randi = randi + math.random(1,40)  
     return math.random(min,max)
 end
@@ -425,9 +463,96 @@ util.roleta = function(...)
     end
 end
 
-util.uniqueid = function(custom)
-    custom = custom or 'noname'
-    return(util.string.replace(os.clock() .. os.time() .. custom .. util.random(0,420),'.',''))
+util.id = function(charTable)
+    charTable = charTable or util.char
+    local tablelen = #charTable
+    local numbers = util.string.replace(os.clock() .. os.time(),'%.','')
+    numbers = util.string.split(numbers,'')
+    local result = ""
+    for i = 1, #numbers do 
+        --print 'a'
+        result = result .. numbers[i]
+        result = result .. charTable[util.random(1,tablelen)]
+    end
+    return result
+end
+
+local function generic(original,name,parent)
+    local obj = {relatives = {}}
+    obj.name = name or 'noname'
+    obj.type = type(original)
+    if(parent ~= nil) then
+        obj.parent = parent
+    end
+    if(obj.type == 'table') then
+        for k, v in pairs(original) do
+            if type(k) ~= "number" then
+                table.insert(obj.relatives,generic(v,k,original))
+            end
+        end
+    end
+    return obj
+end
+
+local function stringifygeneric(obj,titled)
+    titled = titled or false
+    local result = ''
+    if(obj.type == 'table') then
+        if(titled) then
+            result = obj.name .. '='
+        end
+        result = result .. '{'
+        local typs = {}
+        if(#obj.relatives>0) then
+            for i, v in pairs(obj.relatives) do
+                if(type(v) == 'table') then
+                    result = result .. ',' .. stringifygeneric(v,true)
+                end
+            end
+        end
+        result = result .. '}'
+    else
+        return obj.name .. '=' .. obj.type
+    end
+    return result:gsub("{,", '{')
+end
+
+util.type = function(obj)
+    local otype = type(obj)
+    if otype == 'string' then
+        if util.istype(obj) then
+            return obj
+        else
+            return otype
+        end
+    else
+        return stringifygeneric(generic(obj))
+    end
+end
+
+util.bank.new = function(optionalObject)
+    local tipo = 'any'
+    if(optionalObject ~= nil) then
+        tipo = util.type(optionalObject)
+    end
+    return {
+        type = tipo,
+        push = function(bank,object,optname)
+            if(bank.type ~= 'any' and util.type(object) ~= bank.type) then
+                return 
+            end
+            optname = optname or util.id()
+            bank[optname] = object
+            return optname
+        end,
+        find = function(bank,object)
+            for k, v in pairs(bank) do
+                if(v == object) then
+                    return k
+                end
+            end
+        end
+    }
 end
 
 util.file.save.heightmap = function(matrix, filename, drawRamps)
@@ -509,5 +634,15 @@ util.math.scale = function(value, min, max)
     value = util.math.regrad3(max-min,100,value-min)
     return value;
 end
+
+--[[bank example
+local banco = util.bank.new({nome='abc',idade=45})
+print(banco:push({nome='dddas',idade=84})==nil)
+local dummy = (banco:push({nome='212',idade=45},'roberval')==nil)
+dummy = banco['roberval']
+print(banco:push({nome=14,idade=45}))
+banco['roberval'] = nil 
+print(banco:find(dummy))
+--]]
 
 return util

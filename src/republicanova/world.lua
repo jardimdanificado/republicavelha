@@ -1,5 +1,5 @@
 local util = require("src.republicanova.util")
-local terrain = require("src.republicanova.terrain")
+local map = require("src.republicanova.map")
 local types = require("src.republicanova.types")
 local Materials = require("src.republicanova.materials")
 local Plants = require("src.republicanova.plants")
@@ -140,24 +140,6 @@ function gravity(collisionMap,position)
     return(position)
 end
 
-function seedFrame(world,plant)
-    if(world.map.block[plant.position.x][plant.position.y][plant.position.z-1] ~= nil) then
-        plant.position = gravity(world.map.collision,plant.position)
-        --print(plant.position.z)
-        if(world.time%6==0 and plant.position.z> 2 and Materials[world.map.block[plant.position.x][plant.position.y][plant.position.z-1]].name == 'earth') then
-            plant.germination = plant.germination + 1
-            plant.status = (plant.status ~= 'germinating') and 'germinating' or plant.status
-            if(plant.status == 'germinating') then
-                if(plant.germination >= Plants[plant.specie].time.maturing.max/1000000 or (util.roleta(19,1) == 2 and plant.germination>=(Plants[plant.specie].time.maturing.min/1000000))) then
-                    --print("specie = " .. plant.specie)
-                    return(types.plant(plant.specie,plant.status,world.time,plant.position,plant.quality,100))
-                end
-            end
-        end
-    end
-    return(plant)
-end
-
 function growLeaf(plant)
     --print(time)
     if(util.roleta(14,1,16) == 2) then
@@ -228,11 +210,28 @@ function plantFrame(world,plant)
     end
     return(plant)
 end
-    
+
+function seedFrame(world,plant)
+    if(world.map.block[plant.position.x][plant.position.y][plant.position.z-1] ~= nil) then
+        plant.position = gravity(world.map.collision,plant.position)
+        if(world.time%6==0 and plant.position.z> 2 and Materials[world.map.block[plant.position.x][plant.position.y][plant.position.z-1]].name == 'earth') then
+            plant.germination = plant.germination + 1
+            plant.status = (plant.status ~= 'germinating') and 'germinating' or plant.status
+            if(plant.status == 'germinating') then
+                if(plant.germination >= Plants[plant.specie].time.maturing.max/1000000 or (util.roleta(19,1) == 2 and plant.germination>=(Plants[plant.specie].time.maturing.min/1000000))) then
+                    --print("specie = " .. plant.specie)
+                    return(types.plant(plant.specie,plant.status,world.time,plant.position,plant.quality,100))
+                end
+            end
+        end
+    end
+    return(plant)
+end
+
 function frame(world)
     world.time = world.time + 1
-    if(#world.plant>0) then
-        world.plant = util.array.map(world.plant,function(plant)
+    if(#world.data.plant>0) then
+        world.data.plant = util.array.map(world.data.plant,function(plant)
             if(plant.type == 'seed') then
                 return(seedFrame(world,plant))
             elseif(plant.type == 'plant') then
@@ -247,7 +246,7 @@ function world(size,quality)
     local wd = 
     {
         time = 0,
-        map = Map(size,quality),
+        map = map(size,quality),
         frame = frame,
         plant = 
         {
@@ -258,7 +257,7 @@ function world(size,quality)
         data = {}
     }
     for k, v in pairs(types) do
-        wd.data[k] = {}
+        wd.data[k] = util.bank.new(v())
     end
     return wd
 end
