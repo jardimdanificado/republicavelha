@@ -599,14 +599,10 @@ end
 
 util.type = function(obj)
     local otype = type(obj)
-    if otype == 'string' then
-        if util.istype(obj) then
-            return obj
-        else
-            return otype
-        end
-    else
+    if otype == 'table' then
         return stringifygeneric(generic(obj))
+    else
+        return otype
     end
 end
 
@@ -654,18 +650,20 @@ util.bank = function(...)
         end
     }
     for i = 1, #args do
-        
+        local name = (args[i+1] ~=nil and type(args[i+1]) == 'string') and args[i+1] or util.id()
+        result [name] = util.vault(args[i])
     end
+    return result
 end
 
 --bank example
-local banco = util.vault({nome='abc',idade=45})
-print(banco:push({nome='dddas',idade=84})==nil)
-local dummy = (banco:push({nome='212',idade=45},'roberval')==nil)
+local banco = util.bank({nome='abc',idade=45},"basico")
+print(banco.basico:push({nome='dddas',idade=84}))
+local dummy = (banco.basico:push({nome='212',idade=45},'roberval'))
 dummy = banco['roberval']
-print(banco:push({nome=14,idade=45}))
+print(banco.basico:push({nome=14,idade=45}))
 banco['roberval'] = nil 
-print(banco:find(dummy))
+print(banco.basico:find(dummy))
 --]]
 
 return util
