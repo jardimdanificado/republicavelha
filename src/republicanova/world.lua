@@ -30,7 +30,7 @@ function getSunIntensity(minHour, maxHour, seconds)
                         ((maxHour - currentHour) / (hourRange / 2) * 100)
     return intensity
 end
-
+--[[
 function findTrunkGrowPosition(collisionMap,x,y,z)--this try to find a air block in the 9 above blocks
     local directions = 
     {
@@ -214,7 +214,7 @@ end
 function seedFrame(world,plant)
     if(world.map.block[plant.position.x][plant.position.y][plant.position.z-1] ~= nil) then
         plant.position = gravity(world.map.collision,plant.position)
-        if(world.time%6==0 and plant.position.z> 2 and Materials[world.map.block[plant.position.x][plant.position.y][plant.position.z-1]].name == 'earth') then
+        if(world.time%6==0 and plant.position.z> 2 and Materials[world.map.block[plant.position.x][plant.position.y][plant.position.z-1] ].name == 'earth') then
             plant.germination = plant.germination + 1
             plant.status = (plant.status ~= 'germinating') and 'germinating' or plant.status
             if(plant.status == 'germinating') then
@@ -227,6 +227,7 @@ function seedFrame(world,plant)
     end
     return(plant)
 end
+--]]
 
 function frame(world)
     world.time = world.time + 1
@@ -243,10 +244,9 @@ function frame(world)
 end
 
 function world(size,quality)
-    local wd = 
+    local world = 
     {
         time = 0,
-        map = map(size,quality),
         frame = frame,
         plant = 
         {
@@ -257,9 +257,10 @@ function world(size,quality)
         data = {}
     }
     for k, v in pairs(types) do
-        wd.data[k] = util.bank.new(v())
+        world.data[k] = util.bank.new(v())
     end
-    return wd
+    world.map = map(size,quality)
+    return world
 end
 
 return world

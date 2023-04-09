@@ -530,29 +530,52 @@ util.type = function(obj)
     end
 end
 
-util.bank.new = function(optionalObject)
+util.vault = function(optionalObject)
     local tipo = 'any'
     if(optionalObject ~= nil) then
         tipo = util.type(optionalObject)
     end
     return {
         type = tipo,
-        push = function(bank,object,optname)
-            if(bank.type ~= 'any' and util.type(object) ~= bank.type) then
+        push = function(vault,object,optname)
+            if(vault.type ~= 'any' and util.type(object) ~= vault.type) then
                 return 
             end
             optname = optname or util.id()
-            bank[optname] = object
+            vault[optname] = object
             return optname
         end,
-        find = function(bank,object)
-            for k, v in pairs(bank) do
+        find = function(vault,object)
+            for k, v in pairs(vault) do
                 if(v == object) then
                     return k
                 end
             end
         end
     }
+end
+
+util.bank = function(...)
+    local args = {...}
+    local result = 
+    {
+        push = function(bank,object,optname)
+            optname = optname or util.id()
+            bank[optname] = util.vault(object)
+            return optname
+        end,
+        find = function(bank,object)--find a vault
+            local tipo = util.type(object)
+            for k, v in pairs(bank) do
+                if(v.type == tipo) then
+                    return k
+                end
+            end
+        end
+    }
+    for i = 1, #args do
+        
+    end
 end
 
 util.file.save.heightmap = function(matrix, filename, drawRamps)
@@ -635,8 +658,8 @@ util.math.scale = function(value, min, max)
     return value;
 end
 
---[[bank example
-local banco = util.bank.new({nome='abc',idade=45})
+--bank example
+local banco = util.vault({nome='abc',idade=45})
 print(banco:push({nome='dddas',idade=84})==nil)
 local dummy = (banco:push({nome='212',idade=45},'roberval')==nil)
 dummy = banco['roberval']

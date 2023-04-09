@@ -468,7 +468,7 @@ function checkDifference(heightmap)
     return counter
 end
 
-function Terrain(multiHorizontal, layers,retry)
+function Terrain(data,multiHorizontal, layers,retry)
     local floor = math.floor
     local mapsize = {w=64,h=64}
     multiHorizontal = multiHorizontal or 2
@@ -509,7 +509,7 @@ end
 --COLLISION
 -------------------------------------------------
 
-function Collision(blockmap)
+function Collision(data,blockmap)
     local collision = {}
     collision.list = {}
     collision.new={}
@@ -575,14 +575,15 @@ end
 --MAP
 -------------------------------------------------
 
-function Map(multiHorizontal,quality)--create the map
-    local block,heightmap = util.array.unpack(Terrain(multiHorizontal,quality))
+function Map(data,multiHorizontal,quality)--create the map
+
+    local block,heightmap = util.array.unpack(Terrain(data,multiHorizontal,quality))
     local temperature = util.matrix.new(#block,#block[1],#block[1][1],29)
     return {
         block = block,
         height = heightmap,
         temperature = temperature,
-        collision = Collision(block)
+        collision = Collision(data,block)
     }
 end
 
