@@ -15,7 +15,6 @@ util.file = {}
 util.file.save = {}
 util.file.load = {}
 util.func = {}
-util.bank = {}
 
 util.array.unpack = unpack or table.unpack
 
@@ -655,15 +654,9 @@ util.bank = function(...)
     end
     return result
 end
-
+local types = require("src.republicanova.types")
 --bank example
-local banco = util.bank({nome='abc',idade=45},"basico")
-print(banco.basico:push({nome='dddas',idade=84}))
-local dummy = (banco.basico:push({nome='212',idade=45},'roberval'))
-dummy = banco['roberval']
-print(banco.basico:push({nome=14,idade=45}))
-banco['roberval'] = nil 
-print(banco.basico:find(dummy))
+local banco = util.bank()
 --]]
 
 return util

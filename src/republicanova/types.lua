@@ -1,6 +1,26 @@
 local types = {}
 local Plants = require("src.republicanova.plants")
 
+function types.integer(input)
+    return math.floor(input or 1)
+end
+
+function types.float(input)
+    return input+0 or 1.0
+end
+
+function types.string(input)
+    return input..'' or '1'
+end
+
+function types.vector2(x,y)
+    return{x=x or 1,y=y or 1}
+end
+
+function types.vector3(x,y,z)
+    return{x=x or 1,y=y or 1,z=z or 1}
+end
+
 function types.collider(position,value, active)
     return{
 		position = position or {x=1,y=1,z=1},
@@ -80,6 +100,10 @@ function types.fruit(specie, status, birth, position, quality, condition)
     fruit.maturation = maturation or 0
     fruit.seed = seed or 1
     return fruit
+end
+
+function types.block(name,solid)
+    return{name = name, solid = solid}
 end
 
 return types

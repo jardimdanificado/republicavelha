@@ -256,9 +256,6 @@ function world(size,quality)
         },
         data = {}
     }
-    for k, v in pairs(types) do
-        world.data[k] = util.bank.new(v())
-    end
     world.map = map(size,quality)
     return world
 end

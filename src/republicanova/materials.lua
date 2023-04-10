@@ -1,6 +1,4 @@
-function block(name,solid)
-    return{name = name, solid = solid}
-end
+local block = require("src.republicanova.types").block
 
 return {
     block('air',false),
