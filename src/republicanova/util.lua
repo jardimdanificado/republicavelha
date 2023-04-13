@@ -666,6 +666,7 @@ banco.vector3:new(9,5,32)
 banco.vector3:new(6,5400,7)
 banco.vector3:new(2,1.6,6.5)
 reference = banco.vector3[reference].y
+
 --]]
 
 return util
