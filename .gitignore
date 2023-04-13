@@ -10,3 +10,4 @@ raylua_*
 compile_out
 *.exe
 *.appimage
+luajit

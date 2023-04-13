@@ -606,29 +606,38 @@ util.type = function(obj)
 end
 
 util.vault = function(constructor)
-        local new = function(...) 
-        local push = function(vault,object,optname)
-            if(util.type(object) ~= vault.type) then
-                return false
-            end
-            optname = optname or util.id()
-            vault[optname] = object
-            return optname 
+    local push = function(vault,object,optname)
+        if(util.type(object) ~= vault.type) then
+            return false
         end
-        local find = function(vault,object)
-            for k, v in pairs(vault) do
-                if(v == object) then
-                    return k
-                end
+        optname = optname or util.id()
+        vault[optname] = object
+        return optname 
+    end
+    local new = function(vault,...)
+        local object = constructor(util.array.unpack({...}))
+        return vault.push(vault,object)
+    end
+    local find = function(vault,object)
+        for k, v in pairs(vault) do
+            if(v == object) then
+                return k
             end
         end
-        return {type = tipo, constructor = constructor, find = find, push = push)
+    end
+    return {
+        type = util.type(constructor()), 
+        constructor = constructor, 
+        find = find, 
+        push = push,
+        new = new
+    }
 end
 
 util.bank = function()
     local result = 
     {
-        push = function(bank,object,optname)
+        new = function(bank,object,optname)
             optname = optname or util.id()
             bank[optname] = util.vault(object)
             return optname
@@ -644,9 +653,19 @@ util.bank = function()
     }
     return result
 end
---bank example
-local banco = util.bank()
 
+--bank example
+function vec3(x,y,z)
+    return{x=x or 1,y=y or 1,z=z or 1}
+end
+
+local banco = util.bank()
+banco:new(vec3,"vector3")
+local reference = banco.vector3:new(4,5,6)
+banco.vector3:new(9,5,32)
+banco.vector3:new(6,5400,7)
+banco.vector3:new(2,1.6,6.5)
+reference = banco.vector3[reference].y
 --]]
 
 return util
