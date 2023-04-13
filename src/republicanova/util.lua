@@ -605,33 +605,27 @@ util.type = function(obj)
     end
 end
 
-util.vault = function(optionalObject)
-    local tipo = 'any'
-    if(optionalObject ~= nil) then
-        tipo = util.type(optionalObject)
-    end
-    return {
-        type = tipo,
-        push = function(vault,object,optname)
-            if(vault.type ~= 'any' and util.type(object) ~= vault.type) then
-                return 
+util.vault = function(constructor)
+        local new = function(...) 
+        local push = function(vault,object,optname)
+            if(util.type(object) ~= vault.type) then
+                return false
             end
             optname = optname or util.id()
             vault[optname] = object
-            return optname
-        end,
-        find = function(vault,object)
+            return optname 
+        end
+        local find = function(vault,object)
             for k, v in pairs(vault) do
                 if(v == object) then
                     return k
                 end
             end
         end
-    }
+        return {type = tipo, constructor = constructor, find = find, push = push)
 end
 
-util.bank = function(...)
-    local args = {...}
+util.bank = function()
     local result = 
     {
         push = function(bank,object,optname)
@@ -648,15 +642,11 @@ util.bank = function(...)
             end
         end
     }
-    for i = 1, #args do
-        local name = (args[i+1] ~=nil and type(args[i+1]) == 'string') and args[i+1] or util.id()
-        result [name] = util.vault(args[i])
-    end
     return result
 end
-local types = require("src.republicanova.types")
 --bank example
 local banco = util.bank()
+
 --]]
 
 return util
