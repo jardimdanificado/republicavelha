@@ -639,7 +639,6 @@ local reference = banco.vector3:new(4,5,6)
 banco.vector3:new(9,5,32)
 banco.vector3:new(6,5400,7)
 banco.vector3:new(2,1.6,6.5)
-reference = banco.vector3:find(banco:push({x=1,y=6,z=5}))
 --]]
 
 return util
