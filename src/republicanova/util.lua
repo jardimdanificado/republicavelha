@@ -637,9 +637,9 @@ end
 util.bank = function()
     local result = 
     {
-        new = function(bank,object,optname)
+        new = function(bank,constructor,optname)
             optname = optname or util.id()
-            bank[optname] = util.vault(object)
+            bank[optname] = util.vault(constructor)
             return optname
         end,
         find = function(bank,object)--find a vault
