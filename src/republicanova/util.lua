@@ -606,52 +606,26 @@ util.type = function(obj)
 end
 
 util.vault = function(constructor)
-    local push = function(vault,object,optname)
-        if(util.type(object) ~= vault.type) then
-            return false
-        end
-        optname = optname or util.id()
-        vault[optname] = object
-        return optname 
-    end
-    local new = function(vault,...)
-        local object = constructor(util.array.unpack({...}))
-        return vault.push(vault,object)
-    end
-    local find = function(vault,object)
-        for k, v in pairs(vault) do
-            if(v == object) then
-                return k
-            end
-        end
-    end
     return {
         type = util.type(constructor()), 
         constructor = constructor, 
-        find = find, 
-        push = push,
-        new = new
+        new = function(vault,...)
+            local object = constructor(util.array.unpack({...}))
+            local id = util.id()
+            vault[id] = object
+            return id
+        end
     }
 end
 
 util.bank = function()
-    local result = 
-    {
+    return {
         new = function(bank,constructor,optname)
             optname = optname or util.id()
             bank[optname] = util.vault(constructor)
             return optname
-        end,
-        find = function(bank,object)--find a vault
-            local tipo = util.type(object)
-            for k, v in pairs(bank) do
-                if(v.type == tipo) then
-                    return k
-                end
-            end
         end
     }
-    return result
 end
 
 --bank example
@@ -665,8 +639,7 @@ local reference = banco.vector3:new(4,5,6)
 banco.vector3:new(9,5,32)
 banco.vector3:new(6,5400,7)
 banco.vector3:new(2,1.6,6.5)
-reference = banco.vector3[reference].y
-
+reference = banco.vector3:find(banco:push({x=1,y=6,z=5}))
 --]]
 
 return util

@@ -514,7 +514,6 @@ function Collision(data,blockmap)
     collision.list = {}
     collision.new={}
     collision.new.default = function(value,position)
-        local positions = {...}
         local uid = util.id()
         collision.list[uid] = types.collider(position,value)
         return uid

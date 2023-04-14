@@ -4,7 +4,7 @@ modulo.util = require('src.republicanova.util')
 modulo.map = require('src.republicanova.map')
 modulo.world = require('src.republicanova.world')
 modulo.plants = require("src.republicanova.plants")
-modulo.mew = function()
+modulo.new = function()
     local data = modulo.util.bank()
     for k,v in pairs(modulo.types) do
         data:new(v,k)
