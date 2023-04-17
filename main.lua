@@ -160,8 +160,6 @@ function start()
         simple = true,
         paused = true
     }
-    republica.util.file.save.text('./teste.text',serializeTable(data))
-
 
     local mm = republica.util.matrix.minmax(world.map.height)
     local simpler = simplify(world.map.height)
