@@ -1,5 +1,6 @@
 local util = require("src.republicanova.util")
 local types = require ("src.republicanova.types")
+local Materials = require("src.republicanova.materials")
 
 -------------------------------------------------
 --TERRAIN
@@ -263,7 +264,6 @@ function polishHeightmap(heightmap, fixedHeight)
     return heightmap
 end
 
-
 function autoHeightmap(mapsize, multi) 
     local results = {}
     for x = 1, multi do
@@ -287,10 +287,8 @@ end
 
 function autoSmoothHeightmap(hm,smooth)
     local tempfunc = smoothHeightmap
-    rand = 1
     while(smooth>0) do
-        rand = util.random(1,4)
-        hm = tempfunc(hm,rand)
+        hm = tempfunc(hm,util.random(1,4))
         smooth = smooth-1
     end
     return hm
@@ -298,10 +296,8 @@ end
 
 function autoExpandHeightmap(hm,smooth)
     local tempfunc = increaseDistance
-    local rand = 1
     while(smooth>0) do
-        rand = util.random(1,4)
-        hm = tempfunc(hm,rand)
+        hm = tempfunc(hm,util.random(1,4))
         smooth = smooth-1
     end
     return hm
@@ -468,7 +464,7 @@ function checkDifference(heightmap)
     return counter
 end
 
-function Terrain(data,multiHorizontal, layers,retry)
+function Terrain(multiHorizontal, layers,retry)
     local floor = math.floor
     local mapsize = {w=64,h=64}
     multiHorizontal = multiHorizontal or 2
@@ -477,7 +473,7 @@ function Terrain(data,multiHorizontal, layers,retry)
     retry = retry or 1
     local hmap = util.func.time({autoHeightmap,"autoHeightmap"},mapsize.w,multiHorizontal)
     hmap = util.func.time({autoExpandHeightmap,"autoExpandHeightmap"},hmap,mapsize.h/2)
-    hmap = util.func.time({autoSmoothHeightmap,"autoSmoothHeightmap"},hmap,(smooth))
+    hmap = util.func.time({autoSmoothHeightmap,"autoSmoothHeightmap"},hmap,smooth)
     hmap = util.func.time({polishHeightmap,"polishHeightmap"},hmap,mapsize.h+mapsize.h/32)
 
     local mmm = util.matrix.minmax(hmap)
@@ -493,7 +489,7 @@ function Terrain(data,multiHorizontal, layers,retry)
             if(retry > 1) then
                 print("retry number " .. retry)
             end
-            return(AutoTerrain(multiHorizontal, layers, retry+1))
+            return(Terrain(multiHorizontal, layers, retry+1))
         end
     end
     if(retry > 0) then
@@ -511,20 +507,25 @@ end
 
 function Collision(data,blockmap)
     local collision = {}
-    collision.list = {}
+    collision.list = data.collider
     collision.new={}
+
     collision.new.default = function(value,position)
-        local uid = util.id()
-        collision.list[uid] = types.collider(position,value)
-        return uid
+        return data.collider:new(position,value)
     end
+
     collision.new.relative = function(parent,value,position)
-        local uid = util.id()
-        collision.list[uid] = types.collider(position,value)
-        collision.list[uid].parent = parent
-        table.insert(parent.relatives,collision.list[uid])
+        if(parent.relatives == nil) then
+            parent.relatives = {}
+        end
+
+        local uid = data.collider:new(position,value)
+        local obj = data.collider[uid]
+        table.insert(parent.relatives,obj)
+        obj.parent = parent
         return uid
     end
+
     collision.map = util.array.map(blockmap,function(value,x)
         return (
                 util.array.map(value,function(value,y)
@@ -542,14 +543,17 @@ function Collision(data,blockmap)
     end)
     
     collision.move = function(id,newPosition)
-        local position = collision.list[id].position
-        local value = collision.list[id].value
+        local position = data.collider[id].position
+        local value = data.collider[id].value
         local old = collision.map[position.x][position.y][position.z]
         local new = collision.map[newPosition.x][newPosition.y][newPosition.z]
         old = old - value
-        new = new + new
-        collision.list[id].position = newPosition
+        new = new + value
+        position.x = newPosition.x
+        position.y = newPosition.y
+        position.z = newPosition.z
     end
+
     collision.check=function(position,value)--returns true if no collider in the specified position, of if the colliders in the position are below value
         value = value or 75
         if(
@@ -576,7 +580,7 @@ end
 
 function Map(data,multiHorizontal,quality)--create the map
 
-    local block,heightmap = util.array.unpack(Terrain(data,multiHorizontal,quality))
+    local block,heightmap = util.array.unpack(Terrain(multiHorizontal,quality))
     local temperature = util.matrix.new(#block,#block[1],#block[1][1],29)
     return {
         block = block,

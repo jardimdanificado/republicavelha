@@ -6,11 +6,13 @@ function types.integer(input)
 end
 
 function types.float(input)
-    return input+0 or 1.0
+    local result = input ~= nil and input + 0 or 1.0
+    return result
 end
 
 function types.string(input)
-    return input..'' or '1'
+    local result = input ~= nil and input .. '' or '1'
+    return result
 end
 
 function types.vector2(x,y)

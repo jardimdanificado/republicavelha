@@ -140,7 +140,10 @@ end
 function start()
     --size up to 6 is safe, above 6 you can get buggy maps, default is 2
     --layers up to 16 are safe, default is 8
-    local world = republica.world(1,16)
+    rl.SetConfigFlags(rl.FLAG_VSYNC_HINT)
+    rl.SetConfigFlags(rl.FLAG_WINDOW_RESIZABLE)
+    rl.InitWindow(800, 450, 'options.title')
+    local data,world = republica.new(2,16)
     world = grassify(world)
     options = 
     {
@@ -157,11 +160,9 @@ function start()
         simple = true,
         paused = true
     }
+    republica.util.file.save.text('./teste.text',serializeTable(data))
 
-    rl.SetConfigFlags(rl.FLAG_VSYNC_HINT)
-    rl.SetConfigFlags(rl.FLAG_WINDOW_RESIZABLE)
-    rl.InitWindow(options.screen.x, options.screen.y, options.title)
-    --print (world.map.height[1][1])
+
     local mm = republica.util.matrix.minmax(world.map.height)
     local simpler = simplify(world.map.height)
     print("\nmerged " .. #world.map.height*#world.map.height[1] .. ' blocks into ' .. #simpler .. ' blocks\n')
