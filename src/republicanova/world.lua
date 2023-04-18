@@ -231,7 +231,7 @@ end
 
 function frame(world)
     world.time = world.time + 1
-    if(#world.data.plant>0) then
+    --[[if(#world.data.plant>0) then
         world.data.plant = util.array.map(world.data.plant,function(plant)
             if(plant.type == 'seed') then
                 return(seedFrame(world,plant))
@@ -241,6 +241,7 @@ function frame(world)
             return(plant)
         end)
     end
+    --]]
 end
 
 function world(size,quality)
