@@ -632,6 +632,7 @@ util.vault = function(constructor)
         new = function(vault,...)
             local object = constructor(util.array.unpack({...}))
             local id = util.id()
+            object._id = id
             vault[id] = object
             return id
         end

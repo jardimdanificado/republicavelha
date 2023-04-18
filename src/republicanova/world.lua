@@ -133,13 +133,6 @@ local Life =
     }
 }
 
-function gravity(collisionMap,position)
-    if(position.z > 1 and collisionMap.check({x=position.x,y=position.y,z=position.z-1})) then
-        return{x=position.x,y=position.y,z=position.z-1}
-    end
-    return(position)
-end
-
 function growLeaf(plant)
     --print(time)
     if(util.roleta(14,1,16) == 2) then
@@ -229,9 +222,17 @@ function seedFrame(world,plant)
 end
 --]]
 
+function gravity(collisionMap,position)
+    if(position.z > 1 and collisionMap.check({x=position.x,y=position.y,z=position.z-1})) then
+        return{x=position.x,y=position.y,z=position.z-1}
+    end
+    return(position)
+end
+
 function frame(world)
     world.time = world.time + 1
-    --[[if(#world.data.plant>0) then
+    --[[
+        if(#world.data.plant>0) then
         world.data.plant = util.array.map(world.data.plant,function(plant)
             if(plant.type == 'seed') then
                 return(seedFrame(world,plant))

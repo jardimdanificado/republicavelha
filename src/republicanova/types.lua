@@ -99,8 +99,8 @@ end
 function types.fruit(specie, status, birth, position, quality, condition) 
     local fruit = types.generic('fruit', status or 'idle', birth or 0, position or {x=1,y=1,z=1}, quality or 100, condition or 100)
     fruit.specie = specie or 'tomato'
-    fruit.maturation = maturation or 0
-    fruit.seed = seed or 1
+    fruit.maturation = 0
+    fruit.seed = 1
     return fruit
 end
 
