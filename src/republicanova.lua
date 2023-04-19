@@ -10,6 +10,7 @@ modulo.new = function(multiHorizontal,quality)
         data:new(v,k)
     end
     local world = newWorld(data,multiHorizontal,quality)
+
     return data,world
 end
 return modulo

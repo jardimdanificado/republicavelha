@@ -579,7 +579,6 @@ end
 -------------------------------------------------
 
 function Map(data,multiHorizontal,quality)--create the map
-
     local block,heightmap = util.array.unpack(Terrain(multiHorizontal,quality))
     local temperature = util.matrix.new(#block,#block[1],#block[1][1],29)
     return {

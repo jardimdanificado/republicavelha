@@ -16,7 +16,16 @@ util.file.save = {}
 util.file.load = {}
 util.func = {}
 
-util.array.unpack = unpack or table.unpack
+util.array._unpack = unpack or table.unpack
+util.array.unpack = function(obj)
+    local key_list = {}
+    for k in pairs(obj) do
+        if string.sub(k, 1, 1) ~= "_" then
+            table.insert(key_list, obj[k])
+        end
+    end
+    return util.array._unpack(key_list)
+end
 
 util.math.vec2 = function(x, y)
     return {x=x, y=y}
@@ -562,6 +571,24 @@ util.roleta = function(...)
     end
 end
 
+util.pairs = function(obj)
+    local key_list = {}
+    for k in pairs(obj) do
+        if string.sub(k, 1, 1) ~= "_" then
+            table.insert(key_list, k)
+        end
+    end
+    local i = 0
+    return function()
+        i = i + 1
+        if key_list[i] ~= nil then
+            return key_list[i], obj[key_list[i]]
+        else
+            return nil, nil
+        end
+    end
+end
+
 util.id = function(charTable)
     charTable = charTable or util.char
     local tablelen = #charTable
@@ -584,7 +611,7 @@ local function generic(original,name,parent)
         obj.parent = parent
     end
     if(obj.type == 'table') then
-        for k, v in pairs(original) do
+        for k, v in util.pairs(original) do
             if type(k) ~= "number" then
                 table.insert(obj.relatives,generic(v,k,original))
             end
@@ -603,7 +630,7 @@ local function stringifygeneric(obj,titled)
         result = result .. '{'
         local typs = {}
         if(#obj.relatives>0) then
-            for i, v in pairs(obj.relatives) do
+            for i, v in util.pairs(obj.relatives) do
                 if(type(v) == 'table') then
                     result = result .. ',' .. stringifygeneric(v,true)
                 end
@@ -626,40 +653,64 @@ util.type = function(obj)
 end
 
 util.vault = function(constructor)
-    return {
-        type = util.type(constructor()), 
-        constructor = constructor, 
-        new = function(vault,...)
-            local object = constructor(util.array.unpack({...}))
+    local vault = {}
+    vault = 
+    {
+        _type = util.type(constructor()), 
+        _constructor = constructor,
+        _new = function(...)
+            local object = constructor(...)
             local id = util.id()
             object._id = id
+            object._constructor = vault._constructor
+            object._type = vault._type
+            object._set = function(...)--set without breaking reference
+                local newo = constructor(...)
+                for k, v in pairs(newo) do
+                    object[k] = v
+                end
+            end
+            object._assign = function(obj)--same as set but from a object
+                object._set(util.array.unpack(obj))
+            end
             vault[id] = object
-            return id
+            return object
         end
     }
+    return vault
 end
 
 util.bank = function()
-    return {
-        new = function(bank,constructor,optname)
-            optname = optname or util.id()
-            bank[optname] = util.vault(constructor)
-            return optname
-        end
+    local bank =
+    {
+        _id = util.id(),
+        _constructor = util.bank,
+        _type = 'bank'
     }
+    bank._new = function(constructor,optname)
+        optname = optname or util.id()
+        bank[optname] = util.vault(constructor)
+        return optname
+    end
+    return bank
 end
 
---[[ bank example
+-- bank example
 function vec3(x,y,z)
     return{x=x or 1,y=y or 1,z=z or 1}
 end
 
 local banco = util.bank()
-banco:new(vec3,"vector3")
-local reference = banco.vector3:new(4,5,6)
-banco.vector3:new(9,5,32)
-banco.vector3:new(6,5400,7)
-banco.vector3:new(2,1.6,6.5)
+banco._new(vec3,"vector3")
+local reference = banco.vector3._new(4,5,6)
+local ref2 = banco.vector3._new(9,5,32)
+local ref3 = banco.vector3._new(6,5400,7)
+banco.vector3._new(2,1.6,6.5)
+for k, v in util.pairs(banco.vector3) do
+    print(k)
+end
+ref2 = reference
+reference._assign(ref3)
 --]]
 
 return util
