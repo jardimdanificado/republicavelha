@@ -695,7 +695,7 @@ util.bank = function()
     return bank
 end
 
--- bank example
+--[[ bank example
 function vec3(x,y,z)
     return{x=x or 1,y=y or 1,z=z or 1}
 end
