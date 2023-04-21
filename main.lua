@@ -3,6 +3,10 @@ local exit = false
 
 local options
 
+function ytoz(vec3)
+    return {x = vec3.x, y = vec3.z, z = vec3.y}
+end
+
 function grassify(world)
     for  x = 1, #world.map.height do
         for y = 1, #world.map.height[1] do
@@ -106,7 +110,7 @@ function teclado()
     elseif(rl.IsKeyPressed(rl.KEY_F)) then
         print(options.world.time)
     elseif(rl.IsKeyPressed(rl.KEY_G)) then
-        print(options.world.map.block[1][1][64])
+        print(#republica.util.array.filter(options.world.plant,function(value) return republica.util.string.includes(republica.plants[value.specie].type,'tree') end))
     elseif(rl.IsKeyDown(rl.KEY_PAGE_UP)) then
         options.camera.position.y = options.camera.position.y + 2
         rl.UpdateCamera(options.camera,0)
@@ -134,7 +138,12 @@ function teclado()
 end
 
 function start()
-    local world = republica.world(2,16)
+    --size up to 6 is safe, above 6 you can get buggy maps, default is 2
+    --layers up to 16 are safe, default is 8
+    rl.SetConfigFlags(rl.FLAG_VSYNC_HINT)
+    rl.SetConfigFlags(rl.FLAG_WINDOW_RESIZABLE)
+    rl.InitWindow(800, 450, 'options.title')
+    local data,world = republica.new(2,16)
     world = grassify(world)
     options = 
     {
@@ -151,12 +160,7 @@ function start()
         simple = true,
         paused = true
     }
-    --size up to 6 is safe, above 6 you can get buggy maps, default is 2
-    --layers up to 16 are safe, default is 8
-    rl.SetConfigFlags(rl.FLAG_VSYNC_HINT)
-    rl.SetConfigFlags(rl.FLAG_WINDOW_RESIZABLE)
-    rl.InitWindow(options.screen.x, options.screen.y, options.title)
-    --print (world.map.height[1][1])
+
     local mm = republica.util.matrix.minmax(world.map.height)
     local simpler = simplify(world.map.height)
     print("\nmerged " .. #world.map.height*#world.map.height[1] .. ' blocks into ' .. #simpler .. ' blocks\n')
@@ -179,13 +183,27 @@ function start()
                 end
             end
         end
+        for i, plant in ipairs(world.plant) do 
+            if plant.type == 'seed' then
+                rl.DrawCube(ytoz(plant.position),0.5,0.5,0.5,rl.PINK)
+            elseif republica.plants[plant.specie].size.max <=100 then
+                rl.DrawCube(ytoz(plant.position),1,1,1,rl.GREEN)
+            elseif republica.util.string.includes(republica.plants[plant.specie].type,'tree') then
+                for i, trunk in ipairs(plant.trunk) do
+                    
+                    rl.DrawCube(ytoz(republica.util.math.vec3add(plant.position,trunk.position)),1,1,1,rl.BROWN)
+                end
+                for i, branch in ipairs(plant.branch) do
+                    rl.DrawCube(ytoz(republica.util.math.vec3add(plant.position,branch.position)),1,1,1,rl.RED)
+                end
+            end
+        end
+        rl.EndMode3D()
+        rl.DrawFPS(10, 10)
+        rl.EndDrawing()
         if(options.paused == false) then
             world.frame(world)
         end
-        rl.EndMode3D()
-
-        rl.DrawFPS(10, 10)
-        rl.EndDrawing()
     end
     exit = true
     rl.CloseWindow()
@@ -203,8 +221,7 @@ function setup(sys)
             "git submodule init \n" ..
             "git submodule update \n" ..
             "make  &&  cd .. \n" .. 
-            "mv ./raylib-lua/raylua_* . \n" ..
-            "rm -rf raylib-lua \n")
+            "cp ./raylib-lua/raylua_* . \n")
     end
 
 end
