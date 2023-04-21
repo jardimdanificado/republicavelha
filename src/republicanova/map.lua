@@ -507,23 +507,7 @@ end
 
 function Collision(blockmap)
     local collision = {}
-    collision = util.vault()
-
-    collision.new.default = function(value,position)
-        return data.collider:new(position,value)
-    end
-
-    collision.new.relative = function(parent,value,position)
-        if(parent.relatives == nil) then
-            parent.relatives = {}
-        end
-
-        local uid = data.collider:new(position,value)
-        local obj = data.collider[uid]
-        table.insert(parent.relatives,obj)
-        obj.parent = parent
-        return uid
-    end
+    collision = util.vault(types.collider)
 
     collision.map = util.array.map(blockmap,function(value,x)
         return (
