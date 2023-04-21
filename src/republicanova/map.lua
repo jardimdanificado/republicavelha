@@ -505,10 +505,9 @@ end
 --COLLISION
 -------------------------------------------------
 
-function Collision(data,blockmap)
+function Collision(blockmap)
     local collision = {}
-    collision.list = data.collider
-    collision.new={}
+    collision = util.vault()
 
     collision.new.default = function(value,position)
         return data.collider:new(position,value)
@@ -578,14 +577,14 @@ end
 --MAP
 -------------------------------------------------
 
-function Map(data,multiHorizontal,quality)--create the map
+function Map(multiHorizontal,quality)--create the map
     local block,heightmap = util.array.unpack(Terrain(multiHorizontal,quality))
     local temperature = util.matrix.new(#block,#block[1],#block[1][1],29)
     return {
         block = block,
         height = heightmap,
         temperature = temperature,
-        collision = Collision(data,block)
+        collision = Collision(block)
     }
 end
 

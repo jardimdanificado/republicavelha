@@ -23,13 +23,13 @@ function types.vector3(x,y,z)
     return{x=x or 1,y=y or 1,z=z or 1}
 end
 
-function types.collider(position,value, active)
+function types.collider(position,value, active,relatives,parent)
     return{
 		position = position or {x=1,y=1,z=1},
 		value = value or 0,
 		active = active or true,
-        relatives = {},
-        parent = 0
+        relatives = relatives or {},
+        parent = parent or 0
     }
 end
 
