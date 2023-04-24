@@ -1,6 +1,24 @@
 local types = {}
 local Plants = require("src.republicanova.plants")
 
+function types.vector2(x,y)
+    return{x=x or 1,y=y or 1}
+end
+
+function types.vector3(x,y,z)
+    return{x=x or 1,y=y or 1,z=z or 1}
+end
+
+function types.collider(position,value, active,relatives,parent)
+    return{
+		position = position or {x=1,y=1,z=1},
+		value = value or 0,
+		active = active or true,
+        relatives = relatives or {},
+        parent = parent or 0
+    }
+end
+
 function types.generic(type, status, birth, position, quality, condition, decayRate, mods)
     return {
         type = type or "generic",
@@ -14,11 +32,10 @@ function types.generic(type, status, birth, position, quality, condition, decayR
     }
 end
 
-function types.creature(specie, status, birth, position, quality, condition) 
+function types.creature(specie, gender, status, birth, position, quality, condition)  
     local seed = types.generic('creature', status or 'idle', birth or 0, position or {x=1,y=1,z=1}, quality or 100, condition or 100)
     seed.specie = specie or 'human'
     seed.gender = gender or 'female'
-
     return seed
 end
 
@@ -68,17 +85,9 @@ end
 function types.fruit(specie, status, birth, position, quality, condition) 
     local fruit = types.generic('fruit', status or 'idle', birth or 0, position or {x=1,y=1,z=1}, quality or 100, condition or 100)
     fruit.specie = specie or 'tomato'
-    fruit.maturation = maturation or 0
-    fruit.seed = seed or 1
+    fruit.maturation = 0
+    fruit.seed = 1
     return fruit
-end
-
-function types.collider(positions,value, active)
-    return{
-		positions = positions or {x=1,y=1,z=1},
-		value = value or 0,
-		active = active or true
-    }
 end
 
 return types

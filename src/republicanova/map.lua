@@ -1,7 +1,12 @@
 local util = require("src.republicanova.util")
 local types = require ("src.republicanova.types")
+local Materials = require("src.republicanova.materials")
 
-function Heightmap(size) 
+-------------------------------------------------
+--TERRAIN
+-------------------------------------------------
+
+local function Heightmap(size) 
     local N = (8+util.random(0,5))
     local RANDOM_INITIAL_RANGE = (10+util.random(0,3))
     local MATRIX_LENGTH = (2 ^ N)+1
@@ -112,7 +117,7 @@ function Heightmap(size)
     return (normalizeMatrix(diamondSquare(generateMatrix())))
 end
 
-function smoothBlock(hm,position)
+local function smoothBlock(hm,position)
     local x = position.x
     local y = position.y
     local sum = 0
@@ -154,7 +159,7 @@ function smoothBlock(hm,position)
     return sum / count
 end
 
-function smoothHeightmap(hm,corner)
+local function smoothHeightmap(hm,corner)
     corner = corner or util.random(1,4)
     local corners = 
     {
@@ -172,7 +177,7 @@ function smoothHeightmap(hm,corner)
     return hm
 end
 
-function increaseDistance(hm,corner)
+local function increaseDistance(hm,corner)
     corner = corner or util.random(1,4)
     local corners = 
     {
@@ -191,34 +196,8 @@ function increaseDistance(hm,corner)
     end
     return hm
 end
-    
-function roundHeightmap(hm)
-    local min = -math.huge;
-    for x = 1, #hm do
-        for y = 1, #hm do
-            if(min > -math.huge and min > hm[x][y]) then
-                min = hm[x][y]
-            end
-        end
-    end
-    for x = 1, #hm do
-        for y = 1, #hm do
-            if min > -math.huge then
-                hm[x][y] = hm[x][y] + min
-            end
-        end
-    end
-    for x = 1,#hm,1 do
-        for y = 1, #hm,1 do
-            if min > -math.huge then
-                hm[x][y] = math.floor(((hm[x][y] +min)*((10^(string.len(math.floor(min)))))+0.5));
-            end
-        end
-    end
-    return hm;
-end
 
-function polishHeightmap(heightmap, fixedHeight)
+local function polishHeightmap(heightmap, fixedHeight)
     local floor = math.floor
     local limit = util.math.limit
     local hmcache = #heightmap
@@ -259,8 +238,7 @@ function polishHeightmap(heightmap, fixedHeight)
     return heightmap
 end
 
-
-function autoHeightmap(mapsize, multi) 
+local function autoHeightmap(mapsize, multi) 
     local results = {}
     for x = 1, multi do
         for y = 1, multi do
@@ -281,29 +259,25 @@ function autoHeightmap(mapsize, multi)
     return results
 end
 
-function autoSmoothHeightmap(hm,smooth)
+local function autoSmoothHeightmap(hm,smooth)
     local tempfunc = smoothHeightmap
-    rand = 1
     while(smooth>0) do
-        rand = util.random(1,4)
-        hm = tempfunc(hm,rand)
+        hm = tempfunc(hm,util.random(1,4))
         smooth = smooth-1
     end
     return hm
 end
 
-function autoExpandHeightmap(hm,smooth)
+local function autoExpandHeightmap(hm,smooth)
     local tempfunc = increaseDistance
-    local rand = 1
     while(smooth>0) do
-        rand = util.random(1,4)
-        hm = tempfunc(hm,rand)
+        hm = tempfunc(hm,util.random(1,4))
         smooth = smooth-1
     end
     return hm
 end
 
-function Terrain(map,fixedHeight)
+local function terrify(map,fixedHeight)
     if type(fixedHeight) == nil then
         fixedHeight = 128
     end
@@ -321,150 +295,7 @@ function Terrain(map,fixedHeight)
     return(result)
 end
 
-function fixHeightmap(heightmap)
-    local threshold = 10 -- the maximum difference allowed between adjacent cells
-    local maxDiff = 20 -- the maximum amount to reduce a cell by
-    for i = 1, #heightmap do
-        for j = 1, #heightmap[i] do
-            local currentValue = heightmap[i][j]
-            local hasNeighbor = false
-            for x = -1, 1 do
-                for y = -1, 1 do
-                    if (x ~= 0 or y ~= 0) then
-                        local neighborI = i + x;
-                        local neighborJ = j + y;
-                        if (
-                            neighborI >= 1 and
-                            neighborI <= #heightmap and
-                            neighborJ >= 1 and
-                            neighborJ <= #heightmap[i]
-                        ) then
-                            local neighborValue = heightmap[neighborI][neighborJ];
-                            if (math.abs(currentValue - neighborValue) > threshold) then
-                                hasNeighbor = true;
-                                break
-                            end
-                        end
-                    end
-                end
-                
-                if (hasNeighbor) then -- if there is an abrupt change, reduce the value of this cell by up to maxDiff
-                    heightmap[i][j] = math.max(currentValue - maxDiff, heightmap[i][j])
-                    currentValue = heightmap[i][j] -- update currentValue to reflect the new value of this cell
-                end
-                
-            end
-            
-        end
-    
-    end
-    
-    return heightmap
-end
-
-function adjustHeightmap(heightmap)
-    for i = 1, #heightmap do
-        for j = 1, #heightmap[i] do
-            local currentValue = heightmap[i][j]
-            local hasNeighbor = false
-            for x = -1, 1 do
-                for y = -1, 1 do
-                    if (x ~= 0 or y ~= 0) then
-                        local neighborI = i + x;
-                        local neighborJ = j + y;
-                        if (
-                            neighborI >= 1 and
-                            neighborI <= #heightmap and
-                            neighborJ >= 1 and
-                            neighborJ <= #heightmap[i]
-                        ) then
-                            local neighborValue = heightmap[neighborI][neighborJ];
-                            if (math.abs(currentValue - neighborValue) <= 1) then
-                                hasNeighbor = true;
-                                break
-                            end
-                        end
-                    end
-                end
-                if (hasNeighbor) then
-                    break
-                end
-            end
-            
-            if (not hasNeighbor) then -- if there is no suitable neighbor, adjust the value of this cell
-                if i > 1 and i < #heightmap and j > 1 and j < #heightmap[i] then
-                    local nearby = {
-                        heightmap[i-1][j-1], heightmap[i-1][j], heightmap[i-1][j+1],
-                        heightmap[i][j-1], heightmap[i][j+1],
-                        heightmap[i+1][j-1], heightmap[i+1][j], heightmap[i+1][j+1],
-                    }
-                    table.sort(nearby)
-                    local targetValue = nearby[util.random(2,7)]
-                    if targetValue < currentValue - 1 then
-                        heightmap[i][j] = currentValue - 1
-                    elseif targetValue > currentValue + 1 then
-                        heightmap[i][j] = currentValue + 1
-                    else
-                        heightmap[i][j] = targetValue
-                    end
-                elseif currentValue > 1 then
-                    heightmap[i][j] = currentValue - 1
-                else
-                    heightmap[i][j] = currentValue + 1
-                end
-            end
-            
-        end
-    
-    end
-    
-    return heightmap
-end
-
-function checkDifference(heightmap) 
-    local counter = 0;
-    local abs = math.abs
-    for i = 1, #heightmap do 
-        for j = 1, #heightmap[i] do 
-            local currentValue = heightmap[i][j]
-            local hasNeighbor = false
-        
-            for x = -1, 1 do 
-                for y = -1, 1 do
-                    if (x ~= 0 or y ~= 0) then -- changed 'and' to 'or'
-                        local neighborI = i + x;
-                        local neighborJ = j + y;
-                        if (
-                            neighborI >= 1 and
-                            neighborI <= #heightmap and -- changed '<' to '<='
-                            neighborJ >= 1 and
-                            neighborJ <= #heightmap[i] -- changed '<' to '<='
-                        ) then
-                            local neighborValue = heightmap[neighborI][neighborJ];
-                            if (abs(currentValue - neighborValue) == 1) then
-                                hasNeighbor = true;
-                                break
-                            end
-                        end
-                    end
-                end
-                if (hasNeighbor) then
-                    break
-                end
-            end
-            
-            if (hasNeighbor) then -- moved this line inside the inner loop
-                counter = counter + 1
-            end
-            
-        end
-    
-    end
-    
-    return counter
-end
-
-function AutoTerrain(multiHorizontal, layers,retry)
+local function Terrain(multiHorizontal, layers,retry)
     local floor = math.floor
     local mapsize = {w=64,h=64}
     multiHorizontal = multiHorizontal or 2
@@ -473,7 +304,7 @@ function AutoTerrain(multiHorizontal, layers,retry)
     retry = retry or 1
     local hmap = util.func.time({autoHeightmap,"autoHeightmap"},mapsize.w,multiHorizontal)
     hmap = util.func.time({autoExpandHeightmap,"autoExpandHeightmap"},hmap,mapsize.h/2)
-    hmap = util.func.time({autoSmoothHeightmap,"autoSmoothHeightmap"},hmap,(smooth))
+    hmap = util.func.time({autoSmoothHeightmap,"autoSmoothHeightmap"},hmap,smooth)
     hmap = util.func.time({polishHeightmap,"polishHeightmap"},hmap,mapsize.h+mapsize.h/32)
 
     local mmm = util.matrix.minmax(hmap)
@@ -489,7 +320,7 @@ function AutoTerrain(multiHorizontal, layers,retry)
             if(retry > 1) then
                 print("retry number " .. retry)
             end
-            return(AutoTerrain(multiHorizontal, layers, retry+1))
+            return(Terrain(multiHorizontal, layers, retry+1))
         end
     end
     if(retry > 0) then
@@ -497,8 +328,81 @@ function AutoTerrain(multiHorizontal, layers,retry)
     end
     hmap = polishHeightmap(hmap,mapsize.h)
     local terrain = {}
-    terrain = Terrain(hmap,mapsize.h)
+    terrain = terrify(hmap,mapsize.h)
     return {terrain, hmap}
 end
 
-return AutoTerrain
+-------------------------------------------------
+--COLLISION
+-------------------------------------------------
+
+local function Collision(blockmap)
+    local collision = {}
+    collision.colliders = {}
+    collision.colliders.new = function(...)
+        table.insert(collision.colliders,types.collider(...))
+    end
+    collision.map = util.array.map(blockmap,function(value,x)
+        return (
+                util.array.map(value,function(value,y)
+                    return (
+                            util.array.map(value,function(value,z)
+                                local result = 0
+                                if(Materials[value].solid == true) then
+                                    result = 100
+                                end
+                                return (result)
+                            end)
+                    )
+                end)
+        )
+    end)
+    
+    collision.move = function(collider,newPosition)
+        local position = collider.position
+        local value = collider.value
+        local old = collision.map[position.x][position.y][position.z]
+        local new = collision.map[newPosition.x][newPosition.y][newPosition.z]
+        old = old - value
+        new = new + value
+        position.x = newPosition.x
+        position.y = newPosition.y
+        position.z = newPosition.z
+    end
+
+    collision.check=function(position,value)--returns true if no collider in the specified position, of if the colliders in the position are below value
+        value = value or 75
+        if(
+            position.x <1 or 
+            position.y <1 or 
+            position.z <1 or 
+            position.x >#collision.map or 
+            position.y >#collision.map[1] or 
+            position.z >#collision.map[1][1]
+        ) then
+            return true
+        elseif(collision.map[position.x][position.y][position.z] > value) then
+            return false
+        else
+            return true
+        end
+    end
+    return collision
+end
+
+-------------------------------------------------
+--MAP
+-------------------------------------------------
+
+local function Map(multiHorizontal,quality)--create the map
+    local block,heightmap = util.array.unpack(Terrain(multiHorizontal,quality))
+    local temperature = util.matrix.new(#block,#block[1],#block[1][1],29)
+    return {
+        block = block,
+        height = heightmap,
+        temperature = temperature,
+        collision = Collision(block)
+    }
+end
+
+return Map
