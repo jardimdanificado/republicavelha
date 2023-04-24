@@ -4,21 +4,21 @@ local types = require("src.republicanova.types")
 local Materials = require("src.republicanova.materials")
 local Plants = require("src.republicanova.plants")
 
-function getHourOfDay(totalSeconds) 
+local function getHourOfDay(totalSeconds) 
     return math.floor(totalSeconds / 3600) % 24
 end
 
-function getMinuteOfDay(totalSeconds) 
+local function getMinuteOfDay(totalSeconds) 
 
     return math.floor((totalSeconds % 3600) / 60)
 end
 
-function getSecondOfDay(totalSeconds) 
+local function getSecondOfDay(totalSeconds) 
 
     return totalSeconds % 60
 end
 
-function getSunIntensity(minHour, maxHour, seconds) 
+local function getSunIntensity(minHour, maxHour, seconds) 
 
     local hours = (seconds / 3600) % 24 -- convert to hours and wrap around 24 hours
     local hourRange = maxHour - minHour
@@ -30,8 +30,8 @@ function getSunIntensity(minHour, maxHour, seconds)
                         ((maxHour - currentHour) / (hourRange / 2) * 100)
     return intensity
 end
---[[
-function findTrunkGrowPosition(collisionMap,x,y,z)--this try to find a air block in the 9 above blocks
+--
+local function findTrunkGrowPosition(collisionMap,x,y,z)--this try to find a air block in the 9 above blocks
     local directions = 
     {
         {x= -1, y= 0,z=1}, --4
@@ -54,7 +54,7 @@ function findTrunkGrowPosition(collisionMap,x,y,z)--this try to find a air block
     return
 end
 
-function findRootGrowPosition(collisionMap,x,y,z)--this try to find a air block in the 9 below blocks
+local function findRootGrowPosition(collisionMap,x,y,z)--this try to find a air block in the 9 below blocks
     local directions = 
     {
         {x= -1, y= 0,z=-1}, --4
@@ -76,7 +76,7 @@ function findRootGrowPosition(collisionMap,x,y,z)--this try to find a air block 
     return
 end
 
-function findBranchGrowPosition(collisionMap,x,y,z)--this try to find a air block in the 8 surrounding blocks, if fail try the 9 above
+local function findBranchGrowPosition(collisionMap,x,y,z)--this try to find a air block in the 8 surrounding blocks, if fail try the 9 above
     local directions = 
     {
         {x= -1, y= 0,z=0}, --4
@@ -117,7 +117,7 @@ local Life =
             position = position or {x=1,y=1,z=1}
             quality = quality or 100
             condition = condition or 100
-            local newobject = types.plant(specie, status, world.time, position, quality, condition, decayRate)
+            local newobject = types.plant(specie, status, world.time, position, quality, condition, 0)
             table.insert(world.plant,newobject)
             table.insert(world.map.plant[position.x][position.y][position.z],newobject)
         end,
@@ -133,7 +133,7 @@ local Life =
     }
 }
 
-function growLeaf(plant)
+local function growLeaf(plant)
     --print(time)
     if(util.roleta(14,1,16) == 2) then
         plant.leaf = plant.leaf + 1
@@ -141,7 +141,7 @@ function growLeaf(plant)
     return plant
 end
 
-function growBranch(plant,collisionMap,time)
+local function growBranch(plant,collisionMap,time)
     --print(time)
     if(type(plant.trunk) ~= nil and #plant.trunk>=2 and #plant.branch < Plants[plant.specie].leaf.max/1000 and util.roleta(2,1,2) == 1) then
         local customX = util.roleta(1,0,1)-2
@@ -149,12 +149,12 @@ function growBranch(plant,collisionMap,time)
         --print(customX, customY)
         table.insert(plant.branch,1,types.branch(plant.specie,'idle',time,{x=customX,y=customY,z=0},plant.quality,plant.condition))
         local collisionPositions = (#plant.trunk>1) and {plant.position,plant.trunk[2].position,plant.branch[1].position} or {plant.position,plant.trunk[1].position,plant.branch[1].position}
-        collisionMap.new(collisionPositions)
+        collisionMap.colliders.new(plant.branch[1].position,nil,nil,nil,plant.trunk[2].position)
     end
     return plant
 end
 
-function growTrunk(world,plant,time)
+local function growTrunk(world,plant,time)
     local collisionMap = world.map.collision
     if(type(plant.trunk) ~= nil and #plant.trunk < (Plants[plant.specie].size.max/100)) then
         local customX = util.roleta(1,10,1)-2
@@ -176,12 +176,12 @@ function growTrunk(world,plant,time)
             end
         end
         table.insert(plant.trunk,1,types.trunk(plant.specie,'idle',time,{x=1,y=1,z=1},plant.quality,plant.condition))
-        collisionMap.new.relative(plant.position,plant.trunk[1].position)
+        collisionMap.colliders.new({plant.trunk[1].position},nil,nil,nil,nil,plant.position)
     end
     return plant
 end
 
-function plantFrame(world,plant)
+local function plantFrame(world,plant)
     if(plant.leaf < Plants[plant.specie].leaf.max and world.time % 5 ==0) then
         if(Plants[plant.specie].size.max > 100) then
             --print 'b'
@@ -204,7 +204,14 @@ function plantFrame(world,plant)
     return(plant)
 end
 
-function seedFrame(world,plant)
+local function gravity(collisionMap,position)
+    if(position.z > 1 and collisionMap.check({x=position.x,y=position.y,z=position.z-1})) then
+        return{x=position.x,y=position.y,z=position.z-1}
+    end
+    return(position)
+end
+
+local function seedFrame(world,plant)
     if(world.map.block[plant.position.x][plant.position.y][plant.position.z-1] ~= nil) then
         plant.position = gravity(world.map.collision,plant.position)
         if(world.time%6==0 and plant.position.z> 2 and Materials[world.map.block[plant.position.x][plant.position.y][plant.position.z-1] ].name == 'earth') then
@@ -212,7 +219,6 @@ function seedFrame(world,plant)
             plant.status = (plant.status ~= 'germinating') and 'germinating' or plant.status
             if(plant.status == 'germinating') then
                 if(plant.germination >= Plants[plant.specie].time.maturing.max/1000000 or (util.roleta(19,1) == 2 and plant.germination>=(Plants[plant.specie].time.maturing.min/1000000))) then
-                    --print("specie = " .. plant.specie)
                     return(types.plant(plant.specie,plant.status,world.time,plant.position,plant.quality,100))
                 end
             end
@@ -222,18 +228,11 @@ function seedFrame(world,plant)
 end
 --]]
 
-function gravity(collisionMap,position)
-    if(position.z > 1 and collisionMap.check({x=position.x,y=position.y,z=position.z-1})) then
-        return{x=position.x,y=position.y,z=position.z-1}
-    end
-    return(position)
-end
-
-function frame(world)
+local function frame(world)
     world.time = world.time + 1
-    --[[
-        if(#world.data.plant>0) then
-        world.data.plant = util.array.map(world.data.plant,function(plant)
+    --
+        if(#world.plant>0) then
+        world.plant = util.array.map(world.plant,function(plant)
             if(plant.type == 'seed') then
                 return(seedFrame(world,plant))
             elseif(plant.type == 'plant') then
@@ -245,7 +244,7 @@ function frame(world)
     --]]
 end
 
-function world(size,quality)
+local function world(size,quality)
     local world = 
     {
         time = 0,

@@ -1,20 +1,6 @@
 local types = {}
 local Plants = require("src.republicanova.plants")
 
-function types.integer(input)
-    return math.floor(input or 1)
-end
-
-function types.float(input)
-    local result = input ~= nil and input + 0 or 1.0
-    return result
-end
-
-function types.string(input)
-    local result = input ~= nil and input .. '' or '1'
-    return result
-end
-
 function types.vector2(x,y)
     return{x=x or 1,y=y or 1}
 end
@@ -46,7 +32,7 @@ function types.generic(type, status, birth, position, quality, condition, decayR
     }
 end
 
-function types.creature(specie, status, birth, position, quality, condition)  
+function types.creature(specie, gender, status, birth, position, quality, condition)  
     local seed = types.generic('creature', status or 'idle', birth or 0, position or {x=1,y=1,z=1}, quality or 100, condition or 100)
     seed.specie = specie or 'human'
     seed.gender = gender or 'female'
@@ -102,10 +88,6 @@ function types.fruit(specie, status, birth, position, quality, condition)
     fruit.maturation = 0
     fruit.seed = 1
     return fruit
-end
-
-function types.block(name,solid)
-    return{name = name, solid = solid}
 end
 
 return types
