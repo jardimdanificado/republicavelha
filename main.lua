@@ -9,28 +9,22 @@ end
 
 function grassify(world)
     for  x = 1, #world.map.height do
-        for y = 1, #world.map.height[1] do
-            world.plant.spawn(--//this spawns a grass seed at each xy position
+        for y = 1, #world.map.height[x] do
+            --
+                world.plant.spawn(--//this spawns a grass seed at each xy position
                 world,
                 'grass',
                 {x=x,y=y,z=#world.map.block[1][1]}
-            )
-            
-            if(x>1 and y>1 and x<=#world.map.height and y<=#world.map.height[1]) then
-                --print(republica.util.random(1,100))
-                if(republica.util.random(1,3)) then --if roleta == 1
-                    --print(republica.util.array.keys(republica.plants))
-                    local temptype = republica.util.array.keys(republica.plants)
-                    [
-                        republica.util.random(1,3)
-                    ]
-                    if(temptype ~= 'grass') then
-                        world.plant.spawn(--this spawns a random seed at the xy position
-                            world, 
-                            temptype,
-                            {x=x,y=y,z=#world.map.block[1][1]}
-                        )
-                    end
+            )--]]
+            if(republica.util.random(1,100) == 1) then --random seeds start here
+                local temptype = republica.util.array.keys(republica.plants)[republica.util.random(1,republica.util.len(republica.plants))]
+                
+                if(temptype ~= 'grass') then
+                    world.plant.spawn(--this spawns a random seed at the xy position
+                        world,
+                        temptype,
+                        {x=x,y=y,z=#world.map.block[1][1]}
+                    )
                 end
             end
         end
@@ -116,7 +110,7 @@ function teclado()
         print(options.world.time)
     elseif(rl.IsKeyPressed(rl.KEY_G)) then
         options.redraw = true
-        print(#republica.util.array.filter(options.world.plant,function(value) return republica.util.string.includes(republica.plants[value.specie].type,'tree') end))
+        options.rendergrass = (options.rendergrass == false) and true or false
     elseif(rl.IsKeyDown(rl.KEY_PAGE_UP)) then
         options.redraw = true
         options.camera.position.y = options.camera.position.y + 2
@@ -155,7 +149,6 @@ function start()
     --size up to 6 is safe, above 6 you can get buggy maps, default is 2
     --layers up to 16 are safe, default is 8
     local world = republica.world(2,16)
-    rl.SetConfigFlags(rl.FLAG_VSYNC_HINT)
     rl.SetConfigFlags(rl.FLAG_WINDOW_RESIZABLE)
     rl.InitWindow(800, 450, 'Republica Velha')
     rl.SetTargetFPS(0)
@@ -176,7 +169,8 @@ function start()
         paused = true,
         redraw = true,
         dynadraw = false, -- (optimization) this make the screen render only when a key is pressed
-        rendertexture = rl.LoadRenderTexture(800, 450);
+        rendertexture = rl.LoadRenderTexture(800, 450),
+        rendergrass = true
     }
 
     local mm = republica.util.matrix.minmax(world.map.height)
@@ -205,12 +199,17 @@ function start()
             end
             for i, plant in ipairs(world.plant) do 
                 if plant.type == 'seed' then
-                    rl.DrawCube(ytoz(plant.position),0.5,0.5,0.5,rl.PINK)
+                    rl.DrawCube(ytoz(plant.position),0.5,0.5,0.5,rl.BLACK)
+                elseif plant.specie == 'grass' then
+                    if options.rendergrass then
+                        rl.DrawCube(ytoz(plant.position),1,1,1,rl.GREEN)
+                    end
                 elseif republica.plants[plant.specie].size.max <=100 then
-                    rl.DrawCube(ytoz(plant.position),1,1,1,rl.GREEN)
+                    local tempposi = ytoz(plant.position)
+                    tempposi.y = tempposi.y + 1
+                    rl.DrawCube(tempposi,1,1,1,rl.YELLOW)
                 elseif republica.util.string.includes(republica.plants[plant.specie].type,'tree') then
                     for i, trunk in ipairs(plant.trunk) do
-                        
                         rl.DrawCube(ytoz(republica.util.math.vec3add(plant.position,trunk.position)),1,1,1,rl.BROWN)
                     end
                     for i, branch in ipairs(plant.branch) do
