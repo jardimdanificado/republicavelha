@@ -10,13 +10,30 @@ function types.vector3(x,y,z)
 end
 
 function types.collider(position,value, active,relatives,parent)
-    return{
-		position = position or {x=1,y=1,z=1},
-		value = value or 0,
-		active = active or true,
+    
+    local obj = 
+    {
+        position = position or {x=1,y=1,z=1},
+        value = value or 0,
+        active = active or true,
         relatives = relatives or {},
-        parent = parent or 0
+        parent = parent or 0,
     }
+
+    if(obj.parent ~= 0) then
+        if(obj.parent.relatives == nil) then
+            obj.parent.relatives = {}
+        end
+        table.insert(parent.relatives,obj)
+    end
+    if relatives ~= nil then
+        for i, v in ipairs(relatives) do
+            v.parent = obj
+        end
+    end
+        
+
+    return obj
 end
 
 function types.generic(type, status, birth, position, quality, condition, decayRate, mods)

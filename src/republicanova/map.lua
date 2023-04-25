@@ -339,8 +339,8 @@ end
 local function Collision(blockmap)
     local collision = {}
     collision.colliders = {}
-    collision.colliders.new = function(...)
-        table.insert(collision.colliders,types.collider(...))
+    collision.colliders.new = function(position,value, active,relatives,parent)
+        table.insert(collision.colliders,types.collider(position,value, active,relatives,parent))
     end
     collision.map = util.array.map(blockmap,function(value,x)
         return (

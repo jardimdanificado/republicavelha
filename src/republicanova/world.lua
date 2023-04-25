@@ -134,7 +134,6 @@ local Life =
 }
 
 local function growLeaf(plant)
-    --print(time)
     if(util.roleta(14,1,16) == 2) then
         plant.leaf = plant.leaf + 1
     end
@@ -142,21 +141,19 @@ local function growLeaf(plant)
 end
 
 local function growBranch(plant,collisionMap,time)
-    --print(time)
     if(type(plant.trunk) ~= nil and #plant.trunk>=2 and #plant.branch < Plants[plant.specie].leaf.max/1000 and util.roleta(2,1,2) == 1) then
         local customX = util.roleta(1,0,1)-2
         local customY = util.roleta(1,0,1)-2
-        --print(customX, customY)
         table.insert(plant.branch,1,types.branch(plant.specie,'idle',time,{x=customX,y=customY,z=0},plant.quality,plant.condition))
         local collisionPositions = (#plant.trunk>1) and {plant.position,plant.trunk[2].position,plant.branch[1].position} or {plant.position,plant.trunk[1].position,plant.branch[1].position}
-        collisionMap.colliders.new(plant.branch[1].position,nil,nil,nil,plant.trunk[2].position)
+        collisionMap.colliders.new(plant.branch[1].position,nil,nil,nil,plant.trunk[2])
     end
     return plant
 end
 
 local function growTrunk(world,plant,time)
     local collisionMap = world.map.collision
-    if(type(plant.trunk) ~= nil and #plant.trunk < (Plants[plant.specie].size.max/100)) then
+    if(#plant.trunk < (Plants[plant.specie].size.max/100)) then
         local customX = util.roleta(1,10,1)-2
         local customY = util.roleta(1,10,1)-2
         for i = 1, #plant.trunk do
@@ -176,29 +173,30 @@ local function growTrunk(world,plant,time)
             end
         end
         table.insert(plant.trunk,1,types.trunk(plant.specie,'idle',time,{x=1,y=1,z=1},plant.quality,plant.condition))
-        collisionMap.colliders.new({plant.trunk[1].position},nil,nil,nil,nil,plant.position)
+        collisionMap.colliders.new(plant.trunk[1].position,nil,nil,nil,nil,plant)
     end
     return plant
 end
 
 local function plantFrame(world,plant)
-    if(plant.leaf < Plants[plant.specie].leaf.max and world.time % 5 ==0) then
-        if(Plants[plant.specie].size.max > 100) then
-            --print 'b'
-            plant = growBranch(plant,world.map.collision,world.time)
+    if(plant.leaf ~= nil) then
+        if(plant.leaf < Plants[plant.specie].leaf.max and world.time % 5 ==0) then
+            if(Plants[plant.specie].size.max > 100) then
+                growBranch(plant,world.map.collision,world.time)
+            end
+            growLeaf(plant)
         end
-        --print 'c'
-        plant = growLeaf(plant)
     end
-    
-    if util.string.includes(Plants[plant.specie].type,'tree') then
+        
+    if Plants[plant.specie].type == 'fruit tree' then
+        --print(Plants[plant.specie].type)
         local lastTrunkPosition = plant.position
         if(#plant.trunk > 0) then
             lastTrunkPosition = plant.trunk[#plant.trunk].position
         end
-        if(world.time % util.math.limit(Plants[plant.specie].time.maturing.min,1,100)==0 and lastTrunkPosition.x < #world.map.block[1][1]) then
+        if(world.time % util.math.limit(Plants[plant.specie].time.maturing.min,1,100)==0) then
             --print 'a'
-            plant = growTrunk(world,plant,world.time)
+            growTrunk(world,plant,world.time)
         end
     end
     return(plant)
@@ -212,9 +210,10 @@ local function gravity(collisionMap,position)
 end
 
 local function seedFrame(world,plant)
-    if(world.map.block[plant.position.x][plant.position.y][plant.position.z-1] ~= nil) then
-        plant.position = gravity(world.map.collision,plant.position)
-        if(world.time%6==0 and plant.position.z> 2 and Materials[world.map.block[plant.position.x][plant.position.y][plant.position.z-1] ].name == 'earth') then
+    local v = plant
+    if(plant.position.z-1 >1) then
+        
+        if(world.time%6==0 and Materials[world.map.block[plant.position.x][plant.position.y][plant.position.z-1] ].name == 'earth') then
             plant.germination = plant.germination + 1
             plant.status = (plant.status ~= 'germinating') and 'germinating' or plant.status
             if(plant.status == 'germinating') then
@@ -223,6 +222,7 @@ local function seedFrame(world,plant)
                 end
             end
         end
+        plant.position = gravity(world.map.collision,plant.position)
     end
     return(plant)
 end
@@ -231,15 +231,12 @@ end
 local function frame(world)
     world.time = world.time + 1
     --
-        if(#world.plant>0) then
-        world.plant = util.array.map(world.plant,function(plant)
-            if(plant.type == 'seed') then
-                return(seedFrame(world,plant))
-            elseif(plant.type == 'plant') then
-                return(plantFrame(world,plant))
-            end
-            return(plant)
-        end)
+    for i, v in ipairs(world.plant) do
+        if(v.type == 'seed') then
+            util.assign(v,seedFrame(world,v))
+        elseif(v.type == 'plant') then
+            util.assign(v,plantFrame(world,v))
+        end
     end
     --]]
 end
