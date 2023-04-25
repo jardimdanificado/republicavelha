@@ -1,8 +1,6 @@
 *.so
 *.o
 .vscode
-build/lua
-src/old
 .replit
 replit.nix
 heightmap.txt

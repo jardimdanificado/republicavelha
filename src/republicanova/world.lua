@@ -30,6 +30,32 @@ local function getSunIntensity(minHour, maxHour, seconds)
                         ((maxHour - currentHour) / (hourRange / 2) * 100)
     return intensity
 end
+
+local function grassify(world)
+    for  x = 1, #world.map.height do
+        for y = 1, #world.map.height[x] do
+            --
+                world.plant.spawn(--//this spawns a grass seed at each xy position
+                world,
+                'grass',
+                {x=x,y=y,z=#world.map.block[1][1]}
+            )--]]
+            if(util.random(1,100) == 1) then --random seeds start here
+                local temptype = util.array.keys(Plants)[util.random(1,util.len(Plants))]
+                
+                if(temptype ~= 'grass') then
+                    world.plant.spawn(--this spawns a random seed at the xy position
+                        world,
+                        temptype,
+                        {x=x,y=y,z=#world.map.block[1][1]}
+                    )
+                end
+            end
+        end
+    end
+    return world
+end
+
 --
 local function findTrunkGrowPosition(collisionMap,x,y,z)--this try to find a air block in the 9 above blocks
     local directions = 
@@ -255,6 +281,7 @@ local function world(size,quality)
         data = {}
     }
     world.map = map(size,quality)
+    world = grassify(world)
     return world
 end
 
