@@ -1,6 +1,6 @@
 local util = require("src.republicanova.util")
 local types = require ("src.republicanova.types")
-local Materials = require("src.republicanova.materials")
+local materials = types.materials
 
 -------------------------------------------------
 --TERRAIN
@@ -110,7 +110,7 @@ local function Heightmap(size)
         return matrix
     end
     
-    if (type(size) ~= nil) then
+    if (size ~= nil) then
         MATRIX_LENGTH = size
     end
 
@@ -278,9 +278,7 @@ local function autoExpandHeightmap(hm,smooth)
 end
 
 local function terrify(map,fixedHeight)
-    if type(fixedHeight) == nil then
-        fixedHeight = 128
-    end
+    fixedHeight = fixedHeight or 128
     
     local result = {}
     for x = 1, #map do
@@ -332,77 +330,4 @@ local function Terrain(multiHorizontal, layers,retry)
     return {terrain, hmap}
 end
 
--------------------------------------------------
---COLLISION
--------------------------------------------------
-
-local function Collision(blockmap)
-    local collision = {}
-    collision.colliders = {}
-    collision.colliders.new = function(position,value, active,relatives,parent)
-        table.insert(collision.colliders,types.collider(position,value, active,relatives,parent))
-    end
-    collision.map = util.array.map(blockmap,function(value,x)
-        return (
-                util.array.map(value,function(value,y)
-                    return (
-                            util.array.map(value,function(value,z)
-                                local result = 0
-                                if(Materials[value].solid == true) then
-                                    result = 100
-                                end
-                                return (result)
-                            end)
-                    )
-                end)
-        )
-    end)
-    
-    collision.move = function(collider,newPosition)
-        local position = collider.position
-        local value = collider.value
-        local old = collision.map[position.x][position.y][position.z]
-        local new = collision.map[newPosition.x][newPosition.y][newPosition.z]
-        old = old - value
-        new = new + value
-        position.x = newPosition.x
-        position.y = newPosition.y
-        position.z = newPosition.z
-    end
-
-    collision.check=function(position,value)--returns true if no collider in the specified position, of if the colliders in the position are below value
-        value = value or 75
-        if(
-            position.x <1 or 
-            position.y <1 or 
-            position.z <1 or 
-            position.x >#collision.map or 
-            position.y >#collision.map[1] or 
-            position.z >#collision.map[1][1]
-        ) then
-            return true
-        elseif(collision.map[position.x][position.y][position.z] > value) then
-            return false
-        else
-            return true
-        end
-    end
-    return collision
-end
-
--------------------------------------------------
---MAP
--------------------------------------------------
-
-local function Map(multiHorizontal,quality)--create the map
-    local block,heightmap = util.array.unpack(Terrain(multiHorizontal,quality))
-    local temperature = util.matrix.new(#block,#block[1],#block[1][1],29)
-    return {
-        block = block,
-        height = heightmap,
-        temperature = temperature,
-        collision = Collision(block)
-    }
-end
-
-return Map
+return Terrain

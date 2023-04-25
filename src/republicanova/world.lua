@@ -1,25 +1,22 @@
 local util = require("src.republicanova.util")
-local map = require("src.republicanova.map")
+local Terrain = require("src.republicanova.terrain")
 local types = require("src.republicanova.types")
-local Materials = require("src.republicanova.materials")
-local Plants = require("src.republicanova.plants")
+local materials = types.materials
+local plants = types.plants
 
 local function getHourOfDay(totalSeconds) 
     return math.floor(totalSeconds / 3600) % 24
 end
 
 local function getMinuteOfDay(totalSeconds) 
-
     return math.floor((totalSeconds % 3600) / 60)
 end
 
 local function getSecondOfDay(totalSeconds) 
-
     return totalSeconds % 60
 end
 
 local function getSunIntensity(minHour, maxHour, seconds) 
-
     local hours = (seconds / 3600) % 24 -- convert to hours and wrap around 24 hours
     local hourRange = maxHour - minHour
     local currentHour = (hours + 6) % 24 -- add 6 to offset for range from 6am to 6pm
@@ -41,7 +38,7 @@ local function grassify(world)
                 {x=x,y=y,z=#world.map.block[1][1]}
             )--]]
             if(util.random(1,100) == 1) then --random seeds start here
-                local temptype = util.array.keys(Plants)[util.random(1,util.len(Plants))]
+                local temptype = util.array.keys(plants)[util.random(1,util.len(plants))]
                 
                 if(temptype ~= 'grass') then
                     world.plant.spawn(--this spawns a random seed at the xy position
@@ -54,6 +51,79 @@ local function grassify(world)
         end
     end
     return world
+end
+
+-------------------------------------------------
+--COLLISION
+-------------------------------------------------
+
+local function Collision(blockmap)
+    local collision = {}
+    collision.colliders = {}
+    collision.colliders.new = function(position,value, active,relatives,parent)
+        table.insert(collision.colliders,types.collider(position,value, active,relatives,parent))
+    end
+    collision.map = util.array.map(blockmap,function(value,x)
+        return (
+                util.array.map(value,function(value,y)
+                    return (
+                            util.array.map(value,function(value,z)
+                                local result = 0
+                                if(materials[value].solid == true) then
+                                    result = 100
+                                end
+                                return (result)
+                            end)
+                    )
+                end)
+        )
+    end)
+    
+    collision.move = function(collider,newPosition)
+        local position = collider.position
+        local value = collider.value
+        local old = collision.map[position.x][position.y][position.z]
+        local new = collision.map[newPosition.x][newPosition.y][newPosition.z]
+        old = old - value
+        new = new + value
+        position.x = newPosition.x
+        position.y = newPosition.y
+        position.z = newPosition.z
+    end
+
+    collision.check=function(position,value)--returns true if no collider in the specified position, of if the colliders in the position are below value
+        value = value or 75
+        if(
+            position.x <1 or 
+            position.y <1 or 
+            position.z <1 or 
+            position.x >#collision.map or 
+            position.y >#collision.map[1] or 
+            position.z >#collision.map[1][1]
+        ) then
+            return true
+        elseif(collision.map[position.x][position.y][position.z] > value) then
+            return false
+        else
+            return true
+        end
+    end
+    return collision
+end
+
+-------------------------------------------------
+--MAP
+-------------------------------------------------
+
+local function Map(multiHorizontal,quality)--create the map
+    local block,heightmap = util.array.unpack(Terrain(multiHorizontal,quality))
+    local temperature = util.matrix.new(#block,#block[1],#block[1][1],29)
+    return {
+        block = block,
+        height = heightmap,
+        temperature = temperature,
+        collision = Collision(block)
+    }
 end
 
 --
@@ -167,7 +237,7 @@ local function growLeaf(plant)
 end
 
 local function growBranch(plant,collisionMap,time)
-    if(type(plant.trunk) ~= nil and #plant.trunk>=2 and #plant.branch < Plants[plant.specie].leaf.max/1000 and util.roleta(2,1,2) == 1) then
+    if(plant.trunk ~= nil and #plant.trunk>=2 and #plant.branch < plants[plant.specie].leaf.max/1000 and util.roleta(2,1,2) == 1) then
         local customX = util.roleta(1,0,1)-2
         local customY = util.roleta(1,0,1)-2
         table.insert(plant.branch,1,types.branch(plant.specie,'idle',time,{x=customX,y=customY,z=0},plant.quality,plant.condition))
@@ -179,7 +249,7 @@ end
 
 local function growTrunk(world,plant,time)
     local collisionMap = world.map.collision
-    if(#plant.trunk < (Plants[plant.specie].size.max/100)) then
+    if(#plant.trunk < (plants[plant.specie].size.max/100)) then
         local customX = util.roleta(1,10,1)-2
         local customY = util.roleta(1,10,1)-2
         for i = 1, #plant.trunk do
@@ -206,21 +276,21 @@ end
 
 local function plantFrame(world,plant)
     if(plant.leaf ~= nil) then
-        if(plant.leaf < Plants[plant.specie].leaf.max and world.time % 5 ==0) then
-            if(Plants[plant.specie].size.max > 100) then
+        if(plant.leaf < plants[plant.specie].leaf.max and world.time % 5 ==0) then
+            if(plants[plant.specie].size.max > 100) then
                 growBranch(plant,world.map.collision,world.time)
             end
             growLeaf(plant)
         end
     end
         
-    if Plants[plant.specie].type == 'fruit tree' then
-        --print(Plants[plant.specie].type)
+    if plants[plant.specie].type == 'fruit tree' then
+        --print(plants[plant.specie].type)
         local lastTrunkPosition = plant.position
         if(#plant.trunk > 0) then
             lastTrunkPosition = plant.trunk[#plant.trunk].position
         end
-        if(world.time % util.math.limit(Plants[plant.specie].time.maturing.min,1,100)==0) then
+        if(world.time % util.math.limit(plants[plant.specie].time.maturing.min,1,100)==0) then
             --print 'a'
             growTrunk(world,plant,world.time)
         end
@@ -239,11 +309,11 @@ local function seedFrame(world,plant)
     local v = plant
     if(plant.position.z-1 >1) then
         
-        if(world.time%6==0 and Materials[world.map.block[plant.position.x][plant.position.y][plant.position.z-1] ].name == 'earth') then
+        if(world.time%6==0 and materials[world.map.block[plant.position.x][plant.position.y][plant.position.z-1] ].name == 'earth') then
             plant.germination = plant.germination + 1
             plant.status = (plant.status ~= 'germinating') and 'germinating' or plant.status
             if(plant.status == 'germinating') then
-                if(plant.germination >= Plants[plant.specie].time.maturing.max/1000000 or (util.roleta(19,1) == 2 and plant.germination>=(Plants[plant.specie].time.maturing.min/1000000))) then
+                if(plant.germination >= plants[plant.specie].time.maturing.max/1000000 or (util.roleta(19,1) == 2 and plant.germination>=(plants[plant.specie].time.maturing.min/1000000))) then
                     return(types.plant(plant.specie,plant.status,world.time,plant.position,plant.quality,100))
                 end
             end
@@ -280,7 +350,7 @@ local function world(size,quality)
         },
         data = {}
     }
-    world.map = map(size,quality)
+    world.map = Map(size,quality)
     world = grassify(world)
     return world
 end
