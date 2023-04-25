@@ -7,31 +7,6 @@ function ytoz(vec3)
     return {x = vec3.x, y = vec3.z, z = vec3.y}
 end
 
-function grassify(world)
-    for  x = 1, #world.map.height do
-        for y = 1, #world.map.height[x] do
-            --
-                world.plant.spawn(--//this spawns a grass seed at each xy position
-                world,
-                'grass',
-                {x=x,y=y,z=#world.map.block[1][1]}
-            )--]]
-            if(republica.util.random(1,100) == 1) then --random seeds start here
-                local temptype = republica.util.array.keys(republica.plants)[republica.util.random(1,republica.util.len(republica.plants))]
-                
-                if(temptype ~= 'grass') then
-                    world.plant.spawn(--this spawns a random seed at the xy position
-                        world,
-                        temptype,
-                        {x=x,y=y,z=#world.map.block[1][1]}
-                    )
-                end
-            end
-        end
-    end
-    return world;
-end
-
 function y_rgba(index, min_val, max_val, invert)
     local range = max_val - min_val
     local val = (index - min_val) / range
@@ -152,7 +127,6 @@ function start()
     rl.SetConfigFlags(rl.FLAG_WINDOW_RESIZABLE)
     rl.InitWindow(800, 450, 'Republica Velha')
     rl.SetTargetFPS(0)
-    world = grassify(world)
     options = 
     {
         world = world,
