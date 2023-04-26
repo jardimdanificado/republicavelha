@@ -10,7 +10,7 @@ local function Heightmap(size)
     local N = (8+util.random(0,5))
     local RANDOM_INITIAL_RANGE = (10+util.random(0,3))
     local MATRIX_LENGTH = (2 ^ N)+1
-    function generateMatrix() 
+    function generateMatrix()
         local matrix = {}
         for i=1,MATRIX_LENGTH do
             local arr = {}
@@ -307,7 +307,6 @@ local function Terrain(multiHorizontal, layers,retry)
 
     local mmm = util.matrix.minmax(hmap)
     local munique = util.matrix.unique(hmap)
-    local taverage = util.matrix.average(hmap)
 
     if(mmm.min>=16) then
         util.matrix.map(hmap,function(value) return value-(mmm.min/2) end)

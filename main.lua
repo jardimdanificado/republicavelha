@@ -86,6 +86,9 @@ function teclado()
     elseif(rl.IsKeyPressed(rl.KEY_G)) then
         options.redraw = true
         options.rendergrass = (options.rendergrass == false) and true or false
+    elseif(rl.IsKeyPressed(rl.KEY_T)) then
+        options.redraw = true
+        options.renderterrain = (options.renderterrain == false) and true or false
     elseif(rl.IsKeyDown(rl.KEY_PAGE_UP)) then
         options.redraw = true
         options.camera.position.y = options.camera.position.y + 2
@@ -144,7 +147,8 @@ function start()
         redraw = true,
         dynadraw = false, -- (optimization) this make the screen render only when a key is pressed
         rendertexture = rl.LoadRenderTexture(800, 450),
-        rendergrass = true
+        rendergrass = true,
+        renderterrain = true
     }
 
     local mm = republica.util.matrix.minmax(world.map.height)
@@ -158,19 +162,22 @@ function start()
             rl.BeginTextureMode(options.rendertexture)
             rl.ClearBackground(rl.RAYWHITE)
             rl.BeginMode3D(options.camera)
-            if(options.simple == true) then
-                for x = 1, #simpler do
-                    rl.DrawCube(simpler[x].position,simpler[x].size.x,1,simpler[x].size.z,simpler[x].color)
-                    rl.DrawCubeWires(simpler[x].position,simpler[x].size.x,1,simpler[x].size.z,simpler[x].gridcolor)
-                end
-            else
-                for x = 1, #world.map.height do
-                    for z = 1, #world.map.height do
-                        rl.DrawCube({x=x,y=world.map.height[x][z],z=z},1,1,1,y_rgba(world.map.height[x][z],mm.min,mm.max))
-                        rl.DrawCubeWires({x=x,y=world.map.height[x][z],z=z},1,1,1,y_rgba(world.map.height[x][z],mm.min,mm.max,true))
+            if options.renderterrain then
+                if(options.simple == true) then
+                    for x = 1, #simpler do
+                        rl.DrawCube(simpler[x].position,simpler[x].size.x,1,simpler[x].size.z,simpler[x].color)
+                        rl.DrawCubeWires(simpler[x].position,simpler[x].size.x,1,simpler[x].size.z,simpler[x].gridcolor)
+                    end
+                else
+                    for x = 1, #world.map.height do
+                        for z = 1, #world.map.height do
+                            rl.DrawCube({x=x,y=world.map.height[x][z],z=z},1,1,1,y_rgba(world.map.height[x][z],mm.min,mm.max))
+                            rl.DrawCubeWires({x=x,y=world.map.height[x][z],z=z},1,1,1,y_rgba(world.map.height[x][z],mm.min,mm.max,true))
+                        end
                     end
                 end
             end
+                
             for i, plant in ipairs(world.plant) do 
                 if plant.type == 'seed' then
                     rl.DrawCube(ytoz(plant.position),0.5,0.5,0.5,rl.BLACK)
@@ -257,7 +264,7 @@ function main()
             end
             os.execute(
                     "zip -r compile.zip main.lua src \n" ..
-                    execpath .. " compile.zip &&  rm -f compile.zip && rm compile.zip &&  mv compile_out republicanova" .. extension)
+                    execpath .. " compile.zip &&  rm compile.zip &&  mv compile_out republicanova" .. extension)
             os.exit()
         elseif(arg[1] == 'setup') then
             setup(sys)

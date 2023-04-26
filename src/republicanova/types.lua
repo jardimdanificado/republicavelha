@@ -348,29 +348,12 @@ function types.vector3(x,y,z)
 end
 
 function types.collider(position,value, active,relatives,parent)
-    
     local obj = 
     {
-        position = position or {x=1,y=1,z=1},
+        position = position or {x=1,y=1,z=1,parent=0,relatives={}},
         value = value or 0,
-        active = active or true,
-        relatives = relatives or {},
-        parent = parent or 0,
+        active = active or true
     }
-
-    if(obj.parent ~= 0) then
-        if(obj.parent.relatives == nil) then
-            obj.parent.relatives = {}
-        end
-        table.insert(parent.relatives,obj)
-    end
-    if relatives ~= nil then
-        for i, v in ipairs(relatives) do
-            v.parent = obj
-        end
-    end
-        
-
     return obj
 end
 
@@ -420,6 +403,7 @@ end
 
 function types.trunk(specie, status, birth, position, quality, condition) 
     local trunk = types.generic('trunk', status or 'idle', birth or 0, position or {x=1,y=1,z=1}, quality or 100, condition or 100)
+    
     trunk.specie = specie or 'tamarind'
     return trunk
 end

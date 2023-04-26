@@ -1,5 +1,10 @@
 local util = {}
 
+util.reserved = 
+{
+    'parent','new','relatives'
+}
+
 util.char = --36
 {
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
@@ -10,6 +15,7 @@ util.char = --36
 util.math = {}
 util.string = {}
 util.array = {}
+util.table = {}
 util.matrix = {}
 util.file = {}
 util.file.save = {}
@@ -194,6 +200,54 @@ util.file.save.text = function(path, text)
     local file = io.open(path, "w")
     file:write(text)
     file:close()
+end
+
+util.table.add = function(arr1,arr2)
+    for k, v in pairs(arr2) do
+        if util.array.includes(util.reserved,k) then
+            arr1[k] = arr2[k] + arr2[k]
+        end
+    end
+end
+
+util.table.sub = function(arr1,arr2)
+    for k, v in pairs(arr2) do
+        if util.array.includes(util.reserved,k) then
+            arr1[k] = arr2[k] - arr2[k]
+        end
+    end
+end
+
+util.table.mul = function(arr1,arr2)
+    for k, v in pairs(arr2) do
+        if util.array.includes(util.reserved,k) then
+            arr1[k] = arr2[k] * arr2[k]
+        end
+    end
+end
+
+util.table.div = function(arr1,arr2)
+    for k, v in pairs(arr2) do
+        if util.array.includes(util.reserved,k) then
+            arr1[k] = arr2[k] / arr2[k]
+        end
+    end
+end
+
+util.table.mod = function(arr1,arr2)
+    for k, v in pairs(arr2) do
+        if util.array.includes(util.reserved,k) then
+            arr1[k] = arr2[k] % arr2[k]
+        end
+    end
+end
+
+util.table.sub = function(arr1,arr2)
+    for k, v in pairs(arr2) do
+        if util.array.includes(util.reserved,k) then
+            arr1[k] = arr2[k] - arr2[k]
+        end
+    end
 end
 
 util.array.slice = function(arr, start, final)
@@ -655,6 +709,31 @@ util.len = function(obj)
         count = count + 1
     end
     return count
+end
+
+util.link = function(obj,parent,relatives)
+    relatives = relatives or {}
+    parent = parent or 0
+    if(parent ~= 0 and parent.relatives ~= nil) then
+        table.insert(parent.relatives,obj)
+    end
+    for i = 1, #relatives do
+        relatives[i].parent = obj
+    end
+    obj.parent = parent
+    obj.relatives = relatives
+    return obj
+end
+
+util.unlinkVec3 = function(linkedvec3,acumulator)
+    for k, v in pairs(linkedvec3) do
+        print(k,v)
+    end
+    acumulator = acumulator ~= nil and util.math.vec3add(acumulator,linkedvec3) or {x=linkedvec3.x,y=linkedvec3.y,z=linkedvec3.z}
+    if(linkedvec3.parent ~= nil and linkedvec3.parent ~= 0) then
+        util.unlinkVec3(linkedvec3.parent,acumulator)
+    end
+    return acumulator
 end
 
 util.type = function(obj)
