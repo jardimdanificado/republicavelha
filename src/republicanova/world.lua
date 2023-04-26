@@ -60,6 +60,9 @@ end
 local function Collision(blockmap)
     local collision = {}
     collision.colliders = {}
+    collision.colliders.new = function(position,value, active,relatives,parent)
+        table.insert(collision.colliders,types.collider(position,value, active,relatives,parent))
+    end
     collision.map = util.array.map(blockmap,function(value,x)
         return (
                 util.array.map(value,function(value,y)
@@ -244,40 +247,29 @@ local function growBranch(plant,collisionMap,time)
     return plant
 end
 
-local positions = 
-{
-    {x=-1,y=-1},
-    {x=-1,y=0},
-    {x=-1,y=1},
-    {x=0,y=-1},
-    {x=0,y=0},
-    {x=0,y=1},
-    {x=1,y=-1},
-    {x=1,y=0},
-    {x=1,y=1}
-}
-
 local function growTrunk(world,plant,time)
     local collisionMap = world.map.collision
-    local tposi = #plant.trunk > 0 and plant.trunk[#plant.trunk].position or {x=0,y=0,z=0}
     if(#plant.trunk < (plants[plant.specie].size.max/100)) then
-        local exclude = {}
-        local chances = {1,5,1,5,10,5,1,5,1}
-        local n = util.roleta(util.array.unpack(chances))
-        local posi = positions[n]
-        posi.z = 1
-        while #exclude < 9 and collisionMap.check(util.math.vec3add(util.unlinkVec3(tposi),posi)) == false do 
-            chances[n] = 0
-            n = util.roleta(util.array.unpack(chances))
-            posi = positions[n]
+        local customX = util.roleta(1,10,1)-2
+        local customY = util.roleta(1,10,1)-2
+        for i = 1, #plant.trunk do
+            local trunk = plant.trunk[i]
+            if(trunk.position.z < #world.map.block[1][1]) then
+                trunk.position.z = trunk.position.z + 1
+                trunk.position.y = trunk.position.y + customY
+                trunk.position.x = trunk.position.x + customX
+            end
         end
-        if exclude == 9 then
-            return plant
+        for i = 1, #plant.branch do
+            local branch = plant.branch[i]
+            if(branch.position.z < #world.map.block[1][1]) then
+                branch.position.z = branch.position.z + 1
+                branch.position.y = branch.position.y + customY
+                branch.position.x = branch.position.x + customX
+            end
         end
-        tposi = (#plant.trunk > 0 and plant.trunk[#plant.trunk].position ~= nil) and plant.trunk[#plant.trunk].position or 0
-        posi = util.link(posi,tposi)
-        table.insert(plant.trunk,types.trunk(plant.specie,'idle',time,posi,plant.quality,plant.condition))
-        table.insert(collisionMap.colliders,types.collider(posi))
+        table.insert(plant.trunk,1,types.trunk(plant.specie,'idle',time,{x=1,y=1,z=1},plant.quality,plant.condition))
+        collisionMap.colliders.new(plant.trunk[1].position,nil,nil,nil,nil,plant)
     end
     return plant
 end
@@ -286,7 +278,7 @@ local function plantFrame(world,plant)
     if(plant.leaf ~= nil) then
         if(plant.leaf < plants[plant.specie].leaf.max and world.time % 5 ==0) then
             if(plants[plant.specie].size.max > 100) then
-                --growBranch(plant,world.map.collision,world.time)
+                growBranch(plant,world.map.collision,world.time)
             end
             growLeaf(plant)
         end
