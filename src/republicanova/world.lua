@@ -60,9 +60,6 @@ end
 local function Collision(blockmap)
     local collision = {}
     collision.colliders = {}
-    collision.colliders.new = function(position,value, active,relatives,parent)
-        table.insert(collision.colliders,types.collider(position,value, active,relatives,parent))
-    end
     collision.map = util.array.map(blockmap,function(value,x)
         return (
                 util.array.map(value,function(value,y)
@@ -124,75 +121,6 @@ local function Map(multiHorizontal,quality)--create the map
         temperature = temperature,
         collision = Collision(block)
     }
-end
-
---
-local function findTrunkGrowPosition(collisionMap,x,y,z)--this try to find a air block in the 9 above blocks
-    local directions = 
-    {
-        {x= -1, y= 0,z=1}, --4
-        {x= 1, y= 0,z=1},  --6
-        --{x= 1, y= 1,z=1},  --3
-        --{x= -1, y= 1,z=1}, --1
-        {x= 0, y= 0,z=1},
-        {x= 0, y= 1,z=1},  --2
-        {x= 0, y= -1,z=1}, --8
-        --{x= 1, y= -1,z=1}, --9
-        --{x= -1, y= -1,z=1} --7
-    }
-    
-    for i = 1, #directions do
-        opt = directions[i]
-        if((x+opt.x >1 and y+opt.y>1 and x+opt.x < #collisionMap and y+opt.y < #collisionMap[1])~= true) then
-        elseif(collisionMap[x+opt.x][y+opt.y][z+opt.z]  <75) then
-            return opt
-        end
-    end
-    return
-end
-
-local function findRootGrowPosition(collisionMap,x,y,z)--this try to find a air block in the 9 below blocks
-    local directions = 
-    {
-        {x= -1, y= 0,z=-1}, --4
-        {x= 1, y= 0,z=-1},  --6
-        {x= 1, y= 1,z=-1},  --3
-        {x= -1, y= 1,z=-1}, --1
-        {x= 0, y= 1,z=-1},  --2
-        {x= 0, y= -1,z=-1}, --8
-        {x= 1, y= -1,z=-1}, --9
-        {x= -1, y= -1,z=-1} --7
-    }
-    for i = 1, #directions do
-        opt = directions[i]
-        if((x+opt.x >=1 and y+opt.y>=1 and z+opt.z >=1 and x+opt.x < #collisionMap and y+opt.y < #collisionMap[1] and z+opt.z < #collisionMap[1]) ~= true)then
-        elseif(collisionMap[x+opt.x][y+opt.y][z+opt.z]  <75) then
-            return opt
-        end
-    end
-    return
-end
-
-local function findBranchGrowPosition(collisionMap,x,y,z)--this try to find a air block in the 8 surrounding blocks, if fail try the 9 above
-    local directions = 
-    {
-        {x= -1, y= 0,z=0}, --4
-        {x= 1, y= 0,z=0},  --6
-        {x= 1, y= 1,z=0},  --3
-        {x= -1, y= 1,z=0}, --1
-        {x= 0, y= 1,z=0},  --2
-        {x= 0, y= -1,z=0}, --8
-        {x= 1, y= -1,z=0}, --9
-        {x= -1, y= -1,z=0} --7
-    }
-    for i = 1, #directions do
-        opt = directions[i]
-        if((x+opt.x >1 and y+opt.y>1 and x+opt.x < #collisionMap and y+opt.y < #collisionMap[1])~= true) then
-        elseif(collisionMap.check({x=x+opt.x,y=y+opt.y,z=z+opt.z})) then
-            return opt
-        end
-    end
-    return findTrunkGrowPosition(collisionMap,x,y,z)
 end
 
 local Life = 
@@ -273,7 +201,7 @@ end
 local function growTrunk(world,plant,time)
     local height = #plant.trunk ~= 0 and plant.trunk[#plant.trunk].position.z - plant.position.z or 0
     if(height < (plants[plant.specie].size.max/100)) then
-        local lposi = directions[util.roleta(0,1,0,1,10,1,0,1,0)]
+        local lposi = directions[util.roleta(0,1,0,1,2,1,0,1,0)]
         lposi.z = (lposi.x == 0 and lposi.x == 0) and 1 or 0
         local pposi = #plant.trunk ~= 0 and plant.trunk[#plant.trunk].position or plant.position
         if world.map.collision.check(util.math.vec3add(lposi,pposi),75) then

@@ -194,7 +194,6 @@ function start()
                         rl.DrawCube(ytoz(trunk.position),1,1,1,rl.BROWN)
                     end
                     for i, branch in ipairs(plant.branch) do
-                        --print(branch.position)
                         rl.DrawCube(ytoz(branch.position),1,1,1,rl.RED)
                     end
                 end
