@@ -31,21 +31,21 @@ end
 local function grassify(world)
     for  x = 1, #world.map.height do
         for y = 1, #world.map.height[x] do
-            --
+            if(world.map.height[x][y] > world.map.waterlevel+1) then
                 world.plant.spawn(--//this spawns a grass seed at each xy position
                 world,
                 'grass',
                 {x=x,y=y,z=#world.map.block[1][1]}
-            )--]]
-            if(util.random(1,100) == 1) then --random seeds start here
-                local temptype = util.array.keys(plants)[util.random(1,util.len(plants))]
-                
-                if(temptype ~= 'grass') then
-                    world.plant.spawn(--this spawns a random seed at the xy position
-                        world,
-                        temptype,
-                        {x=x,y=y,z=#world.map.block[1][1]}
-                    )
+                )--]]
+                if(util.random(1,100) == 1) then --random seeds start here
+                    local temptype = util.array.keys(plants)[util.random(1,util.len(plants))]
+                    if(temptype ~= 'grass') then
+                        world.plant.spawn(--this spawns a random seed at the xy position
+                            world,
+                            temptype,
+                            {x=x,y=y,z=#world.map.block[1][1]}
+                        )
+                    end
                 end
             end
         end
@@ -60,9 +60,6 @@ end
 local function Collision(blockmap)
     local collision = {}
     collision.colliders = {}
-    collision.colliders.new = function(position,value, active,relatives,parent)
-        table.insert(collision.colliders,types.collider(position,value, active,relatives,parent))
-    end
     collision.map = util.array.map(blockmap,function(value,x)
         return (
                 util.array.map(value,function(value,y)
@@ -122,76 +119,10 @@ local function Map(multiHorizontal,quality)--create the map
         block = block,
         height = heightmap,
         temperature = temperature,
-        collision = Collision(block)
+        collision = Collision(block),
+        waterlevel = util.matrix.average(heightmap),
+        size = {#block,#block[1],#block[1][1]}
     }
-end
-
---
-local function findTrunkGrowPosition(collisionMap,x,y,z)--this try to find a air block in the 9 above blocks
-    local directions = 
-    {
-        {x= -1, y= 0,z=1}, --4
-        {x= 1, y= 0,z=1},  --6
-        --{x= 1, y= 1,z=1},  --3
-        --{x= -1, y= 1,z=1}, --1
-        {x= 0, y= 1,z=1},  --2
-        {x= 0, y= -1,z=1}, --8
-        --{x= 1, y= -1,z=1}, --9
-        --{x= -1, y= -1,z=1} --7
-    }
-    
-    for i = 1, #directions do
-        opt = directions[i]
-        if((x+opt.x >1 and y+opt.y>1 and x+opt.x < #collisionMap and y+opt.y < #collisionMap[1])~= true) then
-        elseif(collisionMap[x+opt.x][y+opt.y][z+opt.z]  <75) then
-            return opt
-        end
-    end
-    return
-end
-
-local function findRootGrowPosition(collisionMap,x,y,z)--this try to find a air block in the 9 below blocks
-    local directions = 
-    {
-        {x= -1, y= 0,z=-1}, --4
-        {x= 1, y= 0,z=-1},  --6
-        {x= 1, y= 1,z=-1},  --3
-        {x= -1, y= 1,z=-1}, --1
-        {x= 0, y= 1,z=-1},  --2
-        {x= 0, y= -1,z=-1}, --8
-        {x= 1, y= -1,z=-1}, --9
-        {x= -1, y= -1,z=-1} --7
-    }
-    for i = 1, #directions do
-        opt = directions[i]
-        if((x+opt.x >=1 and y+opt.y>=1 and z+opt.z >=1 and x+opt.x < #collisionMap and y+opt.y < #collisionMap[1] and z+opt.z < #collisionMap[1]) ~= true)then
-        elseif(collisionMap[x+opt.x][y+opt.y][z+opt.z]  <75) then
-            return opt
-        end
-    end
-    return
-end
-
-local function findBranchGrowPosition(collisionMap,x,y,z)--this try to find a air block in the 8 surrounding blocks, if fail try the 9 above
-    local directions = 
-    {
-        {x= -1, y= 0,z=0}, --4
-        {x= 1, y= 0,z=0},  --6
-        {x= 1, y= 1,z=0},  --3
-        {x= -1, y= 1,z=0}, --1
-        {x= 0, y= 1,z=0},  --2
-        {x= 0, y= -1,z=0}, --8
-        {x= 1, y= -1,z=0}, --9
-        {x= -1, y= -1,z=0} --7
-    }
-    for i = 1, #directions do
-        opt = directions[i]
-        if((x+opt.x >1 and y+opt.y>1 and x+opt.x < #collisionMap and y+opt.y < #collisionMap[1])~= true) then
-        elseif(collisionMap.check({x=x+opt.x,y=y+opt.y,z=z+opt.z})) then
-            return opt
-        end
-    end
-    return findTrunkGrowPosition(collisionMap,x,y,z)
 end
 
 local Life = 
@@ -236,40 +167,49 @@ local function growLeaf(plant)
     return plant
 end
 
-local function growBranch(plant,collisionMap,time)
-    if(plant.trunk ~= nil and #plant.trunk>=2 and #plant.branch < plants[plant.specie].leaf.max/1000 and util.roleta(2,1,2) == 1) then
-        local customX = util.roleta(1,0,1)-2
-        local customY = util.roleta(1,0,1)-2
-        table.insert(plant.branch,1,types.branch(plant.specie,'idle',time,{x=customX,y=customY,z=0},plant.quality,plant.condition))
-        local collisionPositions = (#plant.trunk>1) and {plant.position,plant.trunk[2].position,plant.branch[1].position} or {plant.position,plant.trunk[1].position,plant.branch[1].position}
-        collisionMap.colliders.new(plant.branch[1].position,nil,nil,nil,plant.trunk[2])
+local directions = --based on keypad
+{
+    {x= -1, y= 1,z=0}, --1
+    {x= 0, y= 1,z=0},  --2
+    {x= 1, y= 1,z=0},  --3
+    {x= -1, y= 0,z=0}, --4
+    {x= 0, y= 0,z=0},  --5
+    {x= 1, y= 0,z=0},  --6
+    {x= -1, y= -1,z=0}, --7
+    {x= 0, y= -1,z=0}, --8
+    {x= 1, y= -1,z=0} --9
+}
+
+local function growBranch(world,plant,time)
+    local height = #plant.trunk ~= 0 and plant.trunk[#plant.trunk].position.z - plant.position.z or 0
+    if(height > 3 and #plant.branch < plants[plant.specie].size.max/2) then
+        local lposi = directions[util.roleta(0,1,0,1,0,1,0,1,0)]
+        lposi.z = util.random(0,1)
+        local numb = util.random((#plant.branch/2)*-1,#plant.branch)
+        local pposi = plant.position
+        if(plant.branch[numb] ~= nil) then 
+            pposi = plant.branch[numb].position 
+        elseif(#plant.trunk > 0) then
+            pposi = plant.trunk[util.random(1,#plant.trunk)].position
+        end
+        if pposi.z-math.floor((plants[plant.specie].size.max/100)/2.5) > plant.position.z and world.map.collision.check(util.math.vec3add(lposi,pposi),75) then         
+            table.insert(plant.branch,types.branch(plant.specie,'idle',time,util.math.vec3add(lposi,pposi),plant.quality,plant.condition))
+            table.insert(world.map.collision.colliders,types.collider(lposi,75))
+        end
     end
     return plant
 end
 
 local function growTrunk(world,plant,time)
-    local collisionMap = world.map.collision
-    if(#plant.trunk < (plants[plant.specie].size.max/100)) then
-        local customX = util.roleta(1,10,1)-2
-        local customY = util.roleta(1,10,1)-2
-        for i = 1, #plant.trunk do
-            local trunk = plant.trunk[i]
-            if(trunk.position.z < #world.map.block[1][1]) then
-                trunk.position.z = trunk.position.z + 1
-                trunk.position.y = trunk.position.y + customY
-                trunk.position.x = trunk.position.x + customX
-            end
+    local height = #plant.trunk ~= 0 and plant.trunk[#plant.trunk].position.z - plant.position.z or 0
+    if(height < (plants[plant.specie].size.max/100)) then
+        local lposi = directions[util.roleta(0,1,0,1,2,1,0,1,0)]
+        lposi.z = (lposi.x == 0 and lposi.x == 0) and 1 or 0
+        local pposi = #plant.trunk ~= 0 and plant.trunk[#plant.trunk].position or plant.position
+        if world.map.collision.check(util.math.vec3add(lposi,pposi),75) then
+            table.insert(plant.trunk,types.trunk(plant.specie,'idle',time,util.math.vec3add(lposi,pposi),plant.quality,plant.condition))
+            table.insert(world.map.collision.colliders,types.collider(lposi))
         end
-        for i = 1, #plant.branch do
-            local branch = plant.branch[i]
-            if(branch.position.z < #world.map.block[1][1]) then
-                branch.position.z = branch.position.z + 1
-                branch.position.y = branch.position.y + customY
-                branch.position.x = branch.position.x + customX
-            end
-        end
-        table.insert(plant.trunk,1,types.trunk(plant.specie,'idle',time,{x=1,y=1,z=1},plant.quality,plant.condition))
-        collisionMap.colliders.new(plant.trunk[1].position,nil,nil,nil,nil,plant)
     end
     return plant
 end
@@ -277,9 +217,11 @@ end
 local function plantFrame(world,plant)
     if(plant.leaf ~= nil) then
         if(plant.leaf < plants[plant.specie].leaf.max and world.time % 5 ==0) then
+            --[[
             if(plants[plant.specie].size.max > 100) then
-                growBranch(plant,world.map.collision,world.time)
+                growBranch(world,plant,world.time)
             end
+            --]]
             growLeaf(plant)
         end
     end
@@ -290,6 +232,8 @@ local function plantFrame(world,plant)
         if(#plant.trunk > 0) then
             lastTrunkPosition = plant.trunk[#plant.trunk].position
         end
+            
+        growBranch(world,plant,world.time)
         if(world.time % util.math.limit(plants[plant.specie].time.maturing.min,1,100)==0) then
             --print 'a'
             growTrunk(world,plant,world.time)

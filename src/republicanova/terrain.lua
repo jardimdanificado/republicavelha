@@ -279,7 +279,7 @@ end
 
 local function terrify(map,fixedHeight)
     fixedHeight = fixedHeight or 128
-    
+    local waterlevel = util.matrix.average(map)
     local result = {}
     for x = 1, #map do
         result[x] = {}
@@ -287,6 +287,22 @@ local function terrify(map,fixedHeight)
             result[x][y] = {}
             for z = 1, fixedHeight do
                 result[x][y][z] = (z < map[x][y]) and 2 or 1 --check materials.lua for material types
+                if z < map[x][y] then
+                    if z < waterlevel then
+                        result[x][y][z] = 4
+                    elseif z == waterlevel then
+                        result[x][y][z] = 5
+                    else
+                        result[x][y][z] = 2
+                    end
+                else
+                    if z < waterlevel then
+                        result[x][y][z] = 3
+                    else
+                        result[x][y][z] = 1
+                    end
+                    
+                end
             end
         end
     end
@@ -305,15 +321,15 @@ local function Terrain(multiHorizontal, layers,retry)
     hmap = util.func.time({autoSmoothHeightmap,"autoSmoothHeightmap"},hmap,smooth)
     hmap = util.func.time({polishHeightmap,"polishHeightmap"},hmap,mapsize.h+mapsize.h/32)
 
-    local mmm = util.matrix.minmax(hmap)
+    local min,max = util.matrix.minmax(hmap)
     local munique = util.matrix.unique(hmap)
 
-    if(mmm.min>=16) then
-        util.matrix.map(hmap,function(value) return value-(mmm.min/2) end)
+    if(min>=16) then
+        util.matrix.map(hmap,function(value) return value-(min/2) end)
     end
 
     if(retry>=1) then
-        if (mmm.min<1 or mmm.max > mapsize.w or #munique <= 4 and #munique < layers) then
+        if (min<1 or max > mapsize.w or #munique <= 4 and #munique < layers) then
             if(retry > 1) then
                 print("retry number " .. retry)
             end

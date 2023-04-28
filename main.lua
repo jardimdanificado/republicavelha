@@ -60,12 +60,15 @@ function simplify(arr)
 
     local blocks = {}
     for i=1,#b do 
-        local mm = republica.util.matrix.minmax(arr)
+        local min,max = republica.util.matrix.minmax(arr)
         b[i]={
-            position = rl.new("Vector3",b[i].min.x-0.5+(b[i].max.x-b[i].min.x+1)/2,b[i].value-mm.min+1,b[i].min.y-0.5+(b[i].max.y-b[i].min.y+1)/2),
+            position = rl.new("Vector3",
+            b[i].min.x-0.5+(b[i].max.x-b[i].min.x+1)/2,
+            b[i].value-min+1,
+            b[i].min.y-0.5+(b[i].max.y-b[i].min.y+1)/2),
             size = rl.new("Vector3",(b[i].max.x-b[i].min.x+1),1,(b[i].max.y-b[i].min.y+1)),
-            color = y_rgba(b[i].value,mm.min,mm.max),
-            gridcolor = y_rgba(b[i].value,mm.min,mm.max,true)
+            color = y_rgba(b[i].value,min,max),
+            gridcolor = y_rgba(b[i].value,min,max,true)
         }
         table.insert(blocks,b[i])
     end
@@ -80,9 +83,18 @@ function teclado()
     elseif(rl.IsKeyPressed(rl.KEY_C)) then
         options.redraw = true
         options.dynadraw = (options.dynadraw == false) and true or false
+    elseif(rl.IsKeyPressed(rl.KEY_P)) then
+        options.redraw = true
+        options.prettygrass = (options.prettygrass == false) and true or false
+    elseif(rl.IsKeyPressed(rl.KEY_W)) then
+        options.redraw = true
+        options.renderwater = (options.renderwater == false) and true or false
     elseif(rl.IsKeyPressed(rl.KEY_F)) then
         options.redraw = true
         print(options.world.time)
+    elseif(rl.IsKeyPressed(rl.KEY_R)) then
+        options.redraw = true
+        options.renderwires = (options.renderwires == false) and true or false
     elseif(rl.IsKeyPressed(rl.KEY_G)) then
         options.redraw = true
         options.rendergrass = (options.rendergrass == false) and true or false
@@ -126,36 +138,50 @@ end
 function start()
     --size up to 6 is safe, above 6 you can get buggy maps, default is 2
     --layers up to 16 are safe, default is 8
-    local world = republica.world(2,16)
-    rl.SetConfigFlags(rl.FLAG_WINDOW_RESIZABLE)
-    rl.InitWindow(800, 450, 'Republica Velha')
-    rl.SetTargetFPS(0)
     options = 
     {
-        world = world,
-        camera = rl.new("Camera", {
-            position = rl.new("Vector3", 0, #world.map.height, 0),
-            target = rl.new("Vector3", #world.map.height/2, republica.util.matrix.average(world.map.height), #world.map.height/2),
-            up = rl.new("Vector3", 0, 1, 0),
-            fovy = 45,
-            type = rl.CAMERA_PERSPECTIVE
-        }),
         screen = {x=800,y=450},
         title = 'republica nova',
         simple = true,
         paused = true,
         redraw = true,
         dynadraw = false, -- (optimization) this make the screen render only when a key is pressed
-        rendertexture = rl.LoadRenderTexture(800, 450),
         rendergrass = true,
-        renderterrain = true
+        renderterrain = true,
+        renderwater = true,
+        renderwires = true,
+        prettygrass = true
     }
+    local world = republica.world(2,16)
+    rl.SetConfigFlags(rl.FLAG_MSAA_4X_HINT)
 
-    local mm = republica.util.matrix.minmax(world.map.height)
+    rl.SetConfigFlags(rl.FLAG_WINDOW_RESIZABLE)
+    rl.SetConfigFlags(rl.FLAG_WINDOW_ALWAYS_RUN)
+    rl.InitWindow(options.screen.x, options.screen.y, 'Republica Velha')
+    rl.SetTargetFPS(0)
+    options.rendertexture = rl.LoadRenderTexture(options.screen.x, options.screen.y)
+    options.world = world
+    options.camera = rl.new("Camera", {
+        position = rl.new("Vector3", -10, #world.map.height, -10),
+        target = rl.new("Vector3", #world.map.height/2, republica.util.matrix.average(world.map.height), #world.map.height/2),
+        up = rl.new("Vector3", 0, 1, 0),
+        fovy = 45,
+        type = rl.CAMERA_PERSPECTIVE
+    })
+
+    local min,max = republica.util.matrix.minmax(world.map.height)
     local simpler = simplify(world.map.height)
     print("\nmerged " .. #world.map.height*#world.map.height[1] .. ' blocks into ' .. #simpler .. ' blocks\n')
 
     while not rl.WindowShouldClose() do
+        if(rl.IsWindowResized()) then
+            --print(rl.GetScreenWidth(),rl.GetScreenHeight())
+            rl.UnloadRenderTexture(options.rendertexture)
+            options.screen.x = rl.GetScreenWidth()
+            options.screen.y = rl.GetScreenHeight()
+            options.rendertexture = rl.LoadRenderTexture(options.screen.x, options.screen.y)
+            options.redraw=true
+        end
         teclado(options.camera)
         rl.BeginDrawing()
         if(options.redraw == true) then
@@ -171,8 +197,8 @@ function start()
                 else
                     for x = 1, #world.map.height do
                         for z = 1, #world.map.height do
-                            rl.DrawCube({x=x,y=world.map.height[x][z],z=z},1,1,1,y_rgba(world.map.height[x][z],mm.min,mm.max))
-                            rl.DrawCubeWires({x=x,y=world.map.height[x][z],z=z},1,1,1,y_rgba(world.map.height[x][z],mm.min,mm.max,true))
+                            rl.DrawCube({x=x,y=world.map.height[x][z],z=z},1,1,1,y_rgba(world.map.height[x][z],min,max))
+                            rl.DrawCubeWires({x=x,y=world.map.height[x][z],z=z},1,1,1,y_rgba(world.map.height[x][z],min,max,true))
                         end
                     end
                 end
@@ -180,23 +206,39 @@ function start()
                 
             for i, plant in ipairs(world.plant) do 
                 if plant.type == 'seed' then
-                    rl.DrawCube(ytoz(plant.position),0.5,0.5,0.5,rl.BLACK)
+                    rl.DrawCube(ytoz(plant.position),0.5,1.01,0.5,rl.new("Color",0,0,0,125))
                 elseif plant.specie == 'grass' then
                     if options.rendergrass then
-                        rl.DrawCube(ytoz(plant.position),1,1,1,rl.GREEN)
+                        if(options.prettygrass == false) then
+                            rl.DrawCube(ytoz(plant.position),1,1,1,rl.new("Color",100,255,50,95))
+                        else
+                            rl.DrawCube(ytoz(plant.position),republica.util.random(1.111,1.333),republica.util.random(1.111,1.333),republica.util.random(1.111,1.333),rl.new("Color",100,republica.util.random(200,255),50,republica.util.random(55,95)))
+                        end
                     end
                 elseif republica.plants[plant.specie].size.max <=100 then
                     local tempposi = ytoz(plant.position)
                     tempposi.y = tempposi.y + 1
                     rl.DrawCube(tempposi,1,1,1,rl.YELLOW)
+                    if(options.renderwires) then
+                        rl.DrawCubeWires(ytoz(plant.position),1,1,1,rl.BLACK)
+                    end
                 elseif republica.util.string.includes(republica.plants[plant.specie].type,'tree') then
                     for i, trunk in ipairs(plant.trunk) do
-                        rl.DrawCube(ytoz(republica.util.math.vec3add(plant.position,trunk.position)),1,1,1,rl.BROWN)
+                        rl.DrawCube(ytoz(trunk.position),1,1,1,rl.BROWN)
+                        if(options.renderwires) then
+                            rl.DrawCubeWires(ytoz(trunk.position),1,1,1,rl.BLACK)
+                        end
                     end
                     for i, branch in ipairs(plant.branch) do
-                        rl.DrawCube(ytoz(republica.util.math.vec3add(plant.position,branch.position)),1,1,1,rl.RED)
+                        rl.DrawCube(ytoz(branch.position),1,1,1,rl.RED)
+                        if(options.renderwires) then
+                            rl.DrawCubeWires(ytoz(branch.position),1,1,1,rl.BLACK)
+                        end
                     end
                 end
+            end
+            if options.renderwater then
+                rl.DrawCube({x=0+#world.map.height/2,y=0.5,z=#world.map.height[1]/2},#world.map.height,world.map.waterlevel*2,#world.map.height[1],rl.new("Color",0,190,125,185))
             end
             rl.EndMode3D()
             rl.EndTextureMode();
@@ -209,10 +251,10 @@ function start()
             {
                 x=0,
                 y=0,
-                width=800,
-                height=450*-1
+                width=options.screen.x,
+                height=options.screen.y*-1
             },
-            {x=0,y=0,width=800,height=450},
+            {x=0,y=0,width=options.screen.x,height=options.screen.y},
             {x=0,y=0},
             0,
             rl.WHITE
