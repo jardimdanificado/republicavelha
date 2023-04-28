@@ -180,7 +180,7 @@ function start()
                 
             for i, plant in ipairs(world.plant) do 
                 if plant.type == 'seed' then
-                    rl.DrawCube(ytoz(plant.position),0.5,0.5,0.5,rl.BLACK)
+                    rl.DrawCube(ytoz(plant.position),0.5,0.5,0.5,rl.new("Color",0,0,0,125))
                 elseif plant.specie == 'grass' then
                     if options.rendergrass then
                         rl.DrawCube(ytoz(plant.position),1,1,1,rl.GREEN)
