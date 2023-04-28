@@ -191,10 +191,11 @@ function start()
                     rl.DrawCube(tempposi,1,1,1,rl.YELLOW)
                 elseif republica.util.string.includes(republica.plants[plant.specie].type,'tree') then
                     for i, trunk in ipairs(plant.trunk) do
-                        rl.DrawCube(ytoz(republica.util.math.vec3add(plant.position,trunk.position)),1,1,1,rl.BROWN)
+                        rl.DrawCube(ytoz(trunk.position),1,1,1,rl.BROWN)
                     end
                     for i, branch in ipairs(plant.branch) do
-                        rl.DrawCube(ytoz(republica.util.math.vec3add(plant.position,branch.position)),1,1,1,rl.RED)
+                        --print(branch.position)
+                        rl.DrawCube(ytoz(branch.position),1,1,1,rl.RED)
                     end
                 end
             end

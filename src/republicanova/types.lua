@@ -350,7 +350,7 @@ end
 function types.collider(position,value, active,relatives,parent)
     local obj = 
     {
-        position = position or {x=1,y=1,z=1,parent=0,relatives={}},
+        position = position or {x=1,y=1,z=1},
         value = value or 0,
         active = active or true
     }
