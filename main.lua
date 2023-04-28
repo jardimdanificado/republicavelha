@@ -83,6 +83,9 @@ function teclado()
     elseif(rl.IsKeyPressed(rl.KEY_C)) then
         options.redraw = true
         options.dynadraw = (options.dynadraw == false) and true or false
+    elseif(rl.IsKeyPressed(rl.KEY_P)) then
+        options.redraw = true
+        options.prettygrass = (options.prettygrass == false) and true or false
     elseif(rl.IsKeyPressed(rl.KEY_W)) then
         options.redraw = true
         options.renderwater = (options.renderwater == false) and true or false
@@ -146,16 +149,20 @@ function start()
         rendergrass = true,
         renderterrain = true,
         renderwater = true,
-        renderwires = true
+        renderwires = true,
+        prettygrass = true
     }
     local world = republica.world(2,16)
+    rl.SetConfigFlags(rl.FLAG_MSAA_4X_HINT)
+
     rl.SetConfigFlags(rl.FLAG_WINDOW_RESIZABLE)
+    rl.SetConfigFlags(rl.FLAG_WINDOW_ALWAYS_RUN)
     rl.InitWindow(options.screen.x, options.screen.y, 'Republica Velha')
     rl.SetTargetFPS(0)
     options.rendertexture = rl.LoadRenderTexture(options.screen.x, options.screen.y)
     options.world = world
     options.camera = rl.new("Camera", {
-        position = rl.new("Vector3", 0, #world.map.height, 0),
+        position = rl.new("Vector3", -10, #world.map.height, -10),
         target = rl.new("Vector3", #world.map.height/2, republica.util.matrix.average(world.map.height), #world.map.height/2),
         up = rl.new("Vector3", 0, 1, 0),
         fovy = 45,
@@ -199,12 +206,13 @@ function start()
                 
             for i, plant in ipairs(world.plant) do 
                 if plant.type == 'seed' then
-                    rl.DrawCube(ytoz(plant.position),0.5,0.5,0.5,rl.new("Color",0,0,0,125))
+                    rl.DrawCube(ytoz(plant.position),0.5,1.01,0.5,rl.new("Color",0,0,0,125))
                 elseif plant.specie == 'grass' then
                     if options.rendergrass then
-                        rl.DrawCube(ytoz(plant.position),1,1,1,rl.GREEN)
-                        if(options.renderwires) then
-                            rl.DrawCubeWires(ytoz(plant.position),1,1,1,rl.BLACK)
+                        if(options.prettygrass == false) then
+                            rl.DrawCube(ytoz(plant.position),1,1,1,rl.new("Color",100,255,50,95))
+                        else
+                            rl.DrawCube(ytoz(plant.position),republica.util.random(1.111,1.333),republica.util.random(1.111,1.333),republica.util.random(1.111,1.333),rl.new("Color",100,republica.util.random(200,255),50,republica.util.random(55,95)))
                         end
                     end
                 elseif republica.plants[plant.specie].size.max <=100 then
