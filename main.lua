@@ -126,36 +126,43 @@ end
 function start()
     --size up to 6 is safe, above 6 you can get buggy maps, default is 2
     --layers up to 16 are safe, default is 8
-    local world = republica.world(2,16)
-    rl.SetConfigFlags(rl.FLAG_WINDOW_RESIZABLE)
-    rl.InitWindow(800, 450, 'Republica Velha')
-    rl.SetTargetFPS(0)
     options = 
     {
-        world = world,
-        camera = rl.new("Camera", {
-            position = rl.new("Vector3", 0, #world.map.height, 0),
-            target = rl.new("Vector3", #world.map.height/2, republica.util.matrix.average(world.map.height), #world.map.height/2),
-            up = rl.new("Vector3", 0, 1, 0),
-            fovy = 45,
-            type = rl.CAMERA_PERSPECTIVE
-        }),
         screen = {x=800,y=450},
         title = 'republica nova',
         simple = true,
         paused = true,
         redraw = true,
         dynadraw = false, -- (optimization) this make the screen render only when a key is pressed
-        rendertexture = rl.LoadRenderTexture(800, 450),
         rendergrass = true,
         renderterrain = true
     }
+    local world = republica.world(2,16)
+    rl.SetConfigFlags(rl.FLAG_WINDOW_RESIZABLE)
+    rl.InitWindow(options.screen.x, options.screen.y, 'Republica Velha')
+    rl.SetTargetFPS(0)
+    options.rendertexture = rl.LoadRenderTexture(options.screen.x, options.screen.y)
+    options.world = world
+    options.camera = rl.new("Camera", {
+        position = rl.new("Vector3", 0, #world.map.height, 0),
+        target = rl.new("Vector3", #world.map.height/2, republica.util.matrix.average(world.map.height), #world.map.height/2),
+        up = rl.new("Vector3", 0, 1, 0),
+        fovy = 45,
+        type = rl.CAMERA_PERSPECTIVE
+    })
 
     local mm = republica.util.matrix.minmax(world.map.height)
     local simpler = simplify(world.map.height)
     print("\nmerged " .. #world.map.height*#world.map.height[1] .. ' blocks into ' .. #simpler .. ' blocks\n')
 
     while not rl.WindowShouldClose() do
+        if(rl.IsWindowResized()) then
+            --print(rl.GetScreenWidth(),rl.GetScreenHeight())
+            rl.UnloadRenderTexture(options.rendertexture)
+            options.screen.x = rl.GetScreenWidth()
+            options.screen.y = rl.GetScreenHeight()
+            options.rendertexture = rl.LoadRenderTexture(options.screen.x, options.screen.y)
+        end
         teclado(options.camera)
         rl.BeginDrawing()
         if(options.redraw == true) then
@@ -209,10 +216,10 @@ function start()
             {
                 x=0,
                 y=0,
-                width=800,
-                height=450*-1
+                width=options.screen.x,
+                height=options.screen.y*-1
             },
-            {x=0,y=0,width=800,height=450},
+            {x=0,y=0,width=options.screen.x,height=options.screen.y},
             {x=0,y=0},
             0,
             rl.WHITE
