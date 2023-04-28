@@ -31,21 +31,21 @@ end
 local function grassify(world)
     for  x = 1, #world.map.height do
         for y = 1, #world.map.height[x] do
-            --
+            if(world.map.height[x][y] > world.map.waterlevel+1) then
                 world.plant.spawn(--//this spawns a grass seed at each xy position
                 world,
                 'grass',
                 {x=x,y=y,z=#world.map.block[1][1]}
-            )--]]
-            if(util.random(1,100) == 1) then --random seeds start here
-                local temptype = util.array.keys(plants)[util.random(1,util.len(plants))]
-                
-                if(temptype ~= 'grass') then
-                    world.plant.spawn(--this spawns a random seed at the xy position
-                        world,
-                        temptype,
-                        {x=x,y=y,z=#world.map.block[1][1]}
-                    )
+                )--]]
+                if(util.random(1,100) == 1) then --random seeds start here
+                    local temptype = util.array.keys(plants)[util.random(1,util.len(plants))]
+                    if(temptype ~= 'grass') then
+                        world.plant.spawn(--this spawns a random seed at the xy position
+                            world,
+                            temptype,
+                            {x=x,y=y,z=#world.map.block[1][1]}
+                        )
+                    end
                 end
             end
         end
@@ -119,7 +119,9 @@ local function Map(multiHorizontal,quality)--create the map
         block = block,
         height = heightmap,
         temperature = temperature,
-        collision = Collision(block)
+        collision = Collision(block),
+        waterlevel = util.matrix.average(heightmap),
+        size = {#block,#block[1],#block[1][1]}
     }
 end
 

@@ -441,7 +441,7 @@ util.matrix.minmax = function(matrix)
             end
         end
     end
-    return {min = min_val, max = max_val}
+    return min_val, max_val
 end
 
 util.matrix.unique = function(matrix)

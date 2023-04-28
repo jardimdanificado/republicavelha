@@ -332,7 +332,10 @@ plants.jackfruit = {
 local materials =  
 {
     {name = 'air',solid = false},
-    {name = 'earth',solid = true}
+    {name = 'earth',solid = true},
+    {name = 'water',solid = false},
+    {name = 'mud',solid = true},
+    {name = 'sand',solid = true}
 }
 
 local types = {}
