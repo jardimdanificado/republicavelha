@@ -1,7 +1,6 @@
 local republica = require("src.republicanova")
 local exit = false
-
-local options
+local options = require('data.config')
 
 function ytoz(vec3)
     return {x = vec3.x, y = vec3.z, z = vec3.y}
@@ -138,37 +137,40 @@ end
 function start()
     --size up to 6 is safe, above 6 you can get buggy maps, default is 2
     --layers up to 16 are safe, default is 8
-    options = 
-    {
-        screen = {x=800,y=450},
-        title = 'republica nova',
-        simple = true,
-        paused = true,
-        redraw = true,
-        dynadraw = false, -- (optimization) this make the screen render only when a key is pressed
-        rendergrass = true,
-        renderterrain = true,
-        renderwater = true,
-        renderwires = true,
-        prettygrass = true
-    }
-    local world = republica.world(2,16)
-    rl.SetConfigFlags(rl.FLAG_MSAA_4X_HINT)
+    local world = republica.world(options.mapsize,options.mapquality)
+    --rl.SetConfigFlags(rl.FLAG_MSAA_4X_HINT)
 
+    if options.fullscreen then
+        rl.SetConfigFlags(rl.FLAG_FULLSCREEN_MODE)
+    end
+    if options.vsync then
+        rl.SetConfigFlags(rl.FLAG_VSYNC_HINT)
+    end
+    if options.runonbackground then
+        rl.SetConfigFlags(rl.FLAG_WINDOW_ALWAYS_RUN)
+    end
+    if options.msaa then
+        rl.SetConfigFlags(rl.FLAG_MSAA_4X_HINT)
+    end
+    if options.interlace then
+        rl.SetConfigFlags(rl.FLAG_INTERLACED_HINT)
+    end 
+    if options.highdpi then
+        rl.SetConfigFlags(rl.FLAG_WINDOW_HIGHDPI)
+    end
     rl.SetConfigFlags(rl.FLAG_WINDOW_RESIZABLE)
-    rl.SetConfigFlags(rl.FLAG_WINDOW_ALWAYS_RUN)
-    rl.InitWindow(options.screen.x, options.screen.y, 'Republica Velha')
-    rl.SetTargetFPS(0)
+    rl.InitWindow(options.screen.x, options.screen.y, options.title)
+    rl.SetTargetFPS(options.framerate)
     options.rendertexture = rl.LoadRenderTexture(options.screen.x, options.screen.y)
     options.world = world
     options.camera = rl.new("Camera", {
-        position = rl.new("Vector3", -10, #world.map.height, -10),
+        position = rl.new("Vector3",  options.cameradistance.x, #world.map.height, options.cameradistance.y),
         target = rl.new("Vector3", #world.map.height/2, republica.util.matrix.average(world.map.height), #world.map.height/2),
         up = rl.new("Vector3", 0, 1, 0),
         fovy = 45,
         type = rl.CAMERA_PERSPECTIVE
     })
-
+    options.cameradistance = nil
     local min,max = republica.util.matrix.minmax(world.map.height)
     local simpler = simplify(world.map.height)
     print("\nmerged " .. #world.map.height*#world.map.height[1] .. ' blocks into ' .. #simpler .. ' blocks\n')
@@ -259,7 +261,10 @@ function start()
             0,
             rl.WHITE
         );
-        rl.DrawFPS(10, 10)
+        if options.fpscounter then
+            rl.DrawFPS(10, 10)
+        end
+        
         rl.EndDrawing()
         if(options.paused == false) then
             world.frame(world)
@@ -300,7 +305,7 @@ function main()
     if(arg[1] ~= nil and arg[1] ~= 'main.lua') then
         if(arg[1] == 'compile') then
             local extension = (sys == "Windows") and '.exe' or '.appimage'
-            local execpath =  (sys == "Windows") and "./raylua_r.exe" or "./raylua_r"
+            local execpath =  (sys == "Windows") and "./raylua_r.exe" or "./raylua_e"
             if(republica.util.file.exist(execpath) == false) then 
                 setup(sys)
             end

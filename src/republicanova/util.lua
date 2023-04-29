@@ -189,6 +189,10 @@ util.string.includes = function(str,substring)
     return string.find(str, substring, 1, true) ~= nil
 end
 
+util.string.trim = function(s)
+    return s:gsub("^%s+", ""):gsub("%s+$", "")
+end
+
 util.file.load.text = function(path)
     local file = io.open(path, "r")
     local contents = file("*all")

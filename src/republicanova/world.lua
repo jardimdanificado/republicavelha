@@ -1,7 +1,7 @@
 local util = require("src.republicanova.util")
 local Terrain = require("src.republicanova.terrain")
 local types = require("src.republicanova.types")
-local materials = types.materials
+local blocks = types.blocks
 local plants = types.plants
 
 local function getHourOfDay(totalSeconds) 
@@ -66,7 +66,7 @@ local function Collision(blockmap)
                     return (
                             util.array.map(value,function(value,z)
                                 local result = 0
-                                if(materials[value].solid == true) then
+                                if(blocks[value].solid == true) then
                                     result = 100
                                 end
                                 return (result)
@@ -253,7 +253,7 @@ local function seedFrame(world,plant)
     local v = plant
     if(plant.position.z-1 >1) then
         
-        if(world.time%6==0 and materials[world.map.block[plant.position.x][plant.position.y][plant.position.z-1] ].name == 'earth') then
+        if(world.time%6==0 and blocks[world.map.block[plant.position.x][plant.position.y][plant.position.z-1] ].name == 'earth') then
             plant.germination = plant.germination + 1
             plant.status = (plant.status ~= 'germinating') and 'germinating' or plant.status
             if(plant.status == 'germinating') then

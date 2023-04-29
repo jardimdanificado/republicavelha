@@ -1,6 +1,6 @@
-local plants = {}
-
-plants.orange = {
+local types = {}
+types.plants = {}
+types.plants.orange = {
     type = 'fruit tree',
     fruit = {
         name = 'orange',
@@ -39,7 +39,7 @@ plants.orange = {
         }
     }
 };
-plants.grass = {
+types.plants.grass = {
     type = 'herb',
     size = {
         min = 5, -- centimeters
@@ -67,7 +67,7 @@ plants.grass = {
         }
     }
 };
-plants.caju = {
+types.plants.caju = {
     type = 'fruit tree',
     fruit = {
         name = 'caju',
@@ -106,7 +106,7 @@ plants.caju = {
         }
     }
 };
-plants.cannabis = {
+types.plants.cannabis = {
     type = 'herb',
     size = {
         min = 60, -- centimeters
@@ -140,7 +140,7 @@ plants.cannabis = {
         }
     }
 };
-plants.tamarind = {
+types.plants.tamarind = {
     type = 'fruit tree',
     fruit = {
         name = 'tamarind',
@@ -179,7 +179,7 @@ plants.tamarind = {
         }
     }
 };
-plants.rice = {
+types.plants.rice = {
     type = 'grain',
     size = {
         min = 20,
@@ -212,7 +212,7 @@ plants.rice = {
         }
     }
 };
-plants.starfruit = {
+types.plants.starfruit = {
     type = 'fruit tree',
     fruit = {
         name = 'starfruit',
@@ -251,7 +251,7 @@ plants.starfruit = {
         }
     }
 };
-plants.tomato = {
+types.plants.tomato = {
     type = 'plant',
     fruit = {
         name = 'tomato',
@@ -289,7 +289,7 @@ plants.tomato = {
         }
     }
 };
-plants.jackfruit = {
+types.plants.jackfruit = {
     type = 'fruit tree',
     fruit = {
         name = 'jackfruit',
@@ -328,19 +328,25 @@ plants.jackfruit = {
         }
     }
 }
-
-local materials =  
+types.blocks =  
 {
     {name = 'air',solid = false},
     {name = 'earth',solid = true},
-    {name = 'water',solid = false},
-    {name = 'mud',solid = true},
+    {name = 'rock',solid = true},
     {name = 'sand',solid = true}
 }
-
-local types = {}
-types.plants = plants
-types.materials = materials
+types.fluids = 
+{
+    {name = 'water',density=1},--density is measured by g/cm³ and is only used for verifying which fluid block should be above
+    {name = 'mud',density=1.73},
+    {name = 'pee',density=1.003},
+    {name = 'dog pee',density=1.035},
+    {name = 'oil',density=0.850},
+}
+types.items = 
+{
+    {name="shit",size=10},--size is measured in centimeters, 100 = one full block
+}
 
 function types.vector2(x,y)
     return{x=x or 1,y=y or 1}
@@ -350,14 +356,19 @@ function types.vector3(x,y,z)
     return{x=x or 1,y=y or 1,z=z or 1}
 end
 
-function types.collider(position,value, active,relatives,parent)
-    local obj = 
-    {
+function types.collider(position,value)
+    return {
         position = position or {x=1,y=1,z=1},
-        value = value or 0,
-        active = active or true
+        value = value or 0
     }
-    return obj
+end
+
+function types.fluid(fluidID,position,amount)
+    return {
+        position = position or {x=1,y=1,z=1},
+        amount = amount or 0,
+        material = fluids[fluidID]
+    }
 end
 
 function types.generic(type, status, birth, position, quality, condition, decayRate, mods)
@@ -384,10 +395,10 @@ function types.plant(specie, status, birth, position, quality, condition)
     local plant = types.generic('plant', status or 'idle', birth or 0, position or {x=1,y=1,z=1}, quality or 100, condition or 100)
     plant.specie = specie or 'tomato'
     plant.leaf = 0
-    plant.flower = (plants[plant.specie].flower ~= nil) and {} or 0
-    plant.branch = (plants[plant.specie].type ~= 'herb') and {} or 0
-    plant.trunk = (plants[plant.specie].wood ~= nil) and {} or 0
-    plant.fruit = (plants[plant.specie].fruit ~= nil) and {} or 0
+    plant.flower = (types.plants[plant.specie].flower ~= nil) and {} or 0
+    plant.branch = (types.plants[plant.specie].type ~= 'herb') and {} or 0
+    plant.trunk = (types.plants[plant.specie].wood ~= nil) and {} or 0
+    plant.fruit = (types.plants[plant.specie].fruit ~= nil) and {} or 0
     return plant
 end
 
