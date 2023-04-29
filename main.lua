@@ -1,7 +1,6 @@
 local republica = require("src.republicanova")
 local exit = false
-
-local options
+local options = require('data.config')
 
 function ytoz(vec3)
     return {x = vec3.x, y = vec3.z, z = vec3.y}
@@ -76,193 +75,243 @@ function simplify(arr)
     return blocks;
 end 
 
-function teclado()
-    if(rl.IsKeyPressed(rl.KEY_INSERT)) then
-        options.redraw = true
-        options.simple = (options.simple == false) and true or false
-    elseif(rl.IsKeyPressed(rl.KEY_C)) then
-        options.redraw = true
+function render(world,simplifiedterrain,watercube)
+    if(rl.IsWindowResized()) then
+        rl.UnloadRenderTexture(options.rendertexture)
+        options.screen.x = rl.GetScreenWidth()
+        options.screen.y = rl.GetScreenHeight()
+        options.rendertexture = rl.LoadRenderTexture(options.screen.x, options.screen.y)
+        world.redraw=true
+    end
+    
+    rl.BeginDrawing()
+    if(world.redraw == true) then
+        rl.BeginTextureMode(options.rendertexture)
+        rl.ClearBackground(rl.RAYWHITE)
+        rl.BeginMode3D(options.camera)
+        if options.renderterrain then
+            if(options.simple == true) then
+                for x = 1, #simplifiedterrain do
+                    rl.DrawCube(simplifiedterrain[x].position,simplifiedterrain[x].size.x,1,simplifiedterrain[x].size.z,simplifiedterrain[x].color)
+                    if (options.renderwires) then
+                        rl.DrawCubeWires(simplifiedterrain[x].position,simplifiedterrain[x].size.x,1,simplifiedterrain[x].size.z,simplifiedterrain[x].gridcolor)
+                    end
+                end
+            else
+                for x = 1, #world.map.height do
+                    for z = 1, #world.map.height do
+                        rl.DrawCube({x=x,y=world.map.height[x][z],z=z},1,1,1,y_rgba(world.map.height[x][z],min,max))
+                        if (options.renderwires) then
+                            rl.DrawCubeWires({x=x,y=world.map.height[x][z],z=z},1,1,1,y_rgba(world.map.height[x][z],min,max,true))
+                        end
+                       
+                    end
+                end
+            end
+        end
+            
+        for i, plant in ipairs(world.plant) do 
+            if plant.type == 'seed' then
+                rl.DrawCube(ytoz(plant.position),0.5,1.01,0.5,{r=0,g=255,b=0,a=55})
+            elseif plant.specie == 'grass' then
+                if options.rendergrass then
+                    if(options.prettygrass == false) then
+                        local temp = ytoz(plant.position)
+                        temp.y = temp.y + 1
+                        rl.DrawPlane(temp,{x=1,y=1},{r=100,g=255,b=50,a=95})
+                    else
+                        rl.DrawCube(ytoz(plant.position),republica.util.random(1.111,1.333),republica.util.random(1.111,1.333),republica.util.random(1.111,1.333),rl.new("Color",100,republica.util.random(200,255),50,republica.util.random(55,95)))
+                    end
+                end
+            elseif republica.plants[plant.specie].size.max <=100 then
+                local tempposi = ytoz(plant.position)
+                tempposi.y = tempposi.y + 1
+                rl.DrawCube(tempposi,1,1,1,rl.YELLOW)
+                if(options.renderwires) then
+                    rl.DrawCubeWires(ytoz(plant.position),1,1,1,rl.BLACK)
+                end
+            elseif republica.util.string.includes(republica.plants[plant.specie].type,'tree') then
+                for i, trunk in ipairs(plant.trunk) do
+                    rl.DrawCube(ytoz(trunk.position),1,1,1,rl.BROWN)
+                    if(options.renderwires) then
+                        rl.DrawCubeWires(ytoz(trunk.position),1,1,1,rl.BLACK)
+                    end
+                end
+                for i, branch in ipairs(plant.branch) do
+                    rl.DrawCube(ytoz(branch.position),1,1,1,rl.RED)
+                    if(options.renderwires) then
+                        rl.DrawCubeWires(ytoz(branch.position),1,1,1,rl.BLACK)
+                    end
+                end
+            end
+        end
+        if options.renderwater then
+            rl.DrawCube(republica.util.array.unpack(watercube))
+        end
+        rl.EndMode3D()
+        rl.EndTextureMode();
+        if(options.dynadraw) then
+            world.redraw = false
+        end
+    end
+    rl.DrawTexturePro(
+        options.rendertexture.texture,
+        {
+            x=0,
+            y=0,
+            width=options.screen.x,
+            height=options.screen.y*-1
+        },
+        {x=0,y=0,width=options.screen.x,height=options.screen.y},
+        {x=0,y=0},
+        0,
+        rl.WHITE
+    );
+    if options.fpscounter then
+        rl.DrawFPS(10, 10)
+    end
+    
+    rl.EndDrawing() 
+end
+
+function run_render(world,simplifiedterrain,watercube)
+    while true do
+        render(world,simplifiedterrain,watercube)
+        coroutine.yield()
+    end
+end
+
+function frame(world)
+    while true do
+        if(options.paused == false) then
+            world.frame(world)
+        end
+        coroutine.yield()
+    end
+end
+
+function teclado(world)
+    if(rl.IsKeyPressed(rl.KEY_C)) then
+        world.redraw = true
         options.dynadraw = (options.dynadraw == false) and true or false
     elseif(rl.IsKeyPressed(rl.KEY_P)) then
-        options.redraw = true
+        world.redraw = true
         options.prettygrass = (options.prettygrass == false) and true or false
     elseif(rl.IsKeyPressed(rl.KEY_W)) then
-        options.redraw = true
+        world.redraw = true
         options.renderwater = (options.renderwater == false) and true or false
     elseif(rl.IsKeyPressed(rl.KEY_F)) then
-        options.redraw = true
-        print(options.world.time)
+        world.redraw = true
+        print(world.time)
     elseif(rl.IsKeyPressed(rl.KEY_R)) then
-        options.redraw = true
+        world.redraw = true
         options.renderwires = (options.renderwires == false) and true or false
     elseif(rl.IsKeyPressed(rl.KEY_G)) then
-        options.redraw = true
+        world.redraw = true
         options.rendergrass = (options.rendergrass == false) and true or false
     elseif(rl.IsKeyPressed(rl.KEY_T)) then
-        options.redraw = true
+        world.redraw = true
         options.renderterrain = (options.renderterrain == false) and true or false
     elseif(rl.IsKeyDown(rl.KEY_PAGE_UP)) then
-        options.redraw = true
+        world.redraw = true
         options.camera.position.y = options.camera.position.y + 2
         rl.UpdateCamera(options.camera,0)
     elseif(rl.IsKeyDown(rl.KEY_PAGE_DOWN)) then
-        options.redraw = true
+        world.redraw = true
         options.camera.position.y = options.camera.position.y - 2
         rl.UpdateCamera(options.camera,0)
     elseif(rl.IsKeyDown(rl.KEY_UP)) then
-        options.redraw = true
+        world.redraw = true
         options.camera.target.y = options.camera.target.y + 2
         rl.UpdateCamera(options.camera,0)
     elseif(rl.IsKeyDown(rl.KEY_DOWN)) then
-        options.redraw = true
+        world.redraw = true
         options.camera.target.y = options.camera.target.y - 2
         rl.UpdateCamera(options.camera,0)
     elseif(rl.IsKeyDown(rl.KEY_RIGHT)) then
-        options.redraw = true
+        world.redraw = true
         options.camera.position = republica.util.math.rotate(options.camera.position,options.camera.target,-3)
         rl.UpdateCamera(options.camera,0)
-        options.camera.target = {x=#options.world.map.height/2,y=options.camera.target.y,z=#options.world.map.height/2}
+        if(not rl.IsKeyDown(rl.KEY_LEFT_SHIFT) and not rl.IsKeyDown(rl.KEY_RIGHT_SHIFT)) then
+            options.camera.target = {x=#world.map.height/2,y=options.camera.target.y,z=#world.map.height/2}
+        end
     elseif(rl.IsKeyDown(rl.KEY_LEFT)) then
-        options.redraw = true
+        world.redraw = true
         options.camera.position = republica.util.math.rotate(options.camera.position,options.camera.target,3)
         rl.UpdateCamera(options.camera,0)
-        options.camera.target = {x=#options.world.map.height/2,y=options.camera.target.y,z=#options.world.map.height/2}
+        if(not rl.IsKeyDown(rl.KEY_LEFT_SHIFT) and not rl.IsKeyDown(rl.KEY_RIGHT_SHIFT)) then
+            options.camera.target = {x=#world.map.height/2,y=options.camera.target.y,z=#world.map.height/2}
+        end
+    elseif(rl.IsKeyDown(rl.KEY_PERIOD)) then
+        world.redraw = true
+        options.camera.fovy = options.camera.fovy - 1
+        rl.UpdateCamera(options.camera,0)
+    elseif(rl.IsKeyDown(rl.KEY_COMMA)) then
+        world.redraw = true
+        options.camera.fovy = options.camera.fovy + 1
+        rl.UpdateCamera(options.camera,0)
     elseif(rl.IsKeyPressed(rl.KEY_SPACE)) then
-        options.redraw = true
+        world.redraw = true
         options.paused = (options.paused == false) and true or false
         print("paused = " .. (options.paused and 'true' or 'false'))
     end
-    
 end
 
 function start()
     --size up to 6 is safe, above 6 you can get buggy maps, default is 2
     --layers up to 16 are safe, default is 8
-    options = 
-    {
-        screen = {x=800,y=450},
-        title = 'republica nova',
-        simple = true,
-        paused = true,
-        redraw = true,
-        dynadraw = false, -- (optimization) this make the screen render only when a key is pressed
-        rendergrass = true,
-        renderterrain = true,
-        renderwater = true,
-        renderwires = true,
-        prettygrass = true
-    }
-    local world = republica.world(2,16)
-    rl.SetConfigFlags(rl.FLAG_MSAA_4X_HINT)
+    local world = republica.world(options.mapsize,options.mapquality)
+    world.redraw = options.redraw
+    options.redraw = nil
+    
+    --rl.SetConfigFlags(rl.FLAG_MSAA_4X_HINT)
 
+    if options.fullscreen then
+        rl.SetConfigFlags(rl.FLAG_FULLSCREEN_MODE)
+    end
+    if options.vsync then
+        rl.SetConfigFlags(rl.FLAG_VSYNC_HINT)
+    end
+    if options.runonbackground then
+        rl.SetConfigFlags(rl.FLAG_WINDOW_ALWAYS_RUN)
+    end
+    if options.msaa then
+        rl.SetConfigFlags(rl.FLAG_MSAA_4X_HINT)
+    end
+    if options.interlace then
+        rl.SetConfigFlags(rl.FLAG_INTERLACED_HINT)
+    end 
+    if options.highdpi then
+        rl.SetConfigFlags(rl.FLAG_WINDOW_HIGHDPI)
+    end
     rl.SetConfigFlags(rl.FLAG_WINDOW_RESIZABLE)
-    rl.SetConfigFlags(rl.FLAG_WINDOW_ALWAYS_RUN)
-    rl.InitWindow(options.screen.x, options.screen.y, 'Republica Velha')
-    rl.SetTargetFPS(0)
+    rl.InitWindow(options.screen.x, options.screen.y, options.title)
+    rl.SetTargetFPS(options.framerate)
     options.rendertexture = rl.LoadRenderTexture(options.screen.x, options.screen.y)
-    options.world = world
     options.camera = rl.new("Camera", {
-        position = rl.new("Vector3", -10, #world.map.height, -10),
+        position = options.cameraposition,
         target = rl.new("Vector3", #world.map.height/2, republica.util.matrix.average(world.map.height), #world.map.height/2),
         up = rl.new("Vector3", 0, 1, 0),
-        fovy = 45,
-        type = rl.CAMERA_PERSPECTIVE
+        fovy = options.fov,
+        type = rl.CAMERA_PERSPECTIVE,
     })
-
+    options.cameraposition = nil
     local min,max = republica.util.matrix.minmax(world.map.height)
     local simpler = simplify(world.map.height)
+    local watercube = {{x=0+#world.map.height/2,y=0.5,z=#world.map.height[1]/2},#world.map.height,world.map.waterlevel*2,#world.map.height[1],rl.new("Color",0,190,125,185)}
     print("\nmerged " .. #world.map.height*#world.map.height[1] .. ' blocks into ' .. #simpler .. ' blocks\n')
 
+    local frame_co = coroutine.create(frame)
+    local render_co = coroutine.create(run_render)
+    coroutine.resume(frame_co, world)--pre start the routines
+    coroutine.resume(render_co, world, simpler, watercube)
     while not rl.WindowShouldClose() do
-        if(rl.IsWindowResized()) then
-            --print(rl.GetScreenWidth(),rl.GetScreenHeight())
-            rl.UnloadRenderTexture(options.rendertexture)
-            options.screen.x = rl.GetScreenWidth()
-            options.screen.y = rl.GetScreenHeight()
-            options.rendertexture = rl.LoadRenderTexture(options.screen.x, options.screen.y)
-            options.redraw=true
+        teclado(world)
+        if coroutine.status(frame_co) == "suspended" then
+            coroutine.resume(frame_co, world)
         end
-        teclado(options.camera)
-        rl.BeginDrawing()
-        if(options.redraw == true) then
-            rl.BeginTextureMode(options.rendertexture)
-            rl.ClearBackground(rl.RAYWHITE)
-            rl.BeginMode3D(options.camera)
-            if options.renderterrain then
-                if(options.simple == true) then
-                    for x = 1, #simpler do
-                        rl.DrawCube(simpler[x].position,simpler[x].size.x,1,simpler[x].size.z,simpler[x].color)
-                        rl.DrawCubeWires(simpler[x].position,simpler[x].size.x,1,simpler[x].size.z,simpler[x].gridcolor)
-                    end
-                else
-                    for x = 1, #world.map.height do
-                        for z = 1, #world.map.height do
-                            rl.DrawCube({x=x,y=world.map.height[x][z],z=z},1,1,1,y_rgba(world.map.height[x][z],min,max))
-                            rl.DrawCubeWires({x=x,y=world.map.height[x][z],z=z},1,1,1,y_rgba(world.map.height[x][z],min,max,true))
-                        end
-                    end
-                end
-            end
-                
-            for i, plant in ipairs(world.plant) do 
-                if plant.type == 'seed' then
-                    rl.DrawCube(ytoz(plant.position),0.5,1.01,0.5,rl.new("Color",0,0,0,125))
-                elseif plant.specie == 'grass' then
-                    if options.rendergrass then
-                        if(options.prettygrass == false) then
-                            rl.DrawCube(ytoz(plant.position),1,1,1,rl.new("Color",100,255,50,95))
-                        else
-                            rl.DrawCube(ytoz(plant.position),republica.util.random(1.111,1.333),republica.util.random(1.111,1.333),republica.util.random(1.111,1.333),rl.new("Color",100,republica.util.random(200,255),50,republica.util.random(55,95)))
-                        end
-                    end
-                elseif republica.plants[plant.specie].size.max <=100 then
-                    local tempposi = ytoz(plant.position)
-                    tempposi.y = tempposi.y + 1
-                    rl.DrawCube(tempposi,1,1,1,rl.YELLOW)
-                    if(options.renderwires) then
-                        rl.DrawCubeWires(ytoz(plant.position),1,1,1,rl.BLACK)
-                    end
-                elseif republica.util.string.includes(republica.plants[plant.specie].type,'tree') then
-                    for i, trunk in ipairs(plant.trunk) do
-                        rl.DrawCube(ytoz(trunk.position),1,1,1,rl.BROWN)
-                        if(options.renderwires) then
-                            rl.DrawCubeWires(ytoz(trunk.position),1,1,1,rl.BLACK)
-                        end
-                    end
-                    for i, branch in ipairs(plant.branch) do
-                        rl.DrawCube(ytoz(branch.position),1,1,1,rl.RED)
-                        if(options.renderwires) then
-                            rl.DrawCubeWires(ytoz(branch.position),1,1,1,rl.BLACK)
-                        end
-                    end
-                end
-            end
-            if options.renderwater then
-                rl.DrawCube({x=0+#world.map.height/2,y=0.5,z=#world.map.height[1]/2},#world.map.height,world.map.waterlevel*2,#world.map.height[1],rl.new("Color",0,190,125,185))
-            end
-            rl.EndMode3D()
-            rl.EndTextureMode();
-            if(options.dynadraw) then
-                options.redraw = false
-            end
-        end
-        rl.DrawTexturePro(
-            options.rendertexture.texture,
-            {
-                x=0,
-                y=0,
-                width=options.screen.x,
-                height=options.screen.y*-1
-            },
-            {x=0,y=0,width=options.screen.x,height=options.screen.y},
-            {x=0,y=0},
-            0,
-            rl.WHITE
-        );
-        rl.DrawFPS(10, 10)
-        rl.EndDrawing()
-        if(options.paused == false) then
-            world.frame(world)
+        if coroutine.status(render_co) == "suspended" and world.time % options.slowrender == 0 then
+            coroutine.resume(render_co, world,simpler,watercube)
         end
     end
     exit = true
@@ -300,12 +349,12 @@ function main()
     if(arg[1] ~= nil and arg[1] ~= 'main.lua') then
         if(arg[1] == 'compile') then
             local extension = (sys == "Windows") and '.exe' or '.appimage'
-            local execpath =  (sys == "Windows") and "./raylua_r.exe" or "./raylua_r"
+            local execpath =  (sys == "Windows") and "./raylua_r.exe" or "./raylua_e"
             if(republica.util.file.exist(execpath) == false) then 
                 setup(sys)
             end
             os.execute(
-                    "zip -r compile.zip main.lua src \n" ..
+                    "zip -r compile.zip main.lua src data \n" ..
                     execpath .. " compile.zip &&  rm compile.zip &&  mv compile_out republicanova" .. extension)
             os.exit()
         elseif(arg[1] == 'setup') then

@@ -1,6 +1,6 @@
 local util = require("src.republicanova.util")
 local types = require ("src.republicanova.types")
-local materials = types.materials
+local blocks = types.blocks
 
 -------------------------------------------------
 --TERRAIN
@@ -286,22 +286,17 @@ local function terrify(map,fixedHeight)
         for y = 1, #map do
             result[x][y] = {}
             for z = 1, fixedHeight do
-                result[x][y][z] = (z < map[x][y]) and 2 or 1 --check materials.lua for material types
+                result[x][y][z] = (z < map[x][y]) and 2 or 1 --check blocks.lua for material types
                 if z < map[x][y] then
                     if z < waterlevel then
-                        result[x][y][z] = 4
+                        result[x][y][z] = ({1,1,1,1,1,2,2,3})[util.random(1,8)]
                     elseif z == waterlevel then
-                        result[x][y][z] = 5
+                        result[x][y][z] = 4
                     else
                         result[x][y][z] = 2
                     end
                 else
-                    if z < waterlevel then
-                        result[x][y][z] = 3
-                    else
-                        result[x][y][z] = 1
-                    end
-                    
+                    result[x][y][z] = 1
                 end
             end
         end
@@ -311,7 +306,7 @@ end
 
 local function Terrain(multiHorizontal, layers,retry)
     local floor = math.floor
-    local mapsize = {w=64,h=64}
+    local mapsize = {w=64,h=72}
     multiHorizontal = multiHorizontal or 2
     layers = layers or 8
     local smooth = mapsize.w * (multiHorizontal^2)/2

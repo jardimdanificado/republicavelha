@@ -1,7 +1,7 @@
 local util = require("src.republicanova.util")
 local Terrain = require("src.republicanova.terrain")
 local types = require("src.republicanova.types")
-local materials = types.materials
+local blocks = types.blocks
 local plants = types.plants
 
 local function getHourOfDay(totalSeconds) 
@@ -66,7 +66,7 @@ local function Collision(blockmap)
                     return (
                             util.array.map(value,function(value,z)
                                 local result = 0
-                                if(materials[value].solid == true) then
+                                if(blocks[value].solid == true) then
                                     result = 100
                                 end
                                 return (result)
@@ -89,6 +89,7 @@ local function Collision(blockmap)
     end
 
     collision.check=function(position,value)--returns true if no collider in the specified position, of if the colliders in the position are below value
+       --print (position.x)
         value = value or 75
         if(
             position.x <1 or 
@@ -115,15 +116,104 @@ end
 local function Map(multiHorizontal,quality)--create the map
     local block,heightmap = util.array.unpack(Terrain(multiHorizontal,quality))
     local temperature = util.matrix.new(#block,#block[1],#block[1][1],29)
+    local waterlevel = util.matrix.average(heightmap)
+    local fluid = {}
+    for x = 1, #block, 1 do
+        fluid[x] = {}
+        for y = 1, #block[1], 1 do
+            fluid[x][y] = {}
+            for z = 1, #block[1][1], 1 do
+                if z < waterlevel then
+                    if block[x][y][z] == 1 then--here block[1] is air
+                        fluid[x][y][z] = 1 --fluids[1] is water
+                    end
+                else
+                    fluid[x][y][z] = 0 --fluids[0] is nothing
+                end
+            end
+        end
+    end
     return {
         block = block,
         height = heightmap,
+        fluid = fluid,
         temperature = temperature,
         collision = Collision(block),
-        waterlevel = util.matrix.average(heightmap),
+        waterlevel = waterlevel,
         size = {#block,#block[1],#block[1][1]}
     }
 end
+
+local fluidpathfinder = function(matrix, x, y, z)
+    -- Define the default numpad pattern
+    local directions = {
+        {x = -1, y = -1, z = 0}, -- 7
+        {x = 0, y = -1, z = 0}, -- 8
+        {x = 1, y = -1, z = 0}, -- 9
+        {x = -1, y = 0, z = 0}, -- 4
+        {x = 1, y = 0, z = 0}, -- 6
+        {x = -1, y = 1, z = 0}, -- 1
+        {x = 0, y = 1, z = 0}, -- 2
+        {x = 1, y = 1, z = 0}, -- 3
+    }
+    local queue = {{x = x, y = y, z = z}}
+    local visited = {[z]={[y]={[x]=true}}}
+    local parent = {}
+
+    while #queue > 0 do
+        local current = table.remove(queue, 1)
+
+        for i, dir in ipairs(directions) do
+            local next_x = current.x + dir.x
+            local next_y = current.y + dir.y
+            local next_z = current.z + dir.z
+
+            -- Skip over the starting position
+            if next_x == x and next_y == y and next_z == z then
+                goto continue
+            end
+
+            -- Check if the next position is out of bounds
+            if next_x < 1 or next_x > #matrix[1][1] or 
+               next_y < 1 or next_y > #matrix[1] or 
+               next_z < 1 or next_z > #matrix then
+                goto continue
+            end
+
+            -- Check if the next position has already been visited
+            if visited[next_z][next_y][next_x] then
+                goto continue
+            end
+
+            -- Check if the next position contains a 1
+            if matrix[next_z][next_y][next_x] == 1 then
+                -- Reconstruct the path to the nearest 1
+                local path = {}
+                local current_pos = {x = next_x, y = next_y, z = next_z}
+                while current_pos.x ~= x or current_pos.y ~= y do
+                    local p = parent[current_pos.z][current_pos.y][current_pos.x]
+                    table.insert(path, p)
+                    current_pos.x = current_pos.x - directions[p].x
+                    current_pos.y = current_pos.y - directions[p].y
+                    current_pos.z = current_pos.z - directions[p].z
+                end
+                return path
+            end
+
+            -- Add the next position to the queue and mark it as visited
+            table.insert(queue, {x = next_x, y = next_y, z = next_z})
+            visited[next_z][next_y][next_x] = true
+            parent[next_z][next_y][next_x] = i
+
+            ::continue::
+        end
+    end
+
+    -- If there is no path to a 1, return an empty array
+    return {}
+end
+
+
 
 local Life = 
 {
@@ -195,6 +285,7 @@ local function growBranch(world,plant,time)
         if pposi.z-math.floor((plants[plant.specie].size.max/100)/2.5) > plant.position.z and world.map.collision.check(util.math.vec3add(lposi,pposi),75) then         
             table.insert(plant.branch,types.branch(plant.specie,'idle',time,util.math.vec3add(lposi,pposi),plant.quality,plant.condition))
             table.insert(world.map.collision.colliders,types.collider(lposi,75))
+            world.redraw = true
         end
     end
     return plant
@@ -209,6 +300,7 @@ local function growTrunk(world,plant,time)
         if world.map.collision.check(util.math.vec3add(lposi,pposi),75) then
             table.insert(plant.trunk,types.trunk(plant.specie,'idle',time,util.math.vec3add(lposi,pposi),plant.quality,plant.condition))
             table.insert(world.map.collision.colliders,types.collider(lposi))
+            world.redraw = true
         end
     end
     return plant
@@ -242,27 +334,42 @@ local function plantFrame(world,plant)
     return(plant)
 end
 
-local function gravity(collisionMap,position)
-    if(position.z > 1 and collisionMap.check({x=position.x,y=position.y,z=position.z-1})) then
-        return{x=position.x,y=position.y,z=position.z-1}
+local function gravity(world,object)
+    if(object.position.z > 1 and world.map.collision.check({x=object.position.x,y=object.position.y,z=object.position.z-1})) then
+        local check = false
+        for i = object.position.z, object.position.z - object.falltime, -1 do
+            --print(collisionMap.map[object.position.x][object.position.y][i-1])
+            if world.map.collision.map[object.position.x][object.position.y][i-1] >0 then
+--                print(collisionMap.map[object.position.x][object.position.y][i-1])
+                object.position.z = i
+                object.falltime = 1
+                check = true
+                world.redraw = true
+                break
+            end
+        end
+        if check == false then
+            object.position.z = object.position.z - object.falltime+1
+            object.falltime = object.falltime + 1
+            world.redraw = true
+        end
     end
-    return(position)
 end
 
 local function seedFrame(world,plant)
     local v = plant
     if(plant.position.z-1 >1) then
-        
-        if(world.time%6==0 and materials[world.map.block[plant.position.x][plant.position.y][plant.position.z-1] ].name == 'earth') then
+        if(world.time%6==0 and blocks[world.map.block[plant.position.x][plant.position.y][plant.position.z-1] ].name == 'earth') then
             plant.germination = plant.germination + 1
             plant.status = (plant.status ~= 'germinating') and 'germinating' or plant.status
             if(plant.status == 'germinating') then
                 if(plant.germination >= plants[plant.specie].time.maturing.max/1000000 or (util.roleta(19,1) == 2 and plant.germination>=(plants[plant.specie].time.maturing.min/1000000))) then
+                    world.redraw = true
                     return(types.plant(plant.specie,plant.status,world.time,plant.position,plant.quality,100))
                 end
             end
         end
-        plant.position = gravity(world.map.collision,plant.position)
+        gravity(world,plant)
     end
     return(plant)
 end
@@ -296,6 +403,7 @@ local function world(size,quality)
     }
     world.map = Map(size,quality)
     world = grassify(world)
+    world.redraw = true
     return world
 end
 

@@ -189,6 +189,10 @@ util.string.includes = function(str,substring)
     return string.find(str, substring, 1, true) ~= nil
 end
 
+util.string.trim = function(s)
+    return s:gsub("^%s+", ""):gsub("%s+$", "")
+end
+
 util.file.load.text = function(path)
     local file = io.open(path, "r")
     local contents = file("*all")
@@ -725,10 +729,11 @@ util.link = function(obj,parent,relatives)
     return obj
 end
 
+util.sign = function(x)
+    return x > 0 and 1 or x < 0 and -1 or 0
+end
+
 util.unlinkVec3 = function(linkedvec3,acumulator)
-    for k, v in pairs(linkedvec3) do
-        print(k,v)
-    end
     acumulator = acumulator ~= nil and util.math.vec3add(acumulator,linkedvec3) or {x=linkedvec3.x,y=linkedvec3.y,z=linkedvec3.z}
     if(linkedvec3.parent ~= nil and linkedvec3.parent ~= 0) then
         util.unlinkVec3(linkedvec3.parent,acumulator)
@@ -800,7 +805,7 @@ local ref2 = banco.vector3._new(9,5,32)
 local ref3 = banco.vector3._new(6,5400,7)
 banco.vector3._new(2,1.6,6.5)
 for k, v in util.pairs(banco.vector3) do
-    print(k)
+    --print(k)
 end
 ref2 = reference
 reference._assign(ref3)
