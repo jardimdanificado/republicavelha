@@ -405,6 +405,7 @@ end
 function types.seed(specie, status, birth, position, quality, condition) 
     local seed = types.generic('seed', status or 'idle', birth or 0, position or {x=1,y=1,z=1}, quality or 100, condition or 100,2592000)
     seed.specie = specie or 'tomato'
+    seed.falltime = 1
     seed.germination = 0
     return seed
 end

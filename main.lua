@@ -120,12 +120,24 @@ function teclado()
         options.redraw = true
         options.camera.position = republica.util.math.rotate(options.camera.position,options.camera.target,-3)
         rl.UpdateCamera(options.camera,0)
-        options.camera.target = {x=#options.world.map.height/2,y=options.camera.target.y,z=#options.world.map.height/2}
+        if(not rl.IsKeyDown(rl.KEY_LEFT_SHIFT) and not rl.IsKeyDown(rl.KEY_RIGHT_SHIFT)) then
+            options.camera.target = {x=#options.world.map.height/2,y=options.camera.target.y,z=#options.world.map.height/2}
+        end
     elseif(rl.IsKeyDown(rl.KEY_LEFT)) then
         options.redraw = true
         options.camera.position = republica.util.math.rotate(options.camera.position,options.camera.target,3)
         rl.UpdateCamera(options.camera,0)
-        options.camera.target = {x=#options.world.map.height/2,y=options.camera.target.y,z=#options.world.map.height/2}
+        if(not rl.IsKeyDown(rl.KEY_LEFT_SHIFT) and not rl.IsKeyDown(rl.KEY_RIGHT_SHIFT)) then
+            options.camera.target = {x=#options.world.map.height/2,y=options.camera.target.y,z=#options.world.map.height/2}
+        end
+    elseif(rl.IsKeyDown(rl.KEY_PERIOD)) then
+        options.redraw = true
+        options.camera.fovy = options.camera.fovy - 1
+        rl.UpdateCamera(options.camera,0)
+    elseif(rl.IsKeyDown(rl.KEY_COMMA)) then
+        options.redraw = true
+        options.camera.fovy = options.camera.fovy + 1
+        rl.UpdateCamera(options.camera,0)
     elseif(rl.IsKeyPressed(rl.KEY_SPACE)) then
         options.redraw = true
         options.paused = (options.paused == false) and true or false
@@ -164,20 +176,20 @@ function start()
     options.rendertexture = rl.LoadRenderTexture(options.screen.x, options.screen.y)
     options.world = world
     options.camera = rl.new("Camera", {
-        position = rl.new("Vector3",  options.cameradistance.x, #world.map.height, options.cameradistance.y),
+        position = options.cameraposition,
         target = rl.new("Vector3", #world.map.height/2, republica.util.matrix.average(world.map.height), #world.map.height/2),
         up = rl.new("Vector3", 0, 1, 0),
-        fovy = 45,
+        fovy = options.fov,
         type = rl.CAMERA_PERSPECTIVE
     })
-    options.cameradistance = nil
+    options.cameraposition = nil
     local min,max = republica.util.matrix.minmax(world.map.height)
     local simpler = simplify(world.map.height)
+    local watercube = {{x=0+#world.map.height/2,y=0.5,z=#world.map.height[1]/2},#world.map.height,world.map.waterlevel*2,#world.map.height[1],rl.new("Color",0,190,125,185)}
     print("\nmerged " .. #world.map.height*#world.map.height[1] .. ' blocks into ' .. #simpler .. ' blocks\n')
-
+    local rl = rl
     while not rl.WindowShouldClose() do
         if(rl.IsWindowResized()) then
-            --print(rl.GetScreenWidth(),rl.GetScreenHeight())
             rl.UnloadRenderTexture(options.rendertexture)
             options.screen.x = rl.GetScreenWidth()
             options.screen.y = rl.GetScreenHeight()
@@ -240,7 +252,7 @@ function start()
                 end
             end
             if options.renderwater then
-                rl.DrawCube({x=0+#world.map.height/2,y=0.5,z=#world.map.height[1]/2},#world.map.height,world.map.waterlevel*2,#world.map.height[1],rl.new("Color",0,190,125,185))
+                rl.DrawCube(republica.util.array.unpack(watercube))
             end
             rl.EndMode3D()
             rl.EndTextureMode();

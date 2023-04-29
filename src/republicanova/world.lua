@@ -89,6 +89,7 @@ local function Collision(blockmap)
     end
 
     collision.check=function(position,value)--returns true if no collider in the specified position, of if the colliders in the position are below value
+       --print (position.x)
         value = value or 75
         if(
             position.x <1 or 
@@ -142,6 +143,77 @@ local function Map(multiHorizontal,quality)--create the map
         size = {#block,#block[1],#block[1][1]}
     }
 end
+
+local fluidpathfinder = function(matrix, x, y, z)
+    -- Define the default numpad pattern
+    local directions = {
+        {x = -1, y = -1, z = 0}, -- 7
+        {x = 0, y = -1, z = 0}, -- 8
+        {x = 1, y = -1, z = 0}, -- 9
+        {x = -1, y = 0, z = 0}, -- 4
+        {x = 1, y = 0, z = 0}, -- 6
+        {x = -1, y = 1, z = 0}, -- 1
+        {x = 0, y = 1, z = 0}, -- 2
+        {x = 1, y = 1, z = 0}, -- 3
+    }
+    local queue = {{x = x, y = y, z = z}}
+    local visited = {[z]={[y]={[x]=true}}}
+    local parent = {}
+
+    while #queue > 0 do
+        local current = table.remove(queue, 1)
+
+        for i, dir in ipairs(directions) do
+            local next_x = current.x + dir.x
+            local next_y = current.y + dir.y
+            local next_z = current.z + dir.z
+
+            -- Skip over the starting position
+            if next_x == x and next_y == y and next_z == z then
+                goto continue
+            end
+
+            -- Check if the next position is out of bounds
+            if next_x < 1 or next_x > #matrix[1][1] or 
+               next_y < 1 or next_y > #matrix[1] or 
+               next_z < 1 or next_z > #matrix then
+                goto continue
+            end
+
+            -- Check if the next position has already been visited
+            if visited[next_z][next_y][next_x] then
+                goto continue
+            end
+
+            -- Check if the next position contains a 1
+            if matrix[next_z][next_y][next_x] == 1 then
+                -- Reconstruct the path to the nearest 1
+                local path = {}
+                local current_pos = {x = next_x, y = next_y, z = next_z}
+                while current_pos.x ~= x or current_pos.y ~= y do
+                    local p = parent[current_pos.z][current_pos.y][current_pos.x]
+                    table.insert(path, p)
+                    current_pos.x = current_pos.x - directions[p].x
+                    current_pos.y = current_pos.y - directions[p].y
+                    current_pos.z = current_pos.z - directions[p].z
+                end
+                return path
+            end
+
+            -- Add the next position to the queue and mark it as visited
+            table.insert(queue, {x = next_x, y = next_y, z = next_z})
+            visited[next_z][next_y][next_x] = true
+            parent[next_z][next_y][next_x] = i
+
+            ::continue::
+        end
+    end
+
+    -- If there is no path to a 1, return an empty array
+    return {}
+end
+
+
 
 local Life = 
 {
@@ -260,17 +332,30 @@ local function plantFrame(world,plant)
     return(plant)
 end
 
-local function gravity(collisionMap,position)
-    if(position.z > 1 and collisionMap.check({x=position.x,y=position.y,z=position.z-1})) then
-        return{x=position.x,y=position.y,z=position.z-1}
+local function gravity(collisionMap,object)
+    if(object.position.z > 1 and collisionMap.check({x=object.position.x,y=object.position.y,z=object.position.z-1})) then
+        local check = false
+        for i = object.position.z, object.position.z - object.falltime, -1 do
+            --print(collisionMap.map[object.position.x][object.position.y][i-1])
+            if collisionMap.map[object.position.x][object.position.y][i-1] >0 then
+--                print(collisionMap.map[object.position.x][object.position.y][i-1])
+                object.position.z = i
+                object.falltime = 1
+                check = true
+                break
+            end
+        end
+        if check == false then
+            object.position.z = object.position.z - object.falltime+1
+            object.falltime = object.falltime + 1
+        end
     end
-    return(position)
 end
+
 
 local function seedFrame(world,plant)
     local v = plant
     if(plant.position.z-1 >1) then
-        
         if(world.time%6==0 and blocks[world.map.block[plant.position.x][plant.position.y][plant.position.z-1] ].name == 'earth') then
             plant.germination = plant.germination + 1
             plant.status = (plant.status ~= 'germinating') and 'germinating' or plant.status
@@ -280,7 +365,7 @@ local function seedFrame(world,plant)
                 end
             end
         end
-        plant.position = gravity(world.map.collision,plant.position)
+        gravity(world.map.collision,plant)
     end
     return(plant)
 end

@@ -12,4 +12,4 @@ os.remove("./data/heightmap.txt")
 republica.util.file.save.heightmap(world.map.height,"./data/heightmap.txt")
 --]]
 
-print(options)
+--print(options)
