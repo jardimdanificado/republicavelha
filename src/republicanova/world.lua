@@ -285,6 +285,7 @@ local function growBranch(world,plant,time)
         if pposi.z-math.floor((plants[plant.specie].size.max/100)/2.5) > plant.position.z and world.map.collision.check(util.math.vec3add(lposi,pposi),75) then         
             table.insert(plant.branch,types.branch(plant.specie,'idle',time,util.math.vec3add(lposi,pposi),plant.quality,plant.condition))
             table.insert(world.map.collision.colliders,types.collider(lposi,75))
+            world.redraw = true
         end
     end
     return plant
@@ -299,6 +300,7 @@ local function growTrunk(world,plant,time)
         if world.map.collision.check(util.math.vec3add(lposi,pposi),75) then
             table.insert(plant.trunk,types.trunk(plant.specie,'idle',time,util.math.vec3add(lposi,pposi),plant.quality,plant.condition))
             table.insert(world.map.collision.colliders,types.collider(lposi))
+            world.redraw = true
         end
     end
     return plant
@@ -332,26 +334,27 @@ local function plantFrame(world,plant)
     return(plant)
 end
 
-local function gravity(collisionMap,object)
-    if(object.position.z > 1 and collisionMap.check({x=object.position.x,y=object.position.y,z=object.position.z-1})) then
+local function gravity(world,object)
+    if(object.position.z > 1 and world.map.collision.check({x=object.position.x,y=object.position.y,z=object.position.z-1})) then
         local check = false
         for i = object.position.z, object.position.z - object.falltime, -1 do
             --print(collisionMap.map[object.position.x][object.position.y][i-1])
-            if collisionMap.map[object.position.x][object.position.y][i-1] >0 then
+            if world.map.collision.map[object.position.x][object.position.y][i-1] >0 then
 --                print(collisionMap.map[object.position.x][object.position.y][i-1])
                 object.position.z = i
                 object.falltime = 1
                 check = true
+                world.redraw = true
                 break
             end
         end
         if check == false then
             object.position.z = object.position.z - object.falltime+1
             object.falltime = object.falltime + 1
+            world.redraw = true
         end
     end
 end
-
 
 local function seedFrame(world,plant)
     local v = plant
@@ -361,11 +364,12 @@ local function seedFrame(world,plant)
             plant.status = (plant.status ~= 'germinating') and 'germinating' or plant.status
             if(plant.status == 'germinating') then
                 if(plant.germination >= plants[plant.specie].time.maturing.max/1000000 or (util.roleta(19,1) == 2 and plant.germination>=(plants[plant.specie].time.maturing.min/1000000))) then
+                    world.redraw = true
                     return(types.plant(plant.specie,plant.status,world.time,plant.position,plant.quality,100))
                 end
             end
         end
-        gravity(world.map.collision,plant)
+        gravity(world,plant)
     end
     return(plant)
 end
@@ -399,6 +403,7 @@ local function world(size,quality)
     }
     world.map = Map(size,quality)
     world = grassify(world)
+    world.redraw = true
     return world
 end
 

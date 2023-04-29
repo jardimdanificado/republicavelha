@@ -9,6 +9,7 @@ o.screen =
     y = 450
 }
 o.framerate = 0
+o.slowrender = 1 --minimum is 1, 0 will freeze the game
 o.fpscounter = true
 o.fullscreen = false
 o.vsync = false
@@ -17,7 +18,7 @@ o.msaa = false
 o.interlace = false
 o.highdpi = false
 o.simple = true--this simplify the blocks to reduce resources usage
-o.dynadraw = false
+o.dynadraw = true
 o.rendergrass = true
 o.renderterrain = true
 o.renderwater = true
