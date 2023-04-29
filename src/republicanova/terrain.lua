@@ -306,7 +306,7 @@ end
 
 local function Terrain(multiHorizontal, layers,retry)
     local floor = math.floor
-    local mapsize = {w=64,h=64}
+    local mapsize = {w=64,h=72}
     multiHorizontal = multiHorizontal or 2
     layers = layers or 8
     local smooth = mapsize.w * (multiHorizontal^2)/2

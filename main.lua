@@ -310,7 +310,7 @@ function main()
                 setup(sys)
             end
             os.execute(
-                    "zip -r compile.zip main.lua src \n" ..
+                    "zip -r compile.zip main.lua src data \n" ..
                     execpath .. " compile.zip &&  rm compile.zip &&  mv compile_out republicanova" .. extension)
             os.exit()
         elseif(arg[1] == 'setup') then

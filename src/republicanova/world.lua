@@ -115,12 +115,30 @@ end
 local function Map(multiHorizontal,quality)--create the map
     local block,heightmap = util.array.unpack(Terrain(multiHorizontal,quality))
     local temperature = util.matrix.new(#block,#block[1],#block[1][1],29)
+    local waterlevel = util.matrix.average(heightmap)
+    local fluid = {}
+    for x = 1, #block, 1 do
+        fluid[x] = {}
+        for y = 1, #block[1], 1 do
+            fluid[x][y] = {}
+            for z = 1, #block[1][1], 1 do
+                if z < waterlevel then
+                    if block[x][y][z] == 1 then--here block[1] is air
+                        fluid[x][y][z] = 1 --fluids[1] is water
+                    end
+                else
+                    fluid[x][y][z] = 0 --fluids[0] is nothing
+                end
+            end
+        end
+    end
     return {
         block = block,
         height = heightmap,
+        fluid = fluid,
         temperature = temperature,
         collision = Collision(block),
-        waterlevel = util.matrix.average(heightmap),
+        waterlevel = waterlevel,
         size = {#block,#block[1],#block[1][1]}
     }
 end
