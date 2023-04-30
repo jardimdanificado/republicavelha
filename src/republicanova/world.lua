@@ -272,7 +272,7 @@ local directions = --based on keypad
 
 local function growBranch(world,plant,time)
     local height = #plant.trunk ~= 0 and plant.trunk[#plant.trunk].position.z - plant.position.z or 0
-    if(height > 3 and #plant.branch < plants[plant.specie].size.max/2) then
+    if(height > 3 and #plant.branch < plants[plant.specie].size.max/10) then
         local lposi = directions[util.roleta(0,1,0,1,0,1,0,1,0)]
         lposi.z = util.random(0,1)
         local numb = util.random((#plant.branch/2)*-1,#plant.branch)
@@ -308,18 +308,20 @@ end
 
 local function growRoot(world,plant,time)
     local height = #plant.root ~= 0 and plant.root[#plant.root].position.z - plant.position.z or 0
-    if(height < (plants[plant.specie].size.max/1000)) then
+    if(#plant.root < (plants[plant.specie].size.max/75)) then
         local lposi = directions[util.roleta(0,1,0,1,2,1,0,1,0)]
-        lposi.z = (lposi.x == 0 and lposi.x == 0) and -1 or 0
+        lposi.z = 0
         local pposi = #plant.root ~= 0 and plant.root[#plant.root].position or plant.position
         local randomnumber = 0 
         if #plant.root > 1 then 
+            lposi.z = -1
             randomnumber = util.random(-1*math.floor(#plant.root/2),#plant.root)
             if(randomnumber>1)then
                 pposi = plant.root[randomnumber].position
             end
         end
-        if pposi.z + lposi.z > 1 and world.map.collision.check(util.math.vec3add(lposi,pposi),75) then
+        local posit = util.math.vec3add(lposi,pposi)
+        if posit.z > 1 and posit.z < #world.map.block[1][1] and posit.y < #world.map.block[1] and posit.x < #world.map.block and posit.x > 1 and posit.y > 1 and world.map.block[posit.x][posit.y][posit.z] == 2 or 4 then
             table.insert(plant.root,types.root(plant.specie,'idle',time,util.math.vec3add(lposi,pposi),plant.quality,plant.condition))
             table.insert(world.map.collision.colliders,types.collider(lposi))
             --world.redraw = true
@@ -339,19 +341,24 @@ local function plantFrame(world,plant)
             growLeaf(plant)
         end
     end
-    if(world.time % util.math.limit(plants[plant.specie].time.maturing.min,1,100)==0) then
+    if(world.time % util.math.limit(plants[plant.specie].time.maturing.min,1,233)==0) then
         growRoot(world,plant,world.time)
     end
     if plants[plant.specie].type == 'fruit tree' then
         --print(plants[plant.specie].type)
         local lastTrunkPosition = plant.position
+        if(world.time % util.math.limit(plants[plant.specie].time.maturing.min,1,37)==0) then
+            growRoot(world,plant,world.time)
+            
+        end
         if(#plant.trunk > 0) then
             lastTrunkPosition = plant.trunk[#plant.trunk].position
+            if(world.time % util.math.limit(plants[plant.specie].time.maturing.min,1,10)==0) then
+                growBranch(world,plant,world.time)
+            end
         end
-            
-        growBranch(world,plant,world.time)
-        if(world.time % util.math.limit(plants[plant.specie].time.maturing.min,1,50)==0) then
-            --print 'a'
+        
+        if(world.time % util.math.limit(plants[plant.specie].time.maturing.min,1,127)==0) then
             growTrunk(world,plant,world.time)
         end
     end

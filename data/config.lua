@@ -2,18 +2,21 @@ local o = {}
 --mapgen
 o.mapsize = 2
 o.mapquality = 16
---video
-o.screen = 
-{
-    x = 800,
-    y = 450
-}
+
+--general
 o.framerate = 0
 o.slowrender = 1 --minimum is 1, 0 will freeze the game
 o.fpscounter = true
 o.fullscreen = false
 o.vsync = false
 o.runonbackground = true
+o.multithread = false
+--graphics
+o.screen = 
+{
+    x = 800,
+    y = 450
+}
 o.msaa = false
 o.interlace = false
 o.highdpi = false

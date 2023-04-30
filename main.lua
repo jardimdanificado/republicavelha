@@ -188,12 +188,14 @@ local function run_render(world,simplifiedterrain,watercube)
 end
 
 local function frame(world)
+    if(options.paused == false) then
+        world.frame(world)
+    end
+end
+
+local function run_frame(world)
     while true do
-        --print(options.paused)
-        if(options.paused == false) then
-            world.frame(world)
-        end
-        --teclado(world)
+        frame(world)
         coroutine.yield()
     end
 end
@@ -309,18 +311,26 @@ function start()
     local simpler = simplify(world.map.height)
     local watercube = {{x=0+#world.map.height/2,y=0.5,z=#world.map.height[1]/2},#world.map.height,world.map.waterlevel*2,#world.map.height[1],rl.new("Color",0,190,125,185)}
     print("\nmerged " .. #world.map.height*#world.map.height[1] .. ' blocks into ' .. #simpler .. ' blocks\n')
-
-    local frame_co = coroutine.create(frame)
-    local render_co = coroutine.create(run_render)
-    coroutine.resume(frame_co, world)--pre start the routines
-    coroutine.resume(render_co, world, simpler, watercube)
+    local frame_co
+    local render_co
+    if(options.multithread) then
+        frame_co = coroutine.create(run_frame)
+        render_co = coroutine.create(run_render)
+        coroutine.resume(frame_co, world)--pre start the routines
+        coroutine.resume(render_co, world, simpler, watercube)
+    end
     while not rl.WindowShouldClose() do
-            teclado(world)
-        if coroutine.status(frame_co) == "suspended" then
-            coroutine.resume(frame_co, world)
-        end
-        if coroutine.status(render_co) == "suspended" and world.time % options.slowrender == 0 then
-            coroutine.resume(render_co, world,simpler,watercube)
+        teclado(world)
+        if(options.multithread) then
+            if coroutine.status(frame_co) == "suspended" then
+                coroutine.resume(frame_co, world)
+            end
+            if coroutine.status(render_co) == "suspended" and world.time % options.slowrender == 0 then
+                coroutine.resume(render_co, world,simpler,watercube)
+            end
+        else
+            frame(world)
+            render(world,simpler,watercube)
         end
     end
     exit = true
