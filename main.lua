@@ -143,6 +143,12 @@ local function render(world,simplifiedterrain,watercube)
                         rl.DrawCubeWires(ytoz(branch.position),1,1,1,rl.BLACK)
                     end
                 end
+                for i, root in ipairs(plant.root) do
+                    rl.DrawCube(ytoz(root.position),1,1,1,rl.PINK)
+                    if(options.renderwires) then
+                        rl.DrawCubeWires(ytoz(root.position),1,1,1,rl.BLACK)
+                    end
+                end
             end
         end
         if options.renderwater then

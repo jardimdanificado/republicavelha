@@ -306,6 +306,28 @@ local function growTrunk(world,plant,time)
     return plant
 end
 
+local function growRoot(world,plant,time)
+    local height = #plant.root ~= 0 and plant.root[#plant.root].position.z - plant.position.z or 0
+    if(height < (plants[plant.specie].size.max/1000)) then
+        local lposi = directions[util.roleta(0,1,0,1,2,1,0,1,0)]
+        lposi.z = (lposi.x == 0 and lposi.x == 0) and -1 or 0
+        local pposi = #plant.root ~= 0 and plant.root[#plant.root].position or plant.position
+        local randomnumber = 0 
+        if #plant.root > 1 then 
+            randomnumber = util.random(-1*math.floor(#plant.root/2),#plant.root)
+            if(randomnumber>1)then
+                pposi = plant.root[randomnumber].position
+            end
+        end
+        if pposi.z + lposi.z > 1 and world.map.collision.check(util.math.vec3add(lposi,pposi),75) then
+            table.insert(plant.root,types.root(plant.specie,'idle',time,util.math.vec3add(lposi,pposi),plant.quality,plant.condition))
+            table.insert(world.map.collision.colliders,types.collider(lposi))
+            --world.redraw = true
+        end
+    end
+    return plant
+end
+
 local function plantFrame(world,plant)
     if(plant.leaf ~= nil) then
         if(plant.leaf < plants[plant.specie].leaf.max and world.time % 5 ==0) then
@@ -317,7 +339,9 @@ local function plantFrame(world,plant)
             growLeaf(plant)
         end
     end
-        
+    if(world.time % util.math.limit(plants[plant.specie].time.maturing.min,1,100)==0) then
+        growRoot(world,plant,world.time)
+    end
     if plants[plant.specie].type == 'fruit tree' then
         --print(plants[plant.specie].type)
         local lastTrunkPosition = plant.position
@@ -326,7 +350,7 @@ local function plantFrame(world,plant)
         end
             
         growBranch(world,plant,world.time)
-        if(world.time % util.math.limit(plants[plant.specie].time.maturing.min,1,100)==0) then
+        if(world.time % util.math.limit(plants[plant.specie].time.maturing.min,1,50)==0) then
             --print 'a'
             growTrunk(world,plant,world.time)
         end
