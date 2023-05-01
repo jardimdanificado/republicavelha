@@ -2,23 +2,26 @@ local o = {}
 --mapgen
 o.mapsize = 2
 o.mapquality = 16
---video
-o.screen = 
-{
-    x = 800,
-    y = 450
-}
+
+--general
 o.framerate = 0
 o.slowrender = 1 --minimum is 1, 0 will freeze the game
 o.fpscounter = true
 o.fullscreen = false
 o.vsync = false
 o.runonbackground = true
+o.multithread = false
+--graphics
+o.screen = 
+{
+    x = 800,
+    y = 450
+}
 o.msaa = false
 o.interlace = false
 o.highdpi = false
 o.simple = true--this simplify the blocks to reduce resources usage
-o.dynadraw = true
+o.freeze = false
 o.rendergrass = true
 o.renderterrain = true
 o.renderwater = true

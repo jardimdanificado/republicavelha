@@ -398,6 +398,7 @@ function types.plant(specie, status, birth, position, quality, condition)
     plant.flower = (types.plants[plant.specie].flower ~= nil) and {} or 0
     plant.branch = (types.plants[plant.specie].type ~= 'herb') and {} or 0
     plant.trunk = (types.plants[plant.specie].wood ~= nil) and {} or 0
+    plant.root = {}
     plant.fruit = (types.plants[plant.specie].fruit ~= nil) and {} or 0
     return plant
 end
@@ -418,7 +419,6 @@ end
 
 function types.trunk(specie, status, birth, position, quality, condition) 
     local trunk = types.generic('trunk', status or 'idle', birth or 0, position or {x=1,y=1,z=1}, quality or 100, condition or 100)
-    
     trunk.specie = specie or 'tamarind'
     return trunk
 end
@@ -427,6 +427,12 @@ function types.branch(specie, status, birth, position, quality, condition)
     local branch = types.generic('branch', status or 'idle', birth or 0, position or {x=1,y=1,z=1}, quality or 100, condition or 100)
     branch.specie = specie or 'jackfruit'
     return branch
+end
+
+function types.root(specie, status, birth, position, quality, condition) 
+    local root = types.generic('root', status or 'idle', birth or 0, position or {x=1,y=1,z=1}, quality or 100, condition or 100)
+    root.specie = specie or 'tamarind'
+    return root
 end
 
 function types.flower(specie, status, birth, position, quality, condition) 

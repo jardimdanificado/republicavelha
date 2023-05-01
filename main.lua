@@ -2,11 +2,11 @@ local republica = require("src.republicanova")
 local exit = false
 local options = require('data.config')
 
-function ytoz(vec3)
+local function ytoz(vec3)
     return {x = vec3.x, y = vec3.z, z = vec3.y}
 end
 
-function y_rgba(index, min_val, max_val, invert)
+local function y_rgba(index, min_val, max_val, invert)
     local range = max_val - min_val
     local val = (index - min_val) / range
     local r = math.floor(255 * val)
@@ -18,7 +18,7 @@ function y_rgba(index, min_val, max_val, invert)
     return rl.new("Color",r,g,b,255)
 end
 
-function simplify(arr)
+local function simplify(arr)
     local b = {}
     local dY = false
     local chk = {}
@@ -75,7 +75,7 @@ function simplify(arr)
     return blocks;
 end 
 
-function render(world,simplifiedterrain,watercube)
+local function render(world,simplifiedterrain,watercube)
     if(rl.IsWindowResized()) then
         rl.UnloadRenderTexture(options.rendertexture)
         options.screen.x = rl.GetScreenWidth()
@@ -85,7 +85,7 @@ function render(world,simplifiedterrain,watercube)
     end
     
     rl.BeginDrawing()
-    if(world.redraw == true) then
+    if(world.redraw == true and options.freeze == false) then
         rl.BeginTextureMode(options.rendertexture)
         rl.ClearBackground(rl.RAYWHITE)
         rl.BeginMode3D(options.camera)
@@ -143,6 +143,12 @@ function render(world,simplifiedterrain,watercube)
                         rl.DrawCubeWires(ytoz(branch.position),1,1,1,rl.BLACK)
                     end
                 end
+                for i, root in ipairs(plant.root) do
+                    rl.DrawCube(ytoz(root.position),1,1,1,rl.PINK)
+                    if(options.renderwires) then
+                        rl.DrawCubeWires(ytoz(root.position),1,1,1,rl.BLACK)
+                    end
+                end
             end
         end
         if options.renderwater then
@@ -150,9 +156,7 @@ function render(world,simplifiedterrain,watercube)
         end
         rl.EndMode3D()
         rl.EndTextureMode();
-        if(options.dynadraw) then
-            world.redraw = false
-        end
+        world.redraw = false
     end
     rl.DrawTexturePro(
         options.rendertexture.texture,
@@ -174,26 +178,33 @@ function render(world,simplifiedterrain,watercube)
     rl.EndDrawing() 
 end
 
-function run_render(world,simplifiedterrain,watercube)
+local function run_render(world,simplifiedterrain,watercube)
+    
     while true do
+        
         render(world,simplifiedterrain,watercube)
         coroutine.yield()
     end
 end
 
-function frame(world)
+local function frame(world)
+    if(options.paused == false) then
+        world.frame(world)
+    end
+end
+
+local function run_frame(world)
     while true do
-        if(options.paused == false) then
-            world.frame(world)
-        end
+        frame(world)
         coroutine.yield()
     end
 end
 
-function teclado(world)
+local function teclado(world)
     if(rl.IsKeyPressed(rl.KEY_C)) then
         world.redraw = true
-        options.dynadraw = (options.dynadraw == false) and true or false
+        options.freeze = (options.freeze == false) and true or false
+        print (options.freeze)
     elseif(rl.IsKeyPressed(rl.KEY_P)) then
         world.redraw = true
         options.prettygrass = (options.prettygrass == false) and true or false
@@ -300,18 +311,26 @@ function start()
     local simpler = simplify(world.map.height)
     local watercube = {{x=0+#world.map.height/2,y=0.5,z=#world.map.height[1]/2},#world.map.height,world.map.waterlevel*2,#world.map.height[1],rl.new("Color",0,190,125,185)}
     print("\nmerged " .. #world.map.height*#world.map.height[1] .. ' blocks into ' .. #simpler .. ' blocks\n')
-
-    local frame_co = coroutine.create(frame)
-    local render_co = coroutine.create(run_render)
-    coroutine.resume(frame_co, world)--pre start the routines
-    coroutine.resume(render_co, world, simpler, watercube)
+    local frame_co
+    local render_co
+    if(options.multithread) then
+        frame_co = coroutine.create(run_frame)
+        render_co = coroutine.create(run_render)
+        coroutine.resume(frame_co, world)--pre start the routines
+        coroutine.resume(render_co, world, simpler, watercube)
+    end
     while not rl.WindowShouldClose() do
         teclado(world)
-        if coroutine.status(frame_co) == "suspended" then
-            coroutine.resume(frame_co, world)
-        end
-        if coroutine.status(render_co) == "suspended" and world.time % options.slowrender == 0 then
-            coroutine.resume(render_co, world,simpler,watercube)
+        if(options.multithread) then
+            if coroutine.status(frame_co) == "suspended" then
+                coroutine.resume(frame_co, world)
+            end
+            if coroutine.status(render_co) == "suspended" and world.time % options.slowrender == 0 then
+                coroutine.resume(render_co, world,simpler,watercube)
+            end
+        else
+            frame(world)
+            render(world,simpler,watercube)
         end
     end
     exit = true
