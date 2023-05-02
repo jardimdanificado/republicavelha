@@ -100,8 +100,8 @@ local function Collision(blockmap)
             position.y >#collision.map[1] or 
             position.z >#collision.map[1][1]
         ) then
-            return true
-        elseif(collision.map[position.x][position.y][position.z] > value-reduce) then
+            return false
+        elseif(collision.map[position.x][position.y][position.z] > value+reduce) then
             return false
         else
             return true
@@ -252,9 +252,7 @@ local Life =
 }
 
 local function growLeaf(plant)
-    if(util.roleta(14,1,16) == 2) then
-        plant.leaf = plant.leaf + 1
-    end
+    plant.leaf = plant.leaf + 1
     return plant
 end
 
@@ -273,7 +271,7 @@ local directions = --based on keypad
 
 local function growBranch(world,plant,time)
     local height = #plant.trunk ~= 0 and plant.trunk[#plant.trunk].position.z - plant.position.z or 0
-    if(height > 3 and #plant.branch < plants[plant.specie].size.max/12) then
+    if(height*10 > plants[plant.specie].size.min/40 and #plant.branch < plants[plant.specie].size.max/12) then
         local lposi = directions[util.roleta(0,1,0,1,0,1,0,1,0)]
         lposi.z = util.random(0,1)
         local numb = util.random((#plant.branch/2)*-1,#plant.branch)
@@ -283,9 +281,9 @@ local function growBranch(world,plant,time)
         elseif(#plant.trunk > 0) then
             pposi = plant.trunk[util.random(1,#plant.trunk)].position
         end
-        if pposi.z-math.floor((plants[plant.specie].size.max/100)/2.5) > plant.position.z and world.map.collision.check(util.math.vec3add(lposi,pposi),75) then         
+        if pposi.z-math.floor((plants[plant.specie].size.max/100)/2.5) > plant.position.z and world.map.collision.check(util.math.vec3add(lposi,pposi),100) then         
             table.insert(plant.branch,types.branch(plant.specie,'idle',time,util.math.vec3add(lposi,pposi),plant.quality,plant.condition))
-            table.insert(world.map.collision.colliders,types.collider(lposi,75))
+            table.insert(world.map.collision.colliders,types.collider(lposi,100))
             world.redraw = true
         end
     end
@@ -299,8 +297,7 @@ local function growTrunk(world,plant,time)
         lposi.z = (lposi.x == 0 and lposi.x == 0) and 1 or 0
         local pposi = #plant.trunk ~= 0 and plant.trunk[#plant.trunk].position or plant.position
         local randomnumber=0
-        if #plant.trunk > 1 and world.time % 89 == 0 then 
-            --lposi.z = (lposi.x == 0 and lposi.x == 0) and 1 or 0
+        if #plant.trunk > 1 and world.time % 13 == 0 then 
             randomnumber = util.random(-1*math.floor(#plant.trunk),#plant.trunk)
             if(randomnumber>1)then
                 pposi = plant.trunk[randomnumber].position
@@ -308,7 +305,7 @@ local function growTrunk(world,plant,time)
         end
         if world.map.collision.check(util.math.vec3add(lposi,pposi),75) then
             table.insert(plant.trunk,types.trunk(plant.specie,'idle',time,util.math.vec3add(lposi,pposi),plant.quality,plant.condition))
-            table.insert(world.map.collision.colliders,types.collider(lposi))
+            table.insert(world.map.collision.colliders,types.collider(lposi,100))
             world.redraw = true
         end
     end
@@ -316,8 +313,7 @@ local function growTrunk(world,plant,time)
 end
 
 local function growRoot(world,plant,time)
-    local height = #plant.root ~= 0 and plant.root[#plant.root].position.z - plant.position.z or 0
-    if(#plant.root < (plants[plant.specie].size.max/75)) then
+    if(#plant.root < (plants[plant.specie].size.max/72)) then
         local lposi = directions[util.roleta(0,1,0,1,2,1,0,1,0)]
         lposi.z = 0
         local pposi = #plant.root ~= 0 and plant.root[#plant.root].position or plant.position
@@ -330,7 +326,7 @@ local function growRoot(world,plant,time)
             end
         end
         local posit = util.math.vec3add(lposi,pposi)
-        if posit.z > 1 and posit.z < #world.map.block[1][1] and posit.y < #world.map.block[1] and posit.x < #world.map.block and posit.x > 1 and posit.y > 1 and world.map.block[posit.x][posit.y][posit.z] == 2 or 4 then
+        if world.map.collision.check(util.math.vec3add(lposi,pposi),75,100) then
             table.insert(plant.root,types.root(plant.specie,'idle',time,util.math.vec3add(lposi,pposi),plant.quality,plant.condition))
             table.insert(world.map.collision.colliders,types.collider(lposi))
             --world.redraw = true
@@ -340,21 +336,13 @@ local function growRoot(world,plant,time)
 end
 
 local function plantFrame(world,plant)
-    if(plant.leaf ~= nil) then
-        if(plant.leaf < plants[plant.specie].leaf.max and world.time % 5 ==0) then
-            --[[
-            if(plants[plant.specie].size.max > 100) then
-                growBranch(world,plant,world.time)
-            end
-            --]]
+    if(world.time % 13 == 0) then
+        growRoot(world,plant,world.time)
+        if(plant.leaf < plants[plant.specie].leaf.max) then
             growLeaf(plant)
         end
     end
-    if(world.time % util.math.limit(plants[plant.specie].time.maturing.min,1,127)==0) then
-        growRoot(world,plant,world.time)
-    end
     if plants[plant.specie].type == 'fruit tree' then
-        --print(plants[plant.specie].type)
         local lastTrunkPosition = plant.position
         if(#plant.trunk > 0) then
             lastTrunkPosition = plant.trunk[#plant.trunk].position
@@ -374,9 +362,7 @@ local function gravity(world,object)
     if(object.position.z > 1 and world.map.collision.check({x=object.position.x,y=object.position.y,z=object.position.z-1})) then
         local check = false
         for i = object.position.z, object.position.z - object.falltime, -1 do
-            --print(collisionMap.map[object.position.x][object.position.y][i-1])
             if world.map.collision.map[object.position.x][object.position.y][i-1] >0 then
---                print(collisionMap.map[object.position.x][object.position.y][i-1])
                 object.position.z = i
                 object.falltime = 1
                 check = true
@@ -393,20 +379,15 @@ local function gravity(world,object)
 end
 
 local function seedFrame(world,plant)
-    local v = plant
-    if(plant.position.z-1 >1) then
-        if(world.time%6==0 and blocks[world.map.block[plant.position.x][plant.position.y][plant.position.z-1] ].name == 'earth') then
-            plant.germination = plant.germination + 1
-            plant.status = (plant.status ~= 'germinating') and 'germinating' or plant.status
-            if(plant.status == 'germinating') then
-                if(plant.germination >= plants[plant.specie].time.maturing.max/100000 or (util.roleta(19,1) == 2 and plant.germination>=(plants[plant.specie].time.maturing.min))) then
-                    world.redraw = true
-                    return(types.plant(plant.specie,plant.status,world.time,plant.position,plant.quality,100))
-                end
-            end
+
+    if(world.time%6==0 and world.map.block[plant.position.x][plant.position.y][plant.position.z-1] == 2) then
+        plant.germination = plant.germination + 1
+        if(plant.germination >= plants[plant.specie].time.maturing.max/100000 or util.roleta(19,1) == 2 and plant.germination>=(plants[plant.specie].time.maturing.min)) then
+            world.redraw = true
+            return(types.plant(plant.specie,plant.status,world.time,plant.position,plant.quality,100))
         end
-        gravity(world,plant)
     end
+    gravity(world,plant)
     return(plant)
 end
 --]]
@@ -415,10 +396,10 @@ local function frame(world)
     world.time = world.time + 1
     --
     for i, v in ipairs(world.plant) do
-        if(v.type == 'seed') then
-            util.assign(v,seedFrame(world,v))
-        elseif(v.type == 'plant' and v.specie ~= 'grass') then
+        if(v.type == 'plant' and v.specie ~= 'grass') then
             util.assign(v,plantFrame(world,v))
+        elseif(v.type == 'seed') then
+            util.assign(v,seedFrame(world,v))
         end
     end
     --]]
@@ -434,8 +415,7 @@ local function world(size,quality)
             spawn = function(world,specie,position) 
                 table.insert(world.plant,types.seed(specie,'idle',world.time,position)) 
             end
-        },
-        data = {}
+        }
     }
     world.map = Map(size,quality)
     world = grassify(world)
