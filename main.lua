@@ -69,6 +69,7 @@ local function simplify(arr)
             color = y_rgba(b[i].value,min,max),
             gridcolor = y_rgba(b[i].value,min,max,true)
         }
+        b[i].gridcolor.a = 200
         table.insert(blocks,b[i])
     end
 
@@ -92,10 +93,11 @@ local function render(world,simplifiedterrain,watercube)
         if options.renderterrain then
             if(options.simple == true) then
                 for x = 1, #simplifiedterrain do
-                    rl.DrawCube(simplifiedterrain[x].position,simplifiedterrain[x].size.x,1,simplifiedterrain[x].size.z,simplifiedterrain[x].color)
                     if (options.renderwires) then
                         rl.DrawCubeWires(simplifiedterrain[x].position,simplifiedterrain[x].size.x,1,simplifiedterrain[x].size.z,simplifiedterrain[x].gridcolor)
                     end
+                    rl.DrawCube(simplifiedterrain[x].position,simplifiedterrain[x].size.x,1,simplifiedterrain[x].size.z,simplifiedterrain[x].color)
+                    
                 end
             else
                 for x = 1, #world.map.height do
@@ -104,7 +106,6 @@ local function render(world,simplifiedterrain,watercube)
                         if (options.renderwires) then
                             rl.DrawCubeWires({x=x,y=world.map.height[x][z],z=z},1,1,1,y_rgba(world.map.height[x][z],min,max,true))
                         end
-                       
                     end
                 end
             end
@@ -132,21 +133,21 @@ local function render(world,simplifiedterrain,watercube)
                 end
             elseif republica.util.string.includes(republica.plants[plant.specie].type,'tree') then
                 for i, trunk in ipairs(plant.trunk) do
-                    rl.DrawCube(ytoz(trunk.position),1,1,1,rl.BROWN)
+                    rl.DrawCube(ytoz(trunk.position),1,1,1,{r=59,g=50,b=0,a=255})
                     if(options.renderwires) then
-                        rl.DrawCubeWires(ytoz(trunk.position),1,1,1,{r=0,g=0,b=0,a=150})
+                        rl.DrawCubeWires(ytoz(trunk.position),1,1,1,{r=0,g=0,b=0,a=55})
                     end
                 end
                 for i, branch in ipairs(plant.branch) do
-                    rl.DrawCube(ytoz(branch.position),1,1,1,{r=55,g=85,b=0,a=150})
+                    rl.DrawCube(ytoz(branch.position),1,1,1,{r=85,g=105,b=0,a=245})
                     if(options.renderwires) then
-                        rl.DrawCubeWires(ytoz(branch.position),1,1,1,{r=0,g=0,b=0,a=150})
+                        rl.DrawCubeWires(ytoz(branch.position),1,1,1,{r=0,g=0,b=0,a=55})
                     end
                 end
                 for i, root in ipairs(plant.root) do
-                    rl.DrawCube(ytoz(root.position),1,1,1,rl.PINK)
+                    rl.DrawCube(ytoz(root.position),1,1,1,{r=240,g=235,b=200,a=255})
                     if(options.renderwires) then
-                        rl.DrawCubeWires(ytoz(root.position),1,1,1,rl.BLUE)
+                        rl.DrawCubeWires(ytoz(root.position),1,1,1,{r=0,g=0,b=0,a=50})
                     end
                 end
             end
