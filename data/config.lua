@@ -2,6 +2,7 @@ local o = {}
 --mapgen
 o.mapsize = 2
 o.mapquality = 16
+o.mappolish = 1 -- 0-2 higher values will need more resouces rendering
 
 --general
 o.framerate = 0

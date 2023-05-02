@@ -114,8 +114,9 @@ end
 --MAP
 -------------------------------------------------
 
-local function Map(multiHorizontal,quality)--create the map
-    local block,heightmap = util.array.unpack(Terrain(multiHorizontal,quality))
+local function Map(multiHorizontal,quality,polishment)--create the map
+    polishment = polishment or 2
+    local block,heightmap = util.array.unpack(Terrain(multiHorizontal,quality,polishment))
     local temperature = util.matrix.new(#block,#block[1],#block[1][1],29)
     local waterlevel = util.matrix.average(heightmap)
     local fluid = {}
@@ -297,7 +298,7 @@ local function growTrunk(world,plant,time)
         lposi.z = (lposi.x == 0 and lposi.x == 0) and 1 or 0
         local pposi = #plant.trunk ~= 0 and plant.trunk[#plant.trunk].position or plant.position
         local randomnumber=0
-        if #plant.trunk > 1 and world.time % 13 == 0 then 
+        if #plant.trunk > 1 and world.time % 29 == 0 then 
             randomnumber = util.random(-1*math.floor(#plant.trunk),#plant.trunk)
             if(randomnumber>1)then
                 pposi = plant.trunk[randomnumber].position

@@ -138,7 +138,7 @@ local function render(world,simplifiedterrain,watercube)
                     end
                 end
                 for i, branch in ipairs(plant.branch) do
-                    rl.DrawCube(ytoz(branch.position),1,1,1,rl.RED)
+                    rl.DrawCube(ytoz(branch.position),1,1,1,{r=255,g=0,b=0,a=85})
                     if(options.renderwires) then
                         rl.DrawCubeWires(ytoz(branch.position),1,1,1,rl.BLACK)
                     end
@@ -271,7 +271,7 @@ end
 function start()
     --size up to 6 is safe, above 6 you can get buggy maps, default is 2
     --layers up to 16 are safe, default is 8
-    local world = republica.world(options.mapsize,options.mapquality)
+    local world = republica.world(options.mapsize,options.mapquality,options.mappolish)
     world.redraw = options.redraw
     options.redraw = nil
     
