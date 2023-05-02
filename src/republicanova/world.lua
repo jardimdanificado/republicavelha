@@ -88,9 +88,10 @@ local function Collision(blockmap)
         position.z = newPosition.z
     end
 
-    collision.check=function(position,value)--returns true if no collider in the specified position, of if the colliders in the position are below value
+    collision.check=function(position,value,reduce)--returns true if no collider in the specified position, of if the colliders in the position are below value
        --print (position.x)
         value = value or 75
+        reduce = reduce or 0
         if(
             position.x <1 or 
             position.y <1 or 
@@ -100,7 +101,7 @@ local function Collision(blockmap)
             position.z >#collision.map[1][1]
         ) then
             return true
-        elseif(collision.map[position.x][position.y][position.z] > value) then
+        elseif(collision.map[position.x][position.y][position.z] > value-reduce) then
             return false
         else
             return true
@@ -324,7 +325,7 @@ local function growRoot(world,plant,time)
         if #plant.root > 1 then 
             lposi.z = -1
             randomnumber = util.random(-1*math.floor(#plant.root/2),#plant.root)
-            if(randomnumber>1)then
+            if randomnumber>1 then
                 pposi = plant.root[randomnumber].position
             end
         end
@@ -398,7 +399,7 @@ local function seedFrame(world,plant)
             plant.germination = plant.germination + 1
             plant.status = (plant.status ~= 'germinating') and 'germinating' or plant.status
             if(plant.status == 'germinating') then
-                if(plant.germination >= plants[plant.specie].time.maturing.max/1000000 or (util.roleta(19,1) == 2 and plant.germination>=(plants[plant.specie].time.maturing.min/1000000))) then
+                if(plant.germination >= plants[plant.specie].time.maturing.max/100000 or (util.roleta(19,1) == 2 and plant.germination>=(plants[plant.specie].time.maturing.min))) then
                     world.redraw = true
                     return(types.plant(plant.specie,plant.status,world.time,plant.position,plant.quality,100))
                 end
@@ -416,7 +417,7 @@ local function frame(world)
     for i, v in ipairs(world.plant) do
         if(v.type == 'seed') then
             util.assign(v,seedFrame(world,v))
-        elseif(v.type == 'plant') then
+        elseif(v.type == 'plant' and v.specie ~= 'grass') then
             util.assign(v,plantFrame(world,v))
         end
     end
