@@ -2,6 +2,7 @@ local o = {}
 --mapgen
 o.mapsize = 2
 o.mapquality = 16
+o.mappolish = 1 -- 0-2 higher values will need more resouces rendering
 
 --general
 o.framerate = 0
@@ -26,7 +27,7 @@ o.rendergrass = true
 o.renderterrain = true
 o.renderwater = true
 o.renderwires = true
-o.prettygrass = true
+o.prettygrass = false
 --camera
 o.cameraposition = {x=-20,y=100,z=-20}
 o.fov = 65

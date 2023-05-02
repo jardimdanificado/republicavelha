@@ -289,7 +289,7 @@ local function terrify(map,fixedHeight)
                 result[x][y][z] = (z < map[x][y]) and 2 or 1 --check blocks.lua for material types
                 if z < map[x][y] then
                     if z < waterlevel then
-                        result[x][y][z] = ({1,1,1,1,1,2,2,3})[util.random(1,8)]
+                        result[x][y][z] = ({1,1,1,1,1,2,4,3,4})[util.random(1,9)]
                     elseif z == waterlevel then
                         result[x][y][z] = 4
                     else
@@ -304,7 +304,7 @@ local function terrify(map,fixedHeight)
     return(result)
 end
 
-local function Terrain(multiHorizontal, layers,retry)
+local function Terrain(multiHorizontal, layers,polish,retry)
     local floor = math.floor
     local mapsize = {w=64,h=72}
     multiHorizontal = multiHorizontal or 2
@@ -314,12 +314,14 @@ local function Terrain(multiHorizontal, layers,retry)
     local hmap = util.func.time({autoHeightmap,"autoHeightmap"},mapsize.w,multiHorizontal)
     hmap = util.func.time({autoExpandHeightmap,"autoExpandHeightmap"},hmap,mapsize.h/2)
     hmap = util.func.time({autoSmoothHeightmap,"autoSmoothHeightmap"},hmap,smooth)
-    hmap = util.func.time({polishHeightmap,"polishHeightmap"},hmap,mapsize.h+mapsize.h/32)
+    if polish >= 2 then
+        hmap = util.func.time({polishHeightmap,"polishHeightmap"},hmap,mapsize.h+mapsize.h/32)
+    end
 
     local min,max = util.matrix.minmax(hmap)
     local munique = util.matrix.unique(hmap)
 
-    if(min>=16) then
+    if(min>=8) then
         util.matrix.map(hmap,function(value) return value-(min/2) end)
     end
 
@@ -334,7 +336,9 @@ local function Terrain(multiHorizontal, layers,retry)
     if(retry > 0) then
         print('heightmap generated in ' .. retry .. ' retries.')
     end
-    hmap = polishHeightmap(hmap,mapsize.h)
+    if polish > 1 then
+        hmap = polishHeightmap(hmap,mapsize.h)
+    end
     local terrain = {}
     terrain = terrify(hmap,mapsize.h)
     return {terrain, hmap}

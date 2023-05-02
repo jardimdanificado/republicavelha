@@ -117,7 +117,7 @@ local function render(world,simplifiedterrain,watercube)
                 if options.rendergrass then
                     if(options.prettygrass == false) then
                         local temp = ytoz(plant.position)
-                        temp.y = temp.y + 1
+                        temp.y = temp.y + 0.6
                         rl.DrawPlane(temp,{x=1,y=1},{r=100,g=255,b=50,a=95})
                     else
                         rl.DrawCube(ytoz(plant.position),republica.util.random(1.111,1.333),republica.util.random(1.111,1.333),republica.util.random(1.111,1.333),rl.new("Color",100,republica.util.random(200,255),50,republica.util.random(55,95)))
@@ -128,25 +128,25 @@ local function render(world,simplifiedterrain,watercube)
                 tempposi.y = tempposi.y + 1
                 rl.DrawCube(tempposi,1,1,1,rl.YELLOW)
                 if(options.renderwires) then
-                    rl.DrawCubeWires(ytoz(plant.position),1,1,1,rl.BLACK)
+                    rl.DrawCubeWires(ytoz(plant.position),1,1,1,rl.RED)
                 end
             elseif republica.util.string.includes(republica.plants[plant.specie].type,'tree') then
                 for i, trunk in ipairs(plant.trunk) do
                     rl.DrawCube(ytoz(trunk.position),1,1,1,rl.BROWN)
                     if(options.renderwires) then
-                        rl.DrawCubeWires(ytoz(trunk.position),1,1,1,rl.BLACK)
+                        rl.DrawCubeWires(ytoz(trunk.position),1,1,1,{r=0,g=0,b=0,a=150})
                     end
                 end
                 for i, branch in ipairs(plant.branch) do
-                    rl.DrawCube(ytoz(branch.position),1,1,1,rl.RED)
+                    rl.DrawCube(ytoz(branch.position),1,1,1,{r=55,g=85,b=0,a=150})
                     if(options.renderwires) then
-                        rl.DrawCubeWires(ytoz(branch.position),1,1,1,rl.BLACK)
+                        rl.DrawCubeWires(ytoz(branch.position),1,1,1,{r=0,g=0,b=0,a=150})
                     end
                 end
                 for i, root in ipairs(plant.root) do
                     rl.DrawCube(ytoz(root.position),1,1,1,rl.PINK)
                     if(options.renderwires) then
-                        rl.DrawCubeWires(ytoz(root.position),1,1,1,rl.BLACK)
+                        rl.DrawCubeWires(ytoz(root.position),1,1,1,rl.BLUE)
                     end
                 end
             end
@@ -271,7 +271,7 @@ end
 function start()
     --size up to 6 is safe, above 6 you can get buggy maps, default is 2
     --layers up to 16 are safe, default is 8
-    local world = republica.world(options.mapsize,options.mapquality)
+    local world = republica.world(options.mapsize,options.mapquality,options.mappolish)
     world.redraw = options.redraw
     options.redraw = nil
     

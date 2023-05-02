@@ -1,11 +1,9 @@
 local republica = require("src.republicanova")
 local options = require("data.config")
 
---
-
 --size up to 6 is safe, above 6 you can get buggy maps, default is 2
 --layers up to 16 are safe, default is 8
-local world = republica.world(2,16)
+local world = republica.world(2,16,1)
 
 
 os.remove("./data/heightmap.txt")
