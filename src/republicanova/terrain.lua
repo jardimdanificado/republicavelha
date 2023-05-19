@@ -285,7 +285,7 @@ local function terrify(map,fixedHeight)
         result[x] = {}
         for y = 1, #map do
             result[x][y] = {}
-            for z = 1, fixedHeight do
+            for z = 1, fixedHeight*1.5 do
                 result[x][y][z] = (z < map[x][y]) and 2 or 1 --check blocks.lua for material types
                 if z < map[x][y] then
                     if z < waterlevel then
@@ -306,7 +306,7 @@ end
 
 local function Terrain(multiHorizontal, layers,polish,retry)
     local floor = math.floor
-    local mapsize = {w=64,h=72}
+    local mapsize = {w=64,h=64}
     multiHorizontal = multiHorizontal or 2
     layers = layers or 8
     local smooth = mapsize.w * (multiHorizontal^2)/2
