@@ -604,7 +604,7 @@ util.math.scale = function(value, min, max)
     return value;
 end
 
-randi = randi or 1
+randi = 1
 
 util.random = function(min, max)
     math.randomseed(os.time() + randi)
