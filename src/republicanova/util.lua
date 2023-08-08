@@ -629,24 +629,6 @@ util.roleta = function(...)
     end
 end
 
-util.pairs = function(obj)
-    local key_list = {}
-    for k in pairs(obj) do
-        if string.sub(k, 1, 1) ~= "_" then
-            table.insert(key_list, k)
-        end
-    end
-    local i = 0
-    return function()
-        i = i + 1
-        if key_list[i] ~= nil then
-            return key_list[i], obj[key_list[i]]
-        else
-            return nil, nil
-        end
-    end
-end
-
 util.id = function(charTable)
     charTable = charTable or util.char
     local tablelen = #charTable
@@ -659,46 +641,6 @@ util.id = function(charTable)
         result = result .. charTable[util.random(1,tablelen)]
     end
     return result
-end
-
-local function generic(original,name,parent)
-    local obj = {relatives = {}}
-    obj.name = name or 'noname'
-    obj.type = type(original)
-    if(parent ~= nil) then
-        obj.parent = parent
-    end
-    if(obj.type == 'table') then
-        for k, v in util.pairs(original) do
-            if type(k) ~= "number" then
-                table.insert(obj.relatives,generic(v,k,original))
-            end
-        end
-    end
-    return obj
-end
-
-local function stringifygeneric(obj,titled)
-    titled = titled or false
-    local result = ''
-    if(obj.type == 'table') then
-        if(titled) then
-            result = obj.name .. '='
-        end
-        result = result .. '{'
-        local typs = {}
-        if(#obj.relatives>0) then
-            for i, v in util.pairs(obj.relatives) do
-                if(type(v) == 'table') then
-                    result = result .. ',' .. stringifygeneric(v,true)
-                end
-            end
-        end
-        result = result .. '}'
-    else
-        return obj.name .. '=' .. obj.type
-    end
-    return result:gsub("{,", '{')
 end
 
 util.assign = function(obj1,obj2)
@@ -714,101 +656,5 @@ util.len = function(obj)
     end
     return count
 end
-
-util.link = function(obj,parent,relatives)
-    relatives = relatives or {}
-    parent = parent or 0
-    if(parent ~= 0 and parent.relatives ~= nil) then
-        table.insert(parent.relatives,obj)
-    end
-    for i = 1, #relatives do
-        relatives[i].parent = obj
-    end
-    obj.parent = parent
-    obj.relatives = relatives
-    return obj
-end
-
-util.sign = function(x)
-    return x > 0 and 1 or x < 0 and -1 or 0
-end
-
-util.unlinkVec3 = function(linkedvec3,acumulator)
-    acumulator = acumulator ~= nil and util.math.vec3add(acumulator,linkedvec3) or {x=linkedvec3.x,y=linkedvec3.y,z=linkedvec3.z}
-    if(linkedvec3.parent ~= nil and linkedvec3.parent ~= 0) then
-        util.unlinkVec3(linkedvec3.parent,acumulator)
-    end
-    return acumulator
-end
-
-util.type = function(obj)
-    local otype = type(obj)
-    if otype == 'table' then
-        return stringifygeneric(generic(obj))
-    else
-        return otype
-    end
-end
-
-util.vault = function(constructor)
-    local vault = {}
-    vault = 
-    {
-        _type = util.type(constructor()), 
-        _constructor = constructor,
-        _new = function(...)
-            local object = constructor(...)
-            local id = util.id()
-            object._id = id
-            object._constructor = vault._constructor
-            object._type = vault._type
-            object._set = function(...)--set without breaking reference
-                local newo = constructor(...)
-                for k, v in pairs(newo) do
-                    object[k] = v
-                end
-            end
-            object._assign = function(obj)--same as set but from a object
-                object._set(util.array.unpack(obj))
-            end
-            vault[id] = object
-            return object
-        end
-    }
-    return vault
-end
-
-util.bank = function()
-    local bank =
-    {
-        _id = util.id(),
-        _constructor = util.bank,
-        _type = 'bank'
-    }
-    bank._new = function(constructor,optname)
-        optname = optname or util.id()
-        bank[optname] = util.vault(constructor)
-        return optname
-    end
-    return bank
-end
-
---[[ bank example
-function vec3(x,y,z)
-    return{x=x or 1,y=y or 1,z=z or 1}
-end
-
-local banco = util.bank()
-banco._new(vec3,"vector3")
-local reference = banco.vector3._new(4,5,6)
-local ref2 = banco.vector3._new(9,5,32)
-local ref3 = banco.vector3._new(6,5400,7)
-banco.vector3._new(2,1.6,6.5)
-for k, v in util.pairs(banco.vector3) do
-    --print(k)
-end
-ref2 = reference
-reference._assign(ref3)
---]]
 
 return util
