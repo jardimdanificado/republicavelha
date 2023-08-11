@@ -22,16 +22,7 @@ util.file.save = {}
 util.file.load = {}
 util.func = {}
 
-util.array._unpack = unpack or table.unpack
-util.array.unpack = function(obj)
-    local key_list = {}
-    for k in pairs(obj) do
-        if string.sub(k, 1, 1) ~= "_" then
-            table.insert(key_list, obj[k])
-        end
-    end
-    return util.array._unpack(key_list)
-end
+util.array.unpack = unpack or table.unpack
 
 util.math.vec2 = function(x, y)
     return {x=x, y=y}
@@ -655,6 +646,90 @@ util.len = function(obj)
         count = count + 1
     end
     return count
+end
+
+util.isDumpable = function(func,name)
+    -- Attempt to dump the function
+    local success, dumpResult = pcall(string.dump, func)
+    if name and not success then
+        print((name or 'noname') .. " is not dumpable.")
+    end
+    -- If there were no errors while dumping, the function is dumpable
+    return success
+end
+
+util.stringify = function(obj, indent)
+    if obj == nil then
+        return ''
+    end
+    indent = indent or 0
+    local str = ""
+    local indentStr = string.rep(" ", indent ) -- Use 4 spaces for each level of indentation
+
+    local function recursiveToString(tbl, depth)
+        local tableStr = ""
+        local nextDepth = depth + 1
+        for k, v in pairs(tbl) do
+            if type(v) == "table" then
+                tableStr = tableStr .. string.rep(" ", nextDepth ) .. tostring(k) .. " = {\n"
+                tableStr = tableStr .. recursiveToString(v, nextDepth)
+                tableStr = tableStr .. string.rep(" ", nextDepth ) .. "},\n"
+            elseif type(v) == "function" then
+                -- Handle functions
+                if util.isDumpable(v,k) then
+                    tableStr = tableStr .. string.rep(" ", nextDepth ) .. tostring(k) .. string.dump(v)
+                else
+                    tableStr = tableStr .. string.rep(" ", nextDepth ) .. tostring(k) .. "<function>\n"
+                end
+            elseif type(v) == "boolean" then
+                -- Handle booleans
+                tableStr = tableStr .. string.rep(" ", nextDepth ) .. tostring(k) .. " = " .. tostring(v) .. ",\n"
+            else
+                -- Handle other types
+                tableStr = tableStr .. string.rep(" ", nextDepth ) .. tostring(k) .. " = " .. tostring(v) .. ",\n"
+            end
+        end
+        return tableStr
+    end
+
+    if type(obj) == "table" then
+        str = str .. "{\n"
+        str = str .. recursiveToString(obj, 0) -- Start with depth 0 for the initial table
+        str = str .. "}"
+    else
+        -- Handle other types
+        str = tostring(obj)
+    end
+    return str
+end
+
+util.visualstringify = function(tableToConvert, indent, visited, topLevelName)
+    indent = indent or 0
+    visited = visited or {}
+    topLevelName = topLevelName or "Table"
+    local result = string.rep(" ", indent) .. topLevelName .. " (table):\n"
+
+    for key, value in pairs(tableToConvert) do
+        local valueType = type(value)
+        if valueType == "table" then
+            if not visited[value] then
+                visited[value] = true
+                result = result .. util.visualstringify(value, indent + 2, visited, key)
+                visited[value] = nil
+            else
+                result = result .. string.rep(" ", indent + 2) .. key .. ": Cyclic reference\n"
+            end
+        else
+            result = result .. string.rep(" ", indent + 2) .. key .. ": " .. valueType .. "\n"
+        end
+    end
+
+    return result
+end
+
+util.visualtable = function(tableToPrint, topLevelName)
+    local stringRepresentation = util.visualstringify(tableToPrint, 0, nil, topLevelName)
+    print(stringRepresentation)
 end
 
 return util

@@ -1,5 +1,5 @@
 local modulo = {}
-if not rl then
+if not rl and not love then
     gl = '21'
     rl = require('lib.raylib')
     gl = nil
