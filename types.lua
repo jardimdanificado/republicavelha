@@ -367,7 +367,7 @@ function types.fluid(fluidID,position,amount)
     return {
         position = position or {x=1,y=1,z=1},
         amount = amount or 0,
-        material = fluids[fluidID]
+        material = types.fluids[fluidID]
     }
 end
 

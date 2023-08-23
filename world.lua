@@ -1,6 +1,6 @@
-local util = require("src.republicanova.util")
-local Terrain = require("src.republicanova.terrain")
-local types = require("src.republicanova.types")
+local util = require("republicanova.util")
+local Terrain = require("republicanova.terrain")
+local types = require("republicanova.types")
 local blocks = types.blocks
 local plants = types.plants
 
