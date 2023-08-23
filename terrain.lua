@@ -1,4 +1,5 @@
-local util = require("republicanova.util")
+local util = require("republicanova.luatils")
+--print(util.visualtable(util))
 local types = require ("republicanova.types")
 local blocks = types.blocks
 
@@ -311,11 +312,11 @@ local function Terrain(multiHorizontal, layers,polish,retry)
     layers = layers or 8
     local smooth = mapsize.w * (multiHorizontal^2)/2
     retry = retry or 1
-    local hmap = util.func.time({autoHeightmap,"autoHeightmap"},mapsize.w,multiHorizontal)
-    hmap = util.func.time({autoExpandHeightmap,"autoExpandHeightmap"},hmap,mapsize.h/2)
-    hmap = util.func.time({autoSmoothHeightmap,"autoSmoothHeightmap"},hmap,smooth)
+    local hmap = util.time({autoHeightmap,"autoHeightmap"},mapsize.w,multiHorizontal)
+    hmap = util.time({autoExpandHeightmap,"autoExpandHeightmap"},hmap,mapsize.h/2)
+    hmap = util.time({autoSmoothHeightmap,"autoSmoothHeightmap"},hmap,smooth)
     if polish >= 2 then
-        hmap = util.func.time({polishHeightmap,"polishHeightmap"},hmap,mapsize.h+mapsize.h/32)
+        hmap = util.time({polishHeightmap,"polishHeightmap"},hmap,mapsize.h+mapsize.h/32)
     end
 
     local min,max = util.matrix.minmax(hmap)
