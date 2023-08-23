@@ -1,5 +1,5 @@
-local util = require("src.republicanova.util")
-local types = require ("src.republicanova.types")
+local util = require("republicanova.util")
+local types = require ("republicanova.types")
 local blocks = types.blocks
 
 -------------------------------------------------
