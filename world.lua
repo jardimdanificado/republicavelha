@@ -1,4 +1,4 @@
-local util = require("republicanova.util")
+local util = require("republicanova.luatils")
 local Terrain = require("republicanova.terrain")
 local types = require("republicanova.types")
 local blocks = types.blocks

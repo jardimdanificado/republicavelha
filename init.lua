@@ -4,7 +4,7 @@ if not rl and not love then
     rl = require('lib.raylib')
     gl = nil
 end
-modulo.util = require('republicanova.luatils')
+modulo.util = require('republicanova.luatils.init')
 modulo.types = require('republicanova.types')
 modulo.terrain = require('republicanova.terrain')
 modulo.plants = modulo.types.plants
