@@ -1,6 +1,5 @@
-local util = require("republicanova.luatils")
---print(util.visualtable(util))
-local types = require ("republicanova.types")
+local util = require("logic.luatils.init")
+local types = require ("logic.types")
 local blocks = types.blocks
 
 -------------------------------------------------
