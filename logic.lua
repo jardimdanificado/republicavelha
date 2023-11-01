@@ -1,3 +1,4 @@
+local JSON = require('logic.json')
 -- Republica's core
 local republica = require("logic.init")
 -- options
@@ -13,19 +14,21 @@ local function frame(world)
     end
 end
 
+
 -- main loop
 function main()
     -- size up to 6 is safe, above 6 you can get buggy maps, default is 2
     -- layers up to 16 are safe, default is 8
     -- generate the world and map
+    print('debug')
+    io.flush()
     local world = republica.world(options.mapsize,options.mapquality,options.mappolish)
+    io.read()
     
-    -- set options redraw to world
-    --world.redraw = options.redraw
-    --options.redraw = nil
-    
+    io.write(republica.util.stringify(world.map.block[1][1]))
     -- main loop
-    while not exit do        
+    while not exit do
+        io.flush()
         frame(world)
     end
     exit = true

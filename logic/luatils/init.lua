@@ -61,7 +61,7 @@ util.time = function(func, ...)
     local tclock = os.clock()
     local result = func(util.array.unpack({...}))
     tclock = os.clock() - tclock
-    print(name .. ": " .. tclock .. " seconds")
+    --print(name .. ": " .. tclock .. " seconds")
     return result, tclock
 end
 
