@@ -1,6 +1,5 @@
-local util = require("republicanova.luatils")
---print(util.visualtable(util))
-local types = require ("republicanova.types")
+local util = require("logic.luatils.init")
+local types = require ("logic.types")
 local blocks = types.blocks
 
 -------------------------------------------------
@@ -329,13 +328,13 @@ local function Terrain(multiHorizontal, layers,polish,retry)
     if(retry>=1) then
         if (min<1 or max > mapsize.w or #munique <= 4 and #munique < layers) then
             if(retry > 1) then
-                print("retry number " .. retry)
+                --print("retry number " .. retry)
             end
             return(Terrain(multiHorizontal, layers, retry+1))
         end
     end
     if(retry > 0) then
-        print('heightmap generated in ' .. retry .. ' retries.')
+        --print('heightmap generated in ' .. retry .. ' retries.')
     end
     if polish > 1 then
         hmap = polishHeightmap(hmap,mapsize.h)
