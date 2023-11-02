@@ -1,0 +1,6 @@
+[submodule "republicanova"]
+	path = republicanova
+	url = https://github.com/jardimdanificado/republicavelha
+[submodule "mocegui"]
+	path = mocegui
+	url = https://github.com/jardimdanificado/mocegui

@@ -1,1 +1,0 @@
-g++ main.cpp -o main lib/libraylib.a -lGL -lm -lpthread -ldl -lrt -lX11

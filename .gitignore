@@ -1,3 +1,5 @@
 node_modules
 .vscode
 .git
+data/save/*
+lua_repl.lua
