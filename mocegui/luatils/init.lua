@@ -36,14 +36,14 @@ util.char =
     [248] = 'ø', [249] = 'ù', [250] = 'ú', [251] = 'û', [252] = 'ü', [253] = 'ý', [254] = 'þ', [255] = 'ÿ',
 }
 
-util.math = require "luatils._math"
-util.string = require "luatils._string"
-util.table = require "luatils._table"
-util.array = require "luatils._array"
-util.matrix = require "luatils._matrix"
-util.file = require "luatils._file"
-util.encode = require "luatils._encode"
-util.console = require "luatils._console"
+util.math = require "_math"
+util.string = require "_string"
+util.table = require "_table"
+util.array = require "_array"
+util.matrix = require "_matrix"
+util.file = require "_file"
+util.encode = require "_encode"
+util.console = require "_console"
 
 util.isjit = function(iftrue,ifalse)
     return (jit and jit.version) and (iftrue or true) or (ifalse or false)
