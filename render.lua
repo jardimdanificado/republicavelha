@@ -89,7 +89,7 @@ function render_module.render(world,simplifiedterrain,watercube,republica,option
     rl.BeginDrawing()
     if(world.redraw == true and options.freeze == false) then
         rl.BeginTextureMode(options.rendertexture)
-        rl.ClearBackground(rl.BLACK)
+        rl.ClearBackground(rl.RAYWHITE)
         rl.BeginMode3D(options.camera)
         if options.renderterrain then
             if(options.simple == true) then
