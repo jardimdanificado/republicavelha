@@ -4,7 +4,7 @@ if not rl and not love then
     for i, v in ipairs(arg or {}) do
         if util.string.includes(v,'-gl') then
             gl = util.string.replace(v,'-gl','')
-            print(gl)
+            print("using opengl " .. gl)
         end
     end
     if not gl then
@@ -15,7 +15,14 @@ if not rl and not love then
 end
 
 package.path = 'mocegui/luatils/?.lua' .. ";" .. package.path
-local mocegui={version="0.1.95",pending = {},font={size = 12}}
+
+local mocegui=
+{
+	version="0.1.95",
+	pending = {},
+	font={size = 12}
+}
+
 mocegui.util = util
 local config = require "mocegui.data.config"
 local mouse =
